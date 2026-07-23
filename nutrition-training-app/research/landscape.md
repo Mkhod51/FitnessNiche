@@ -1,0 +1,36 @@
+# Incumbent Landscape: Structural vs Surface Weaknesses
+
+## Surface complaints (ignored)
+
+- MyFitnessPal: intrusive ads on free tier, rising Premium price, and a 2026 "Today tab" redesign users say made the app harder to navigate.
+- Cronometer: web app reported slow/laggy for months at a time; diary UI bugs (progress bars not summing, items inserted out of order).
+- Boostcamp: post-update bugs (workout-completion state not registering, requiring a "fake" workout + delete workaround); fixed within a version or two.
+- Fitbod: early-session odd numeric suggestions (e.g., 35 lb lateral raises) that self-correct as the algorithm gets more user data.
+- General: sync glitches, occasional crashes, onboarding friction — reported across all six apps, fixed via ordinary patch cycles.
+
+## Structural weaknesses
+
+| Structural weakness | Incumbent(s) | Why it persists (the irreversible choice) | Evidence tag |
+|---|---|---|---|
+| Crowdsourced food entries stay wrong/duplicated indefinitely | MyFitnessPal | 20M+-entry database built over a decade via low-friction, unpaid user submission; that low friction *is* the mechanism that produced the coverage advantage over verified-only rivals. Retroactively verifying the existing corpus scales with corpus size, not with revenue, and the crowdsourcing model has no economic step that retires bad entries — it only adds. | [C] |
+| Most reliable non-crowdsourced input (barcode scan) is paywalled | MyFitnessPal | Since the 2020 sale to Francisco Partners (private equity), the mandate is monetization/ROI, not reinvestment in invisible data-quality work; barcode-behind-Premium is a proven conversion lever the owner won't give back. | [D] |
+| AI-native logging (photo estimation) arrived via acquisition, not in-house build | MyFitnessPal | Bought the teen-built "Cal AI" app in 2026 rather than shipping the feature natively — consistent with a decade-old codebase/org under cost-reduction pressure being slower to originate AI-native features than newer entrants. | [D] |
+| Verified-only entry pipeline caps database breadth and entry speed | Cronometer | Every new item requires photo + curator review before publishing; this *is* the accuracy claim that differentiates it from MyFitnessPal, so speeding it up by relaxing review would erode the one thing that justifies switching from a bigger, messier database. | [C] |
+| Adaptive TDEE algorithm only works if logging is sustained and reasonably consistent | MacroFactor | The core differentiator (learns your true expenditure from your data, vs. static Mifflin-St Jeor style formulas) is structurally dependent on continuous input; sporadic/partial logging degrades the output, and this can't be patched with UI — it's inherent to an adaptive-algorithm product. | [C] |
+| Food database is licensed from third parties (FatSecret, Open Food Facts, research DBs), not self-curated | MacroFactor | The business bet is "we are an algorithm company, not a database company"; database quality is therefore bounded by partner data and update cadence, and improving it competes for investment against the algorithm that is the actual product. | [C]/[D] |
+| Zero-social minimalism vs. built-in social graph — neither can safely copy the other | Strong vs. Hevy | Strong's whole identity is "fast, distraction-free logging"; adding a social feed dilutes that positioning. Hevy's social value is networked — it only matters if your training partners are also on Hevy — which is a lock-in Strong forgoes on principle and Hevy can't manufacture for a new entrant's friend group either. | [C] |
+| AI workout-generation misjudges recovery/exercise overlap for advanced/high-frequency lifters | Fitbod | Reported case: programming Romanian deadlifts the day after heavy conventional pulls because the algorithm didn't model hamstring/glute overlap. Because the entire paid pitch is "trust the AI to program you," adding a real periodization engine or full manual override either is hard to build well or undercuts the premium narrative that justifies the subscription. | [C]/[D] |
+| Subscription-only monetization with no durable free tier | Fitbod | No ad or data-sale revenue stream; funding AI development purely through subscriptions means the free trial has to stay thin (reported at ~3 workouts) to protect conversion — loosening it removes the revenue base. | [D] |
+| No incumbent spans both strength logging and nutrition as first-class features | All six | Each was built and monetized around one domain (MyFitnessPal/Cronometer/MacroFactor around food logging + business models tuned to that; Hevy/Strong/Boostcamp/Fitbod around workout logging + their own models). Bolting on the other domain means re-architecting data models, onboarding, and pricing simultaneously — none has done it, consistent across every comparison thread found. | [C] |
+
+## The MFP database question
+
+MyFitnessPal's database problem is a business-model lock-in, not an unfixed bug. Three reinforcing reasons: (1) **Scale economics** — the 20M+-entry database was built via free, low-friction crowdsourcing over a decade; verifying that entire corpus with paid dietitian review costs money proportional to the size of the very asset that gives MFP its coverage advantage over verified-only rivals like Cronometer, so the fix is expensive precisely because the product succeeded. (2) **Ownership incentives** — since the 2020 sale to private-equity owner Francisco Partners, capital goes to monetization (ads, paywalling the barcode scanner) rather than invisible, unmarketable data cleanup. (3) **No pruning mechanism** — crowdsourcing only adds entries; nothing in the model systematically retires or merges bad/duplicate ones, so errors accumulate permanently. None of this is reversible without abandoning the low-friction-crowdsourcing growth engine itself.
+
+## What this makes attackable
+
+- Curation debt scales with existing database size — a new entrant with a small, disciplined verified-entry set starts with zero legacy debt; MyFitnessPal cannot retroactively acquire this advantage without the cost it has avoided for a decade.
+- No incumbent nutrition app (MFP, Cronometer, MacroFactor) has strength training as a first-class feature, and no incumbent training app (Hevy, Strong, Boostcamp, Fitbod) has nutrition as a first-class feature — this gap is consistent across every comparison source found, not an isolated complaint.
+- Fitbod's periodization/exercise-overlap weakness for advanced lifters is a documented, specific, repeatable failure mode (RDL-after-deadlift), not a vague dissatisfaction — it names a concrete algorithmic gap.
+- Strong and Hevy occupy opposite ends of a social/minimalism spectrum by identity commitment, not technical limitation — a new entrant is not bound by either commitment and can choose freely without diluting an existing brand promise.
+- MacroFactor treats the food database as a licensed, non-core input while treating the expenditure algorithm as the product; MyFitnessPal treats the database as the product and monetizes access to it — these are the two existing structural bets in nutrition tracking, and any newcomer's database/algorithm investment choice will sit somewhere relative to both.
