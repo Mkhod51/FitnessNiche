@@ -47,7 +47,6 @@ export function createRpc(worker: Worker) {
     init: () => send<StorageMode>({ kind: 'init' }),
     exec: (sql: string, params: unknown[] = [], method: SqlMethod = 'all') =>
       send<unknown[][]>({ kind: 'exec', sql, params, method }),
-    dispose: () => worker.terminate(),
     // Debug-only: lets tests confirm the map is actually emptied on crash,
     // not just that the promises settled.
     _pendingCount: () => pending.size,

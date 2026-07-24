@@ -16,7 +16,6 @@ vi.mock('./rpc', () => ({
     // initDb now runs migrations right after init, which selects rows and
     // .maps() them — an empty result set keeps that a no-op here.
     exec: vi.fn(async () => []),
-    dispose: vi.fn(),
   })),
 }));
 
@@ -56,7 +55,6 @@ describe('initDb concurrency', () => {
       exec: vi.fn(async () => {
         throw new Error('migration boom');
       }),
-      dispose: vi.fn(),
     }) as unknown as ReturnType<typeof createRpc>);
     const { initDb } = await import('./client');
 
