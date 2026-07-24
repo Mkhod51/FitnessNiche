@@ -28,4 +28,22 @@ describe('runMigrations', () => {
     const second = await runMigrations(f.exec);
     expect(second).toEqual([]);
   });
+
+  it('rolls back and does not record a migration that fails mid-way', async () => {
+    const applied: string[] = [];
+    const statements: string[] = [];
+    const exec = async (sql: string, params: unknown[] = []) => {
+      statements.push(sql);
+      if (sql.includes('select name from _migrations')) return applied.map((n) => [n]);
+      if (sql.startsWith('insert into _migrations')) { applied.push(String(params[0])); return []; }
+      if (sql.includes('create table if not exists users')) throw new Error('boom');
+      return [];
+    };
+
+    await expect(runMigrations(exec)).rejects.toThrow('boom');
+    expect(applied).toEqual([]);
+    expect(statements).toContain('begin');
+    expect(statements).toContain('rollback');
+    expect(statements.some((s) => s.startsWith('insert into _migrations'))).toBe(false);
+  });
 });
