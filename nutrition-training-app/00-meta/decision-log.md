@@ -67,6 +67,39 @@ This is where the differentiating features hide — each row is a claim incumben
 3. **Weight-cut segment retained only in harm-filtered form** (gradual, capped, powerlifting-oriented); acute protocols out of scope permanently, not deferred.
 4. **Ethics/regulatory used as a gate, then a small weight.** Stream D's vetoes were applied before scoring (dead candidates never entered the list); residual risk gets 5% weight in ranking rather than dominating it, because the gate already did the heavy lifting.
 5. **Recommendation: Verdict over Leucine Ledger (4.40 vs 4.25 — decided by tiebreakers, not arithmetic).** Alternatives seriously considered: Leucine Ledger (deeper moat, better data-engineering story, smaller reach), Blind (biggest structural moat, unresolved audience-exists question). Reasoning: Verdict is the only candidate that embodies the one integration claim Stream B left alive; three other top-seven candidates independently collapsed into it as features; its evidence floor is uniformly [A]/[A/B]. Flip condition recorded: if the developer is plant-based, Leucine Ledger wins on builder-segment fit. The named kill risk (payoff latency vs. two-week churn) and the named competitive threat (MacroFactor shipping a lift logger) are stated in recommended.md rather than hedged.
+## Phase 2 — science-based-lifting pivot (2026-07-24, post-interruption)
+
+Per user direction, Phase 2 was re-scoped: leaner (Sonnet workers, ceilings, small batches to stay under the session limit), focused on the **science-based / evidence-based lifting** niche. Two Sonnet research streams ran successfully; synthesis and ideation done by the Opus main thread (no subagent tokens). This supersedes the seven-stream exhaustive plan, which is parked in the resume checklist below if ever wanted.
+
+### Premise status after the e1RM investigation
+
+The premise-critical question Phase 1 dodged is answered: **e1RM trend is wounded, not killed.** Single-reading e1RM CV is 5–10% [B]; a single before/after comparison cannot see 4–8 weeks of intermediate progress (squat MDC ≈10 kg vs ~0.5–5 kg real gain). But a regression trend over 8–24 logged sessions pulls trend-SEM down to ~1–3.5 kg — same order as the signal. **Consequences, now hard design constraints for any candidate using e1RM:**
+- Compute e1RM as a many-point regression, never point-to-point.
+- Use only sets at **RIR ≤3** (RIR error is ±1 near failure, >2 reps out at RIR 7–10 [B]) and **≤10 reps** (formulas diverge ±15–20% beyond that [B]).
+- For advanced lifters, say plainly when progress is below the noise floor rather than draw a confident line. *The honesty is the feature.*
+
+### Conventional-wisdom vs evidence gaps (the niche's differentiator seams)
+
+This is where a science-based product can do what incumbents won't, because incumbents sell the conventional version:
+
+| Niche conventional wisdom | Evidence reality | Opening |
+|---|---|---|
+| Individualized MEV/MV/MAV/MRV volume landmarks you can locate from your logs (RP, $25–35/mo, built entirely on this) | Population dose-response "~10–20 sets/muscle/wk, plateau ~10" is [A] directional; **individualized in-app MEV/MRV detection is [C/D]** — asserted, not shown identifiable from training data | Track volume against the *evidenced population range* and refuse to fabricate a personal MRV number. Honesty as differentiation, aimed at the one audience that rewards it |
+| Deload every 4–6 weeks, autoregulate from fatigue | [C] consensus; a 2024 RCT found a 1-wk deload gave no hypertrophy benefit and *worse* strength gains | A deload prompt the app can surface but must not dress as evidence-backed |
+| Your e1RM number today | [B] pseudo-precision as a point value | Show a trend with a confidence band, not a number |
+| Body-fat % from a smart scale | [B] for trend, [D] for absolute value | Trend only; never display the absolute number as truth |
+| VBT autoregulation from your phone | [D]/unvalidated without a real transducer | Do not build phone-only velocity; stick to RIR |
+
+### The most defensible integration gap (drives the recommendation)
+
+Reconciling a **cut/bulk against training performance** is the one job that structurally requires both halves: MacroFactor adjusts calories from weight-trend alone and is blind to whether strength/volume tolerance is dropping in the deficit; RP/Hevy see training but not intake. Science-based lifters demonstrably pay for *both* (~$30–45/mo combined) and stitch the reconciliation in their heads. This is Phase 1's "Verdict" sharpened to the cut/bulk decision and aimed at a paying, reachable niche.
+
+### CSV-import reality (Phase 1's "survival requirement", now corrected)
+
+Partially true. **Hevy** exports CSV free [C] — that path works. **Strong** export is paywalled behind PRO [C] — the import path silently fails for free-tier Strong users. **Boostcamp** has no first-party export. **RP app** export status could not be determined. Column-level content (does the CSV carry RIR, not just weight×reps?) is unconfirmed for all. So import-driven onboarding is a real but *Hevy-specific* funnel, not the universal safety net Phase 1 assumed.
+
+---
+
 ## Phase 2 — resume checklist (after 2026-07-24 session-limit interruption)
 
 Wave 1 was dispatched as seven parallel agents; all were cut off by an Anthropic session limit (resets 02:00 Europe/London) before finishing. Salvaged and committed: three nutrition-incumbent teardowns (MFP, Cronometer, MacroFactor) and Stream C1's raw notes. To resume, dispatch in one wave once the limit clears:
