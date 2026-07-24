@@ -10,17 +10,25 @@ async function init(): Promise<StorageMode> {
   // params (the brief assumed a `{ print, printErr }` config arg) — follow
   // the types and take the default console output.
   const sqlite3 = await sqlite3InitModule();
+  let pool;
   try {
     // Preferred: persistent, no COOP/COEP needed, iOS Safari 16.4+.
-    const pool = await sqlite3.installOpfsSAHPoolVfs({ name: 'etl-pool' });
-    db = new pool.OpfsSAHPoolDb('/app.db');
-    storage = 'opfs-sahpool';
+    // Only the capability probe goes in this try — private browsing,
+    // unsupported browser, or pool-lock acquisition failure are legitimate
+    // "this environment can't" outcomes worth falling back for.
+    pool = await sqlite3.installOpfsSAHPoolVfs({ name: 'etl-pool' });
   } catch (err) {
-    // Private browsing, unsupported browser, or pool acquisition failure.
     console.warn('OPFS SAHPool unavailable, falling back to in-memory:', err);
     db = new sqlite3.oo1.DB(':memory:');
     storage = 'memory-fallback';
+    return storage;
   }
+  // The pool installed fine, so constructing the db from it is a plain API
+  // call. A failure here is almost certainly a bug (NFR-1: no silent data
+  // loss) — let it throw so `init` rejects instead of masquerading as a
+  // capability fallback.
+  db = new pool.OpfsSAHPoolDb('/app.db');
+  storage = 'opfs-sahpool';
   return storage;
 }
 
