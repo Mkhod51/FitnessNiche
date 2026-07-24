@@ -106,7 +106,7 @@ Wave 1 was dispatched as seven parallel agents; all were cut off by an Anthropic
 
 - [ ] **Stream A (Opus)** — exercise science + measurement validity. **Premise-critical:** quantify e1RM trend error (carryover §2.1). Nothing salvaged.
 - [ ] **Stream B (Opus)** — nutrition science depth. Nothing salvaged.
-- [ ] **Stream C1 deliverables** — write `behaviour-change.md` + `abandonment.md` superset from the existing `03-sources/raw-notes/stream-c1-notes.md` (notes are thorough; may not need a fresh search pass).
+- [ ] **Stream C1 deliverables** — write `behaviour-change.md` + `abandonment.md` superset from the existing `04-sources/raw-notes/stream-c1-notes.md` (notes are thorough; may not need a fresh search pass).
 - [ ] **Stream C2 (Sonnet)** — jobs-to-be-done; test the cross-app recomposition-read claim. Nothing salvaged.
 - [ ] **Stream D1 finish** — `loseit.md` + `failed-products.md` (three incumbent files already done).
 - [ ] **Stream D2 (Sonnet)** — training incumbents + adjacent products. **Load-bearing:** verify Hevy/Strong free-tier CSV export (carryover §2.3). Nothing salvaged.

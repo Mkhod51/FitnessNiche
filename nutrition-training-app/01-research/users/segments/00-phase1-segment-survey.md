@@ -1,7 +1,7 @@
 # Phase 1 Segment Survey (baseline)
 
 > **Status:** Phase 1 baseline — six segments. Wave 1 Stream E goes much wider (~18+), one file per segment in this directory.
-> Verbatim Phase 1 source archived at `03-sources/raw-notes/phase1/data-and-segments.md`.
+> Verbatim Phase 1 source archived at `04-sources/raw-notes/phase1/data-and-segments.md`.
 > Sizes below are **[D]-grade estimates** and must be re-sourced.
 
 ## Phase 1 top-5 table

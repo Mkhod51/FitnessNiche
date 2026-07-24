@@ -69,7 +69,7 @@ This is **exactly** the claim the whole project needs — which is itself a reas
 
 ## 4. Precision-vs-adherence tradeoff — verification of Phase 1's claim
 
-Phase 1 claim (from `03-sources/raw-notes/phase1/constraints.md`): "5 RCTs of simplified vs detailed dietary self-monitoring, 4/5 equivalent weight loss; pilot RCT ~equal 5% weight-loss rates (43.2% vs 42.9%) and higher engagement in simplified arm."
+Phase 1 claim (from `04-sources/raw-notes/phase1/constraints.md`): "5 RCTs of simplified vs detailed dietary self-monitoring, 4/5 equivalent weight loss; pilot RCT ~equal 5% weight-loss rates (43.2% vs 42.9%) and higher engagement in simplified arm."
 
 **Verified independently, matches:**
 - Nezami BT et al. "A pilot randomized trial of simplified versus standard calorie dietary self-monitoring in a mobile weight loss intervention." *Obesity* 2022;30(3). N=72 parents of young children, 6-month mobile behavioural weight-loss intervention. **Confirmed exact numbers**: simplified arm (tracked only high-calorie "red" foods) lost 4.0% body weight vs standard arm (full calorie tracking) 5.7%, not significantly different; rate reaching clinically meaningful ≥5% weight loss: 42.9% (simplified) vs 43.2% (standard) — Phase 1's specific figures are accurate to this specific study.

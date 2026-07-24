@@ -1,7 +1,7 @@
 # Abandonment & Retention Reality
 
 > **Status:** Phase 1 baseline. Wave 1 Stream C extends this — everything below is retained, not replaced.
-> Verbatim Phase 1 source archived at `03-sources/raw-notes/phase1/constraints.md`.
+> Verbatim Phase 1 source archived at `04-sources/raw-notes/phase1/constraints.md`.
 
 Evidence grades: **[A]** meta-analysis/replicated RCT · **[B]** single good study/consistent observational · **[C]** mechanistic/small-n/expert consensus · **[D]** industry/anecdote.
 

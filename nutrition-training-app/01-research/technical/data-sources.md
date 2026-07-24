@@ -1,7 +1,7 @@
 # Data Sources: Food, Exercise, Wearables
 
 > **Status:** Phase 1 baseline (food databases only). Wave 1 Stream F extends this — everything below is retained, not replaced.
-> Verbatim Phase 1 source archived at `03-sources/raw-notes/phase1/data-and-segments.md`.
+> Verbatim Phase 1 source archived at `04-sources/raw-notes/phase1/data-and-segments.md`.
 
 Evidence grades: **[A]** meta-analysis/replicated RCT · **[B]** single good study/consistent observational · **[C]** mechanistic/small-n/expert consensus · **[D]** industry/anecdote.
 

@@ -1,7 +1,7 @@
 # Architecture Patterns: Offline-First, Sync, On-Device
 
 > **Status:** Phase 1 baseline. Wave 1 Stream F extends this — everything below is retained, not replaced.
-> Verbatim Phase 1 source archived at `03-sources/raw-notes/phase1/constraints.md`.
+> Verbatim Phase 1 source archived at `04-sources/raw-notes/phase1/constraints.md`.
 
 ## Phase 1 baseline — offline-first sync
 
