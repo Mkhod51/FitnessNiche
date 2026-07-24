@@ -7,8 +7,10 @@ A three-phase research and ideation project to land a differentiated, buildable 
 | Phase | Question | Outcome |
 |---|---|---|
 | **1 — Ideation sprint** | Where are incumbents structurally weak, and what can a combined app do that two separate apps can't? | Killed the "computational moat" premise; recommended **Verdict** (an honest weight-trend × strength-trend read). Archived in [archive/phase1-ideation/](archive/phase1-ideation/) and [01-research/](01-research/). |
-| **2 — Deep ideation (science-based-lifting pivot)** | For the evidence-based lifting niche specifically, what holds up? | e1RM trend is *wounded, not killed*; recommended the **bounded Cut Reconciler**. See [02-ideation/recommended.md](02-ideation/recommended.md). |
-| **3 — Thesis review** | Does "citation-grounded, nuanced advice" hold as the differentiator? | **Holds, but only reframed** — see below. [03-thesis-review/review.md](03-thesis-review/review.md). |
+| **2 — Deep ideation (science-based-lifting pivot)** | For the evidence-based lifting niche specifically, what holds up? | e1RM trend is *wounded, not killed*; produced the **Cut Reconciler** engine. Archived in [archive/phase2-ideation/](archive/phase2-ideation/). |
+| **3 — Thesis review + commit** | Does "citation-grounded, nuanced advice" hold as the differentiator? | **Holds, reframed** — and now the chosen direction. [03-thesis-review/review.md](03-thesis-review/review.md). |
+
+> **Status: idea chosen.** The project has committed to the citation-graded advice product. All other ideas are in [archive/](archive/); the live product knowledge base is [03-thesis-review/](03-thesis-review/) (thesis, findings, advice-strategies, feasibility) plus the supporting research it points to.
 
 ## Phase 3 headline (current)
 
@@ -23,7 +25,7 @@ The thesis under test was: a tracker whose differentiators are (1) advice backed
 
 ## Recommended, and the strongest objection
 
-**Verdict:** the reframed thesis holds and is the strongest concept the project has produced — an honest-grading advice layer (features **A** evidence-grade primitive + **C** progressive disclosure at its core; [feature-brainstorm.md](03-thesis-review/feature-brainstorm.md)), ideally attached to Phase 2's cut/bulk reconciliation engine so citations are earned by the user's own data.
+**Verdict:** the reframed thesis holds and is now the chosen product — an honest-grading advice layer (features **A** evidence-grade primitive + **C** progressive disclosure at its core; [feature-brainstorm.md](03-thesis-review/feature-brainstorm.md)), attached to the archived Phase 2 cut/bulk reconciliation engine so citations are earned by the user's own data. How the advice is actually generated is worked out in [advice-strategies.md](03-thesis-review/advice-strategies.md); the build assessment is in [feasibility.md](03-thesis-review/feasibility.md).
 
 **Strongest objection:** the biggest risk is neither technical nor competitive — it's whether de-mythologising is a product people *sustain using*. An app that tells science-based lifters their favourite protocols are [C] earns respect, but respect and daily engagement are different things, and no evidence settles which way it goes. For a portfolio piece that risk is acceptable; for a business it's the first thing to validate.
 
@@ -36,10 +38,9 @@ The thesis under test was: a tracker whose differentiators are (1) advice backed
 
 ## Repo map
 
+- [03-thesis-review/](03-thesis-review/) — **the live product**: thesis (review), findings, feature brainstorm, advice-strategies, feasibility, credibility-risk
+- [01-research/](01-research/) — supporting research kept live: evidence base, citation infrastructure, audience, constraints, competitor intel, tech patterns, food data
 - [00-meta/](00-meta/) — decision log, evidence standards, carryover, migration maps
-- [01-research/](01-research/) — domain, market, technical, users, constraints
-- [02-ideation/](02-ideation/) — Phase 2 candidates, ranking, recommendation, rejected
-- [03-thesis-review/](03-thesis-review/) — Phase 3 findings, feature brainstorm, review
 - [04-sources/](04-sources/) — raw subagent notes
-- [archive/](archive/) — superseded Phase 1 ideation
+- [archive/](archive/) — all other, non-chosen ideas: Phase 1 ideation & research, Phase 2 ideation (incl. the Cut Reconciler)
 - [PROJECT-STATE.md](PROJECT-STATE.md) · [MIGRATION.md](MIGRATION.md)
