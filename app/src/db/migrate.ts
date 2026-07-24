@@ -4,6 +4,20 @@ type Exec = (sql: string, params?: unknown[], method?: string) => Promise<unknow
 
 const MIGRATIONS: { name: string; sql: string }[] = [{ name: '0001_init', sql: initSql }];
 
+// Execution order is array order — a migration appended out of sequence, or
+// a duplicated name, must fail loudly at load time rather than surface as a
+// production UNIQUE constraint crash on the second insert.
+export function assertMigrationOrder(migrations: { name: string }[]): void {
+  for (let i = 1; i < migrations.length; i++) {
+    if (migrations[i].name <= migrations[i - 1].name) {
+      throw new Error(
+        `migrations must be unique and in ascending order: "${migrations[i].name}" does not come after "${migrations[i - 1].name}"`,
+      );
+    }
+  }
+}
+assertMigrationOrder(MIGRATIONS);
+
 export async function runMigrations(exec: Exec): Promise<string[]> {
   await exec('create table if not exists _migrations (name text primary key, applied_at text not null)', [], 'run');
   const rows = await exec('select name from _migrations', [], 'all');

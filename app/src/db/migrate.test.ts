@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { runMigrations } from './migrate';
+import { runMigrations, assertMigrationOrder } from './migrate';
 
 function fakeExec() {
   const applied: string[] = [];
@@ -45,5 +45,19 @@ describe('runMigrations', () => {
     expect(statements).toContain('begin');
     expect(statements).toContain('rollback');
     expect(statements.some((s) => s.startsWith('insert into _migrations'))).toBe(false);
+  });
+});
+
+describe('assertMigrationOrder', () => {
+  it('accepts unique, ascending names', () => {
+    expect(() => assertMigrationOrder([{ name: '0001_init' }, { name: '0002_add_thing' }])).not.toThrow();
+  });
+
+  it('rejects a duplicated name', () => {
+    expect(() => assertMigrationOrder([{ name: '0001_init' }, { name: '0001_init' }])).toThrow(/ascending/);
+  });
+
+  it('rejects an out-of-order name', () => {
+    expect(() => assertMigrationOrder([{ name: '0002_add_thing' }, { name: '0001_init' }])).toThrow(/ascending/);
   });
 });
