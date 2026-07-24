@@ -10,6 +10,7 @@ import type { Database, BindingSpec } from '@sqlite.org/sqlite-wasm';
 import { drizzle } from 'drizzle-orm/sqlite-proxy';
 import { eq } from 'drizzle-orm';
 import { runMigrations, type Exec } from './migrate';
+import { makeProxyCallback } from './client';
 import * as schema from './schema';
 
 async function makeRealExec(): Promise<Exec> {
@@ -44,10 +45,10 @@ describe('drizzle-orm/sqlite-proxy contract against a real sqlite engine', () =>
   });
 
   it('the corrected adapter (rows[0], no fallback) round-trips select/insert/get correctly', async () => {
-    const dz = drizzle(async (sql, params, method) => {
-      const rows = await exec(sql, params, method);
-      return { rows: method === 'get' ? rows[0] : rows };
-    }, { schema });
+    // Build this from the actual shipped adapter, not a hand-copied
+    // duplicate — that's the only way reverting client.ts's proxy callback
+    // to the buggy `rows[0] ?? []` would ever fail this suite.
+    const dz = drizzle(makeProxyCallback(exec), { schema });
 
     await dz.insert(schema.users).values({ id: 'u1', updatedAt: '2026-01-01T00:00:00.000Z' }).run();
 

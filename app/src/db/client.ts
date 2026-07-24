@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/sqlite-proxy';
 import { createRpc } from './rpc';
 import type { SqlMethod, StorageMode } from './protocol';
-import { runMigrations } from './migrate';
+import { runMigrations, type Exec } from './migrate';
 import { seedExercises } from './seed';
 import * as schema from './schema';
 
@@ -18,11 +18,15 @@ let dz: ReturnType<typeof drizzle> | null = null;
 // mapGetResult treats a falsy row as "not found" and returns undefined, but
 // `[]` is truthy, so it would map an all-undefined-fields row instead
 // (verified with a real sqlite engine in drizzle-contract.test.ts).
-function makeDrizzle() {
-  return drizzle(async (sql, params, method) => {
-    const rows = await execSql(sql, params, method as SqlMethod);
+export function makeProxyCallback(exec: Exec) {
+  return async (sql: string, params: unknown[], method: string) => {
+    const rows = await exec(sql, params, method as SqlMethod);
     return { rows: method === 'get' ? rows[0] : rows };
-  }, { schema });
+  };
+}
+
+function makeDrizzle() {
+  return drizzle(makeProxyCallback(execSql), { schema });
 }
 
 export async function initDb(): Promise<StorageMode> {
