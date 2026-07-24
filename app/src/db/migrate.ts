@@ -33,7 +33,15 @@ export async function runMigrations(exec: Exec): Promise<string[]> {
       await exec('insert into _migrations (name, applied_at) values (?, ?)', [m.name, new Date().toISOString()], 'run');
       await exec('commit', [], 'run');
     } catch (err) {
-      await exec('rollback', [], 'run');
+      // sqlite auto-rolls-back on some errors (SQLITE_FULL/IOERR/BUSY),
+      // which makes this rollback throw "no transaction is active" — if
+      // that throw wasn't caught here it would replace `err` and the real
+      // migration failure would never reach the caller.
+      try {
+        await exec('rollback', [], 'run');
+      } catch {
+        /* no-op: transaction was already rolled back by sqlite itself */
+      }
       throw err;
     }
     applied.push(m.name);

@@ -46,6 +46,22 @@ describe('runMigrations', () => {
     expect(statements).toContain('rollback');
     expect(statements.some((s) => s.startsWith('insert into _migrations'))).toBe(false);
   });
+
+  it('surfaces the original migration error even when the rollback itself throws', async () => {
+    // Mirrors sqlite auto-rolling-back on SQLITE_FULL/IOERR/BUSY: by the time
+    // our catch block calls `rollback`, there's no transaction left, so
+    // `rollback` itself throws "cannot rollback - no transaction is active".
+    const applied: string[] = [];
+    const exec = async (sql: string, params: unknown[] = []) => {
+      if (sql.includes('select name from _migrations')) return applied.map((n) => [n]);
+      if (sql.startsWith('insert into _migrations')) { applied.push(String(params[0])); return []; }
+      if (sql.includes('create table if not exists users')) throw new Error('database or disk is full');
+      if (sql === 'rollback') throw new Error('cannot rollback - no transaction is active');
+      return [];
+    };
+
+    await expect(runMigrations(exec)).rejects.toThrow('database or disk is full');
+  });
 });
 
 describe('assertMigrationOrder', () => {
