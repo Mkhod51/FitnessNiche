@@ -1,0 +1,35 @@
+# Stream D — Ethical & Credibility Risk of a Citation-Backed Advice App
+
+Architect's own analysis (not delegated). This is the risk register specific to *citing studies to justify advice* — a class of risk a generic tracker does not carry. It connects directly to the "nuance" differentiator, and the central claim of this stream is that **nuance is not a nice-to-have; it is the load-bearing mitigation for the risks below, and without it the citation feature is net-negative.**
+
+Evidence tags: [A] meta/RCT · [B] single good study/consistent obs · [C] mechanistic/consensus · [D] industry/anecdote.
+
+## The core problem: a citation is a trust primitive, and this app manufactures them
+
+To a specialist, a citation is a pointer to be evaluated. To a non-specialist — most users — **a citation reads as "proven."** The mere presence of "[Schoenfeld 2017]" next to a claim raises believed certainty regardless of the study's actual strength. This is the "veneer of scientific-ness" effect: peripheral cues of rigour (references, jargon, numbers) increase persuasion independent of argument quality [C, established in persuasion/credibility research]. The app therefore has a power it must not misuse: **attaching a citation increases user trust more than the underlying evidence often warrants.** Every risk below is a way that power goes wrong.
+
+## Risk register
+
+| # | Risk | Why it's specific to *this* app | Severity | Primary mitigation |
+|---|---|---|---|---|
+| D1 | **Laundering weak evidence** — citing an n=14, 8-week, untrained-subject study as if it settles a question, because the citation confers unearned authority | A plain tracker never claims evidential backing, so it can't launder anything. This app's entire value prop is the backing, so misgraded backing is a core-feature failure, not a peripheral bug | **High** | Evidence grade shown *with* every citation, never a citation alone; grade must be as prominent as the claim |
+| D2 | **Cherry-picking to a predetermined conclusion** — the literature is genuinely split on many lifting questions; selecting the supporting subset produces "evidence-based" advice that is actually opinion with references | High, because the builder has priors (everyone in this space does) and the audience can't audit the selection | **High** | Show the *distribution* of evidence and named dissent, not one supporting study; "where reasonable people disagree" as a first-class UI element — i.e. the nuance differentiator, doing real work |
+| D3 | **Overconfidence inheritance** — the app is positioned *against* the confident-directive content ecosystem, yet a citation next to a directive is *more* authoritative than the directive alone. It can end up more overconfident than what it critiques | This is the thesis's self-undermining failure mode; unique to a product whose pitch is "we're the honest one" | **High** | Confidence-graded, hedged presentation must be the *default*, not an on-request layer. If nuance is optional, D3 fires |
+| D4 | **Stale citations** — sport science moves; a 2015 claim superseded by 2023 work becomes actively misleading *because* it carries a citation | A tracker with no claims never goes stale this way | Medium | A supersession/"last reviewed" mechanism and dated claims; scope the claim set small enough to maintain |
+| D5 | **Harm from evidence-framed advice** — advice that caused harm is worse when it was framed as scientifically established, both ethically and for liability; a user hurts themselves trusting "the science said so" | Higher exposure than a neutral tracker; interacts with the ED/deficit constraints from prior phases and with the medical-device line | Medium–High | Keep advice in the wellness/performance lane (never disease/clinical — see `01-research/constraints/regulatory.md`); the calorie floor, deficit cap and performance framing already mandated stay mandatory; disclaim individual applicability |
+| D6 | **False precision from figures** — surfacing "effect size 0.37% per set" implies a per-individual predictive precision the population statistic does not have | The "show me the figures" feature is the vector; a non-numeric app can't do this | Medium | Present figures as population-level with dispersion/CI, never as a personal prediction; pair with the measurement-honesty stance already adopted for e1RM (`00-meta/decision-log.md`) |
+| D7 | **Authority overreach / scope creep into clinical** — users will ask evidence-cited questions about disease, medication (GLP-1), pregnancy; a citation-backed answer there crosses into medical-device/clinical territory fast | The citation feature *invites* these questions more than a tracker does | Medium | Hard refusal + signpost on clinical topics; the medical-device fence from prior phases is even more necessary here |
+
+## The key finding: nuance is a hedge, and that's the honest case for it
+
+The Phase 3 brief frames "nuance" as a second, separate differentiator. It is not separate. **Nuance (confidence grading, showing dissent, hedged defaults) is the direct mitigation for D1, D2 and D3 — the three High risks — all of which are created by the citation feature itself.** A citation-backed app *without* nuance is strictly more dangerous than a plain tracker, because it adds the trust-amplification of citations without the correction of showing how weak/contested the evidence often is. So the two differentiators are not additive features; they are a feature and its safety system. This should be stated plainly in the review: **you cannot ship the citations without the nuance and remain honest.** That also raises the design bar — see the "does nuance survive the UI?" question for Wave 2, because if nuance degrades under interface constraints, the whole thesis is compromised, not just softened.
+
+## Interaction with prior-phase constraints (all still binding)
+
+- ED harm-reduction baseline (`01-research/constraints/ethics.md`): unchanged and still mandatory. Note a *new* interaction — evidence-framed weight-loss advice could rationalise restriction ("the study says a deficit works"); the deficit cap and performance framing must gate citation-backed advice too, not just raw targets.
+- Medical-device line (`01-research/constraints/regulatory.md`): the citation feature increases the pull toward clinical claims (D7); the fence must hold harder.
+- Measurement honesty (`00-meta/decision-log.md`): the "show figures" feature (D6) is the same false-precision risk already confronted for e1RM — apply the same discipline (CIs, population-not-personal, honest noise floor).
+
+## Verdict for synthesis
+
+The idea is **not** low-risk-because-scientific; it is **higher-risk than a plain tracker**, in a way that is fully mitigable but only if nuance is a mandatory default rather than an optional layer. The credibility risk and the credibility *differentiator* are the same axis: do the grading and the dissent honestly and it's the moat; do them lazily and it's the most authoritative-looking way yet built to be confidently wrong to people who can't tell. Feeds directly into `findings.md` and the `review.md` concerns section.
