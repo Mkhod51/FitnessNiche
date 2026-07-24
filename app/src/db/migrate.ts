@@ -12,9 +12,7 @@ export async function runMigrations(exec: Exec): Promise<string[]> {
 
   for (const m of MIGRATIONS) {
     if (already.has(m.name)) continue;
-    for (const stmt of m.sql.split(';').map((s) => s.trim()).filter(Boolean)) {
-      await exec(stmt, [], 'run');
-    }
+    await exec(m.sql, [], 'run');
     await exec('insert into _migrations (name, applied_at) values (?, ?)', [m.name, new Date().toISOString()], 'run');
     applied.push(m.name);
   }
