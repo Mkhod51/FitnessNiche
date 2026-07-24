@@ -1,6 +1,16 @@
 # Project State
 
-**Updated:** 2026-07-24 · **Phase:** 2 (Deep Ideation) · **Stage:** Wave 1 dispatched
+**Updated:** 2026-07-24 · **Phase:** 2 (Deep Ideation) · **Stage:** Wave 1 INTERRUPTED — session limit (resets 02:00 Europe/London)
+
+## ⚠️ Wave 1 interruption
+
+All seven Wave 1 agents were terminated early by an Anthropic session limit, not by completing. Salvaged to disk and committed:
+- **Stream D1 (nutrition incumbents):** `myfitnesspal.md`, `cronometer.md`, `macrofactor.md` written and intact. **Missing:** `loseit.md`, `failed-products.md`, D1 notes.
+- **Stream C1 (behaviour change):** raw notes only (`stream-c1-notes.md`, thorough). **Missing both deliverables:** `behaviour-change.md` and the `abandonment.md` superset.
+- **Streams A (exercise science), B (nutrition science), C2 (jobs-to-be-done), D2 (training incumbents + adjacent + CSV-export check), G (ethics/regulatory/licensing):** nothing reached disk. The premise-critical e1RM-error question (Stream A) and the CSV-export verification (Stream D2) are both still unanswered.
+
+**To resume after the reset:** re-dispatch A, B, C2, D2, G in full; finish D1 (loseit + failed-products); write C1's two deliverables from its existing notes. See `00-meta/decision-log.md` for the resume checklist.
+
 
 ## Where this stands
 

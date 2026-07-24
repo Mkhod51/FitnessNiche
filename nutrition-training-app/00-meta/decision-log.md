@@ -67,4 +67,21 @@ This is where the differentiating features hide — each row is a claim incumben
 3. **Weight-cut segment retained only in harm-filtered form** (gradual, capped, powerlifting-oriented); acute protocols out of scope permanently, not deferred.
 4. **Ethics/regulatory used as a gate, then a small weight.** Stream D's vetoes were applied before scoring (dead candidates never entered the list); residual risk gets 5% weight in ranking rather than dominating it, because the gate already did the heavy lifting.
 5. **Recommendation: Verdict over Leucine Ledger (4.40 vs 4.25 — decided by tiebreakers, not arithmetic).** Alternatives seriously considered: Leucine Ledger (deeper moat, better data-engineering story, smaller reach), Blind (biggest structural moat, unresolved audience-exists question). Reasoning: Verdict is the only candidate that embodies the one integration claim Stream B left alive; three other top-seven candidates independently collapsed into it as features; its evidence floor is uniformly [A]/[A/B]. Flip condition recorded: if the developer is plant-based, Leucine Ledger wins on builder-segment fit. The named kill risk (payoff latency vs. two-week churn) and the named competitive threat (MacroFactor shipping a lift logger) are stated in recommended.md rather than hedged.
+## Phase 2 — resume checklist (after 2026-07-24 session-limit interruption)
+
+Wave 1 was dispatched as seven parallel agents; all were cut off by an Anthropic session limit (resets 02:00 Europe/London) before finishing. Salvaged and committed: three nutrition-incumbent teardowns (MFP, Cronometer, MacroFactor) and Stream C1's raw notes. To resume, dispatch in one wave once the limit clears:
+
+- [ ] **Stream A (Opus)** — exercise science + measurement validity. **Premise-critical:** quantify e1RM trend error (carryover §2.1). Nothing salvaged.
+- [ ] **Stream B (Opus)** — nutrition science depth. Nothing salvaged.
+- [ ] **Stream C1 deliverables** — write `behaviour-change.md` + `abandonment.md` superset from the existing `03-sources/raw-notes/stream-c1-notes.md` (notes are thorough; may not need a fresh search pass).
+- [ ] **Stream C2 (Sonnet)** — jobs-to-be-done; test the cross-app recomposition-read claim. Nothing salvaged.
+- [ ] **Stream D1 finish** — `loseit.md` + `failed-products.md` (three incumbent files already done).
+- [ ] **Stream D2 (Sonnet)** — training incumbents + adjacent products. **Load-bearing:** verify Hevy/Strong free-tier CSV export (carryover §2.3). Nothing salvaged.
+- [ ] **Stream G (Opus)** — ethics/regulatory/licensing supersets; ODbL share-alike verdict. Nothing salvaged.
+- [ ] Then Wave 2 synthesis, Wave 3 ideation, Wave 4 ranking + deep dives.
+
+Lesson logged: a single wave of seven long-running Opus/Sonnet agents is enough to exhaust a session. On resume, consider dispatching in two smaller batches to stay under the limit.
+
+---
+
 6. **CSV import promoted from feature to survival requirement.** The verdict engine is mute for 4–6 weeks on fresh data while median tracker churn happens inside 2. Hevy/Strong import converts existing two-app users' history into a day-one verdict — it is the only mitigation found for the payoff-latency failure mode, so it ships first, not last.
