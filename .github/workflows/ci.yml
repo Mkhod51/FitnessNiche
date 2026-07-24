@@ -17,5 +17,11 @@ jobs:
       - run: npm run typecheck
       - run: npm test -- --run
       - run: npm run build
+      - name: fail if the e2e-only __db escape hatch leaked into the production bundle
+        run: |
+          if grep -rl "__db" dist/; then
+            echo "found window.__db in a production build — this is UK-GDPR special-category health data, it must never ship"
+            exit 1
+          fi
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
