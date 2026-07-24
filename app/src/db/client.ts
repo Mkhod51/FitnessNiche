@@ -2,6 +2,7 @@ import { drizzle } from 'drizzle-orm/sqlite-proxy';
 import { createRpc } from './rpc';
 import type { SqlMethod, StorageMode } from './protocol';
 import { runMigrations } from './migrate';
+import { seedExercises } from './seed';
 import * as schema from './schema';
 
 let rpc: ReturnType<typeof createRpc> | null = null;
@@ -35,6 +36,7 @@ export async function initDb(): Promise<StorageMode> {
       rpc = createRpc(worker);
       mode = await rpc.init();
       await runMigrations(execSql);
+      await seedExercises(execSql);
       dz = makeDrizzle();
       return mode;
     })();
