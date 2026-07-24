@@ -1,15 +1,24 @@
 # Project State
 
-**Updated:** 2026-07-24 · **Phase:** 2 (Deep Ideation) · **Stage:** Wave 1 INTERRUPTED — session limit (resets 02:00 Europe/London)
+**Updated:** 2026-07-24 · **Phase:** 2 (Deep Ideation, science-based-lifting pivot) · **Stage:** Recommendation reached
 
-## ⚠️ Wave 1 interruption
+## Where this stands
 
-All seven Wave 1 agents were terminated early by an Anthropic session limit, not by completing. Salvaged to disk and committed:
-- **Stream D1 (nutrition incumbents):** `myfitnesspal.md`, `cronometer.md`, `macrofactor.md` written and intact. **Missing:** `loseit.md`, `failed-products.md`, D1 notes.
-- **Stream C1 (behaviour change):** raw notes only (`stream-c1-notes.md`, thorough). **Missing both deliverables:** `behaviour-change.md` and the `abandonment.md` superset.
-- **Streams A (exercise science), B (nutrition science), C2 (jobs-to-be-done), D2 (training incumbents + adjacent + CSV-export check), G (ethics/regulatory/licensing):** nothing reached disk. The premise-critical e1RM-error question (Stream A) and the CSV-export verification (Stream D2) are both still unanswered.
+Re-scoped per user direction: leaner (Sonnet workers + Opus-main synthesis, small batches after a session-limit interruption), focused on the **science-based lifting** niche. Two research streams landed cleanly; ideation, ranking and recommendation done.
 
-**To resume after the reset:** re-dispatch A, B, C2, D2, G in full; finish D1 (loseit + failed-products); write C1's two deliverables from its existing notes. See `00-meta/decision-log.md` for the resume checklist.
+**Recommendation: the Cut Reconciler (SBL-6 bounded frame over SBL-2 engine)** — a science-based, bounded-duration cut companion that reconciles weight/intake trend against training performance, refuses to fake precision, and is designed to be finished at maintenance. Full case in `02-ideation/recommended.md`.
+
+**Premise resolved:** e1RM trend is *wounded, not killed* — usable only as a many-point regression from RIR≤3, ≤10-rep sets, with honesty about the noise floor for advanced lifters. See `00-meta/decision-log.md`.
+
+## Open verification items before any build
+
+- Do RP users actually also pay for MacroFactor? (the WTP-for-the-seam argument rests on this; currently inference)
+- Does Hevy's free CSV export carry RIR, or only weight×reps? (affects imported-history quality)
+- Does the reconciliation verdict earn its keep as more than two overlaid charts? (the core product risk)
+
+## Parked (the original exhaustive plan, if ever wanted)
+
+The seven-stream Wave 1 was abandoned in favour of the lean pivot. Salvaged before the interruption and still on disk: three nutrition-incumbent teardowns (`myfitnesspal`, `cronometer`, `macrofactor`) and Stream C1's behaviour-change raw notes. The full resume checklist remains in `00-meta/decision-log.md` for anyone wanting the exhaustive version later.
 
 
 ## Where this stands
