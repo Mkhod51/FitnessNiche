@@ -9,10 +9,8 @@ import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import type { Database, BindingSpec } from '@sqlite.org/sqlite-wasm';
 import { drizzle } from 'drizzle-orm/sqlite-proxy';
 import { eq } from 'drizzle-orm';
-import { runMigrations } from './migrate';
+import { runMigrations, type Exec } from './migrate';
 import * as schema from './schema';
-
-type Exec = (sql: string, params?: unknown[], method?: string) => Promise<unknown[][]>;
 
 async function makeRealExec(): Promise<Exec> {
   const sqlite3 = await sqlite3InitModule();

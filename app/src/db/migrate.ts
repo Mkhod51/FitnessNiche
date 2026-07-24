@@ -1,6 +1,7 @@
 import initSql from './migrations/0001_init.sql?raw';
+import type { SqlMethod } from './protocol';
 
-type Exec = (sql: string, params?: unknown[], method?: string) => Promise<unknown[][]>;
+export type Exec = (sql: string, params?: unknown[], method?: SqlMethod) => Promise<unknown[][]>;
 
 const MIGRATIONS: { name: string; sql: string }[] = [{ name: '0001_init', sql: initSql }];
 

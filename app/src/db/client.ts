@@ -34,11 +34,7 @@ export async function initDb(): Promise<StorageMode> {
       const worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' });
       rpc = createRpc(worker);
       mode = await rpc.init();
-      // Widened here on purpose: runMigrations only ever calls this with
-      // 'run'/'all', but its Exec type takes a plain `string` for `method`,
-      // and execSql's parameter type is the narrower SqlMethod — passing
-      // execSql straight through as an Exec is a contravariant mismatch.
-      await runMigrations((sql, params, method) => execSql(sql, params, method as SqlMethod));
+      await runMigrations(execSql);
       dz = makeDrizzle();
       return mode;
     })();
