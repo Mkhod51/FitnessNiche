@@ -44,5 +44,11 @@ describe('rpc', () => {
     await expect(a).rejects.toThrow(/worker crashed/);
     await expect(b).rejects.toThrow(/worker crashed/);
     expect(rpc._pendingCount()).toBe(0);
+
+    // A call made after the crash must reject immediately too, not hang
+    // forever posting into a worker nothing will ever reply from.
+    const c = rpc.exec('select 3', [], 'all');
+    await expect(c).rejects.toThrow(/worker crashed/);
+    expect(w.posted.length).toBe(2); // the post-crash call never reached the worker
   });
 });

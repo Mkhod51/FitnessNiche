@@ -6,6 +6,10 @@ type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K>
 
 export function createRpc(worker: Worker) {
   let nextId = 1;
+  // Set once the worker has crashed; every call made after that point
+  // rejects immediately instead of posting into a torn-down worker and
+  // hanging forever (nothing will ever reply to it).
+  let dead: Error | null = null;
   const pending = new Map<number, { resolve: (v: never) => void; reject: (e: Error) => void }>();
 
   worker.onmessage = (e: MessageEvent<DbResponse>) => {
@@ -25,11 +29,13 @@ export function createRpc(worker: Worker) {
   // catch anything this doesn't.
   worker.onerror = (e: ErrorEvent) => {
     const error = new Error(`worker crashed: ${e.message}`);
+    dead = error;
     for (const entry of pending.values()) entry.reject(error);
     pending.clear();
   };
 
   function send<T>(req: DistributiveOmit<DbRequest, 'id'>): Promise<T> {
+    if (dead) return Promise.reject(dead);
     const id = nextId++;
     return new Promise<T>((resolve, reject) => {
       pending.set(id, { resolve: resolve as (v: never) => void, reject });
