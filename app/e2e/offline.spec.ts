@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { SEED_EXERCISES } from '../src/db/seed-exercises';
 
 test('the app boots and reads data with the network off', async ({ page, context }) => {
   await page.goto('/');
@@ -13,7 +14,7 @@ test('the app boots and reads data with the network off', async ({ page, context
 
   await expect(page.getByRole('heading', { name: /evidence/i })).toBeVisible();
   await expect(page.getByTestId('storage-mode')).toHaveText('opfs-sahpool');
-  await expect(page.getByTestId('exercise-count')).not.toHaveText('-');
+  await expect(page.getByTestId('exercise-count')).toHaveText(String(SEED_EXERCISES.length));
 
   // M0's check is "reads/writes SQLite" with the network down, so prove the write half
   // too. No user-facing write path exists until M2, so this goes through the same
