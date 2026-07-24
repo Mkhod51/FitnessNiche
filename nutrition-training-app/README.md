@@ -1,36 +1,45 @@
-# Project Zero: Ideation Sprint — Combined Nutrition + Training App
+# Project Zero — Combined Nutrition + Training App: Ideation & Thesis Review
 
-One-round research sprint to land a differentiated, buildable concept for a solo 2–3 month v1. Orchestrated by an architect model; four parallel research streams (two Sonnet 5, two Opus 4.8); every consequential call logged in [decisions.md](decisions.md).
+A three-phase research and ideation project to land a differentiated, buildable concept for a solo UK developer's 2–3 month portfolio app (strength-training logging + nutrition tracking). Orchestrated by an architect model dispatching bounded research subagents; every consequential call is logged in [00-meta/decision-log.md](00-meta/decision-log.md), with evidence graded [A]–[D] throughout ([00-meta/evidence-standards.md](00-meta/evidence-standards.md)).
 
-## What was researched
+## The three phases
 
-| Stream | File | Question |
+| Phase | Question | Outcome |
 |---|---|---|
-| A | [research/landscape.md](research/landscape.md) | Which incumbent weaknesses are structural (irreversible) vs surface (copyable fixes)? Why has MFP's database problem survived a decade? |
-| B | [research/integration-thesis.md](research/integration-thesis.md) | The premise test: what can a combined app compute that two separate apps fundamentally cannot? |
-| C | [research/data-and-segments.md](research/data-and-segments.md) | Is the food-database moat surmountable solo (UK-based)? Which segments are underserved by hard constraint? |
-| D | [research/constraints.md](research/constraints.md) | ED harm-reduction baseline (veto power), MHRA/MDR/GDPR lines, retention reality, offline-first sync |
+| **1 — Ideation sprint** | Where are incumbents structurally weak, and what can a combined app do that two separate apps can't? | Killed the "computational moat" premise; recommended **Verdict** (an honest weight-trend × strength-trend read). Archived in [archive/phase1-ideation/](archive/phase1-ideation/) and [01-research/](01-research/). |
+| **2 — Deep ideation (science-based-lifting pivot)** | For the evidence-based lifting niche specifically, what holds up? | e1RM trend is *wounded, not killed*; recommended the **bounded Cut Reconciler**. See [02-ideation/recommended.md](02-ideation/recommended.md). |
+| **3 — Thesis review** | Does "citation-grounded, nuanced advice" hold as the differentiator? | **Holds, but only reframed** — see below. [03-thesis-review/review.md](03-thesis-review/review.md). |
 
-## Headline findings
+## Phase 3 headline (current)
 
-- **The combined-app premise fails as a computational moat and survives as something better-grounded:** there is no unique calculation, but there is one honest cross-domain read — bodyweight trend vs strength trend — built on the only two low-noise signals consumer logging produces [A/B]. Everything else (RED-S detection, protein timing, phase periodization) died on evidence, data quality, or regulation.
-- **Approximate logging sustained beats precise logging abandoned** (5 RCTs [A/B]) — the entire logging layer should default to tiers/quick-add, which incumbents' business models prevent them from leading with.
-- **The food-database moat is surmountable solo:** Open Food Facts (UK barcodes) + CoFID (UK-government-verified generics) + USDA FDC (CC0 fallback) — all free; commercial APIs are US-gated or ToS-hostile.
-- **Hard fences:** disease detection of any kind = regulated medical device; ED-safe design means removed affordances (hard calorie floor, deficit cap, maintenance default, numbers-hidden mode), not warnings; health data stays on-device (GDPR + offline-first align).
+The thesis under test was: a tracker whose differentiators are (1) advice backed by cited studies and (2) nuance instead of confident directives. Wave 1 found:
 
-## Recommended project
+- **The in-app market slot is empty** — every citation-rich product (MASS, Examine.com, Helms, Menno, Stronger By Science) keeps evidence in a *content* layer, never inside the tracker at the point of decision. ([Stream A](04-sources/raw-notes/phase3-a-landscape.md))
+- **The evidence base is mostly thin** — small-n (10–40/arm), short, untrained-dominated. Flagship "science-based" claims (per-meal protein/leucine timing, mandatory periodization, optimal bulk rate) are far weaker than the content ecosystem implies; the field even reversed itself on lengthened partials. ([Stream B](04-sources/raw-notes/phase3-b-literature.md))
+- **Infrastructure is solved; curation is the cost** — OpenAlex (CC0) + Europe PMC + CrossRef; extracted numbers aren't copyrightable (re-plot, don't embed figures); a ~50-claim curated DB is solo-feasible, but grading is irreducible ongoing human labour. ([Stream C](01-research/technical/citation-infrastructure.md))
+- **Citations amplify trust more than the evidence warrants** — so a bare citation on this literature launders weak evidence. ([Stream D](03-thesis-review/wave1-d-credibility-risk.md))
 
-**Verdict** ([ideation/recommended.md](ideation/recommended.md)) — a combined lift-and-food logger whose identity is one honest, evidence-bounded read: *is your plan working?* Recomp/cut/bulk verdicts from weight-trend × e1RM-trend reconciliation, training-day protein compliance [A], a weekly one-page Coach Read, tier-based logging by default, Hevy/Strong CSV import for a day-one verdict. Chosen over 11 alternatives ([ideation/candidates.md](ideation/candidates.md), [ideation/ranking.md](ideation/ranking.md)); runner-up **Leucine Ledger** (plant-based protein-quality tracker) wins instead if the developer is plant-based — flip condition recorded.
+**The reframe (the review's core):** citations and nuance are not two differentiators but **a feature and its safety system.** The honest product is not "the app that cites studies" but **"the app that grades the evidence honestly — including grading the sacred cows [C] — with the citation as the receipt."** Full synthesis in [03-thesis-review/findings.md](03-thesis-review/findings.md).
 
-## Strongest objection
+## Recommended, and the strongest objection
 
-**Payoff latency vs churn:** the verdict needs 4–6 weeks of data; median tracker churn is under 2. CSV import mitigates for two-app switchers, does nothing for newcomers. This is the failure mode to bet on, and it's stated, not hedged, in [recommended.md](ideation/recommended.md). (Second: MacroFactor is one team decision away from shipping the same read.)
+**Verdict:** the reframed thesis holds and is the strongest concept the project has produced — an honest-grading advice layer (features **A** evidence-grade primitive + **C** progressive disclosure at its core; [feature-brainstorm.md](03-thesis-review/feature-brainstorm.md)), ideally attached to Phase 2's cut/bulk reconciliation engine so citations are earned by the user's own data.
+
+**Strongest objection:** the biggest risk is neither technical nor competitive — it's whether de-mythologising is a product people *sustain using*. An app that tells science-based lifters their favourite protocols are [C] earns respect, but respect and daily engagement are different things, and no evidence settles which way it goes. For a portfolio piece that risk is acceptable; for a business it's the first thing to validate.
 
 ## What planning should tackle first
 
-1. **CSV import + verdict engine as the first vertical slice** — the survival requirement, not a nice-to-have (decisions.md §5.6).
-2. **e1RM estimation + trend smoothing spec** — which formula (Epley/Brzycki), what smoothing window, how the rules engine expresses uncertainty honestly.
-3. **The open-data pipeline** — OFF UK dump filtering, CoFID ingestion, dedup/matching, the contribute-back loop.
-4. **Offline-first schema** — append-log entry model, LWW sync, on-device-by-default (also the GDPR strategy).
+1. **Prove the A+C interaction** — a confidence-graded claim with decisive default + depth-on-demand that feels honest *and* pleasant. This single interaction is the thesis standing or falling.
+2. **Curate ~50 high-leverage claims**, graded properly, treated as the product (not 500 shallow ones).
+3. **Attach citations to the reconciliation engine** so evidence is contextual to logged data.
+4. Carry forward all prior constraints (ED-safe baseline, medical-device fence, offline-first, open-data food stack) — see [00-meta/decision-log.md](00-meta/decision-log.md).
 
-See [ideation/what-not-to-build.md](ideation/what-not-to-build.md) before adding any feature.
+## Repo map
+
+- [00-meta/](00-meta/) — decision log, evidence standards, carryover, migration maps
+- [01-research/](01-research/) — domain, market, technical, users, constraints
+- [02-ideation/](02-ideation/) — Phase 2 candidates, ranking, recommendation, rejected
+- [03-thesis-review/](03-thesis-review/) — Phase 3 findings, feature brainstorm, review
+- [04-sources/](04-sources/) — raw subagent notes
+- [archive/](archive/) — superseded Phase 1 ideation
+- [PROJECT-STATE.md](PROJECT-STATE.md) · [MIGRATION.md](MIGRATION.md)

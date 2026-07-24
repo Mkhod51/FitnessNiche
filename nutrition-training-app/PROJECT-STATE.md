@@ -28,10 +28,12 @@ The seven-stream Wave 1 was abandoned in favour of the lean pivot. Salvaged befo
 Stress-testing one specific idea rather than generating breadth: **a combined training+nutrition tracker whose differentiator is citation-grounded advice (naming the studies, showing figures on request) delivered with nuance rather than confident directives.** Treated as a hypothesis to test, not a spec. Outputs land in `03-thesis-review/`.
 
 - [x] Housekeeping reorg + MIGRATION.md
-- [ ] Wave 1 — Streams A (evidence-coaching landscape), B (state of the literature), C (citation infrastructure), D (ethics/credibility — kept in-house)
-- [ ] Wave 2 — synthesis → `03-thesis-review/findings.md`
-- [ ] Wave 3 — grounded brainstorm → `03-thesis-review/feature-brainstorm.md`
-- [ ] Deliverable — `03-thesis-review/review.md`
+- [x] Wave 1 — Streams A (landscape), B (literature), C (infrastructure), D (credibility, in-house)
+- [x] Wave 2 — synthesis → `03-thesis-review/findings.md`
+- [x] Wave 3 — grounded brainstorm → `03-thesis-review/feature-brainstorm.md`
+- [x] Deliverable → `03-thesis-review/review.md`
+
+**Phase 3 verdict:** the citation thesis holds only when reframed — *citations and nuance are one feature and its safety system.* The honest product is "grade the evidence (including the sacred cows [C]) with the citation as the receipt," because Stream B found the science-based-lifting evidence base is mostly small-n/untrained/thin. Market slot is empty (all citation-rich competitors are content, not in-app); solo-feasible if scoped to ~50 curated claims; biggest risk is demand-side (whether de-mythologising is a product people sustain using), not technical. Build the A+C interaction first.
 
 ## Constraints in force (non-negotiable)
 
