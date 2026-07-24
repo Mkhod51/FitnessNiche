@@ -3,9 +3,11 @@ import { createRpc } from './rpc';
 
 class FakeWorker {
   onmessage: ((e: { data: unknown }) => void) | null = null;
+  onerror: ((e: { message: string }) => void) | null = null;
   posted: unknown[] = [];
   postMessage(msg: unknown) { this.posted.push(msg); }
   reply(data: unknown) { this.onmessage?.({ data }); }
+  crash(message: string) { this.onerror?.({ message }); }
   terminate() {}
 }
 
@@ -28,5 +30,19 @@ describe('rpc', () => {
     const p = rpc.exec('bad sql', [], 'all');
     w.reply({ id: 1, ok: false, error: 'syntax error' });
     await expect(p).rejects.toThrow('syntax error');
+  });
+
+  it('rejects every pending request and clears the queue when the worker dies', async () => {
+    const w = new FakeWorker();
+    const rpc = createRpc(w as unknown as Worker);
+    const a = rpc.exec('select 1', [], 'all');
+    const b = rpc.exec('select 2', [], 'all');
+    expect(rpc._pendingCount()).toBe(2);
+
+    w.crash('script error');
+
+    await expect(a).rejects.toThrow(/worker crashed/);
+    await expect(b).rejects.toThrow(/worker crashed/);
+    expect(rpc._pendingCount()).toBe(0);
   });
 });

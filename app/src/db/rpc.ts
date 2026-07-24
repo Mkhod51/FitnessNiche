@@ -17,6 +17,18 @@ export function createRpc(worker: Worker) {
     entry.resolve((res.kind === 'exec' ? res.rows : res.storage) as never);
   };
 
+  // A dead/crashed worker never posts a response, so without this every
+  // pending caller hangs forever. Reject them all here instead.
+  // Deliberately no per-request timeout: slow devices and cold wasm init
+  // make timeouts a source of false failures, and a crash is already
+  // covered by onerror — a timeout would only add false positives, not
+  // catch anything this doesn't.
+  worker.onerror = (e: ErrorEvent) => {
+    const error = new Error(`worker crashed: ${e.message}`);
+    for (const entry of pending.values()) entry.reject(error);
+    pending.clear();
+  };
+
   function send<T>(req: DistributiveOmit<DbRequest, 'id'>): Promise<T> {
     const id = nextId++;
     return new Promise<T>((resolve, reject) => {
@@ -30,5 +42,8 @@ export function createRpc(worker: Worker) {
     exec: (sql: string, params: unknown[] = [], method: SqlMethod = 'all') =>
       send<unknown[][]>({ kind: 'exec', sql, params, method }),
     dispose: () => worker.terminate(),
+    // Debug-only: lets tests confirm the map is actually emptied on crash,
+    // not just that the promises settled.
+    _pendingCount: () => pending.size,
   };
 }
