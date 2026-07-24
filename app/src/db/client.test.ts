@@ -13,7 +13,9 @@ vi.mock('./rpc', () => ({
     // Resolve on a microtask delay so two concurrent initDb() calls actually
     // race each other instead of one finishing before the other starts.
     init: () => new Promise((resolve) => setTimeout(() => resolve('opfs-sahpool'), 5)),
-    exec: vi.fn(),
+    // initDb now runs migrations right after init, which selects rows and
+    // .maps() them — an empty result set keeps that a no-op here.
+    exec: vi.fn(async () => []),
     dispose: vi.fn(),
   })),
 }));
