@@ -46,4 +46,24 @@ describe('initDb concurrency', () => {
 
     expect(createRpc).toHaveBeenCalledTimes(1);
   });
+
+  it('keeps rejecting on later calls after a failed init, instead of falsely resolving', async () => {
+    const { createRpc } = await import('./rpc');
+    vi.mocked(createRpc).mockImplementation(() => ({
+      init: () => Promise.resolve('opfs-sahpool'),
+      // migrations run right after init and call exec() first — fail there
+      // to simulate e.g. a disk-full error during the migration transaction.
+      exec: vi.fn(async () => {
+        throw new Error('migration boom');
+      }),
+      dispose: vi.fn(),
+    }) as unknown as ReturnType<typeof createRpc>);
+    const { initDb } = await import('./client');
+
+    await expect(initDb()).rejects.toThrow('migration boom');
+    // Before the fix, `mode` was set before migrations ran and never got
+    // cleared on failure, so this second call would resolve 'opfs-sahpool'
+    // against a database with no tables instead of rejecting again.
+    await expect(initDb()).rejects.toThrow('migration boom');
+  });
 });

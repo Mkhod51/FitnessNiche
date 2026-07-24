@@ -32,13 +32,24 @@ export async function initDb(): Promise<StorageMode> {
   // same initialisation instead of each spawning their own worker.
   if (!initPromise) {
     initPromise = (async () => {
-      const worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' });
-      rpc = createRpc(worker);
-      mode = await rpc.init();
-      await runMigrations(execSql);
-      await seedExercises(execSql);
-      dz = makeDrizzle();
-      return mode;
+      try {
+        const worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' });
+        rpc = createRpc(worker);
+        mode = await rpc.init();
+        await runMigrations(execSql);
+        await seedExercises(execSql);
+        dz = makeDrizzle();
+        return mode;
+      } catch (err) {
+        // `mode` gets assigned before migrations/seed run, so a failure
+        // there must clear it too — otherwise the next call's `if (mode)
+        // return mode` above resolves successfully against a database that
+        // never finished migrating, and getDrizzle() throws downstream
+        // instead of the real error surfacing here.
+        mode = null;
+        initPromise = null;
+        throw err;
+      }
     })();
   }
   return initPromise;
