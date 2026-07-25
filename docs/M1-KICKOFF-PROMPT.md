@@ -61,9 +61,14 @@ This is the moat and the single most dangerous surface in the product. **Fabrica
 **Available tooling.** Three MCP servers are configured for this work — `perplexity`, `firecrawl`, and `playwright` — alongside `WebSearch` and `WebFetch`. If they don't appear in your tool list, they are scoped to the wrong project; check with `claude mcp list` and see the note at the end of this section.
 
 The curation-time sources REQUIREMENTS TA-5 names remain the authority:
-- **OpenAlex** (`api.openalex.org`) — CC0 metadata, abstracts, citation graph. The backbone.
-- **Europe PMC** — open-access full text where available.
-- **CrossRef** — DOI resolution.
+- **OpenAlex** (`api.openalex.org`) — CC0 metadata, abstracts, citation graph. Broadest coverage; it ingests PubMed among its sources, so it is a numerical superset (~250M works). Weak at filtering by study design.
+- **Europe PMC** (`ebi.ac.uk/europepmc/webservices/rest/`) — mirrors MEDLINE/PubMed and adds **open-access full text**, which is what you actually need to extract n, effect size and CI. Also indexes preprints (relevant: SportRxiv).
+- **PubMed E-utilities** (`eutils.ncbi.nlm.nih.gov`) — **use this first for discovery.** Its hand-assigned MEDLINE publication types are the only reliable way to filter by study design, and this rubric's top grade is *defined* by study design. `"Meta-Analysis"[pt]`, `"Systematic Review"[pt]`, `"Randomized Controlled Trial"[pt]` and the `systematic[sb]` subset do work OpenAlex's crude `type` field cannot.
+- **CrossRef** (`api.crossref.org`) — DOI resolution and metadata verification. Not a content search engine.
+
+**Why PubMed leads the discovery step.** `evidence-standards.md` grants [A] only to a meta-analysis, systematic review with quantitative synthesis, or replicated RCT. So the highest-leverage move on every topic is *find the meta-analysis before anything else* — grading upward from primary studies you happened to find first is how grade inflation happens (rule 7). Run the publication-type-filtered PubMed query first; only go to primary trials when no synthesis exists, and record that absence, because "searched for X, found nothing" is itself a finding (rule 5).
+
+**The real bottleneck is paywalls, not indexes.** Much of this literature — *JSCR*, *Sports Medicine*, *MSSE* — is closed access, and Europe PMC serves full text only for OA. Expect to reach the abstract and no further on a meaningful fraction of papers. When that happens the extracted-figure fields stay `null`; an abstract usually gives you n and the direction of effect but rarely the CI. Do not fill the gap from a secondary source's description of the paper. This is why rule 3 below is load-bearing rather than bureaucratic.
 
 **How to use each tool — this distinction is the whole ballgame:**
 
