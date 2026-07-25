@@ -103,6 +103,286 @@ export const CLAIMS: Claim[] = [
     ]
   },
   {
+    "id": "c-protein-dose-plateau",
+    "statement": "Past roughly 1.6 g of protein per kg of bodyweight a day, more protein stops adding measurable lean mass",
+    "grade": "B",
+    "status": "settled",
+    "domain": "protein-dose",
+    "predicates": {
+      "and": [
+        {
+          "!=": [
+            {
+              "var": "proteinPerKg7d"
+            },
+            null
+          ]
+        },
+        {
+          "<": [
+            {
+              "var": "proteinPerKg7d"
+            },
+            1.6
+          ]
+        }
+      ]
+    },
+    "clusterId": null,
+    "phrasingKey": "protein-dose-plateau",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-protein-plateau-morton",
+        "claimId": "c-protein-dose-plateau",
+        "doi": "10.1136/bjsports-2017-097608",
+        "authors": "Morton RW, Murphy KT, McKellar SR, Schoenfeld BJ, Henselmans M, Helms E, Aragon AA, Devries MC, Banfield L, Krieger JW, Phillips SM",
+        "year": 2018,
+        "journal": "British Journal of Sports Medicine",
+        "n": 1863,
+        "population": "mixed",
+        "effectSize": "Two-phase break-point analysis placed the plateau at a total intake of 1.62 g/kg/day, beyond which supplementation produced no further gain in fat-free mass.",
+        "ci": null,
+        "figures": [
+          {
+            "label": "intake where added protein stops helping",
+            "value": 1.62,
+            "unit": "g/kg/day"
+          },
+          {
+            "label": "randomised trials pooled",
+            "value": 49
+          },
+          {
+            "label": "participants",
+            "value": 1863
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-protein-helps-trained-more",
+    "statement": "Training experience increases how much extra protein helps, while getting older reduces it",
+    "grade": "B",
+    "status": "settled",
+    "domain": "protein-dose",
+    "predicates": null,
+    "clusterId": null,
+    "phrasingKey": "protein-trained-benefit",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-protein-trained-morton",
+        "claimId": "c-protein-helps-trained-more",
+        "doi": "10.1136/bjsports-2017-097608",
+        "authors": "Morton RW, Murphy KT, McKellar SR, Schoenfeld BJ, Henselmans M, Helms E, Aragon AA, Devries MC, Banfield L, Krieger JW, Phillips SM",
+        "year": 2018,
+        "journal": "British Journal of Sports Medicine",
+        "n": 1863,
+        "population": "mixed",
+        "effectSize": "Supplementation was more effective in resistance-trained participants by 0.75 kg of fat-free mass (p = 0.03); the benefit fell by 0.01 kg per year of age (p = 0.002). Both are covariate subgroup findings within one meta-regression, not separately replicated.",
+        "ci": "Resistance-trained advantage 95% CI 0.09 to 1.40 kg; effect of age 95% CI -0.02 to -0.00 kg per year",
+        "figures": [
+          {
+            "label": "extra fat-free mass in resistance-trained participants",
+            "value": 0.75,
+            "unit": "kg"
+          },
+          {
+            "label": "fat-free mass benefit lost per year of age",
+            "value": -0.01,
+            "unit": "kg/year"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-protein-supplementation-works",
+    "statement": "Adding protein to an otherwise adequate diet produces a real but modest increase in lean mass and strength while you are lifting",
+    "grade": "A",
+    "status": "settled",
+    "domain": "protein-dose",
+    "predicates": null,
+    "clusterId": null,
+    "phrasingKey": "protein-supplementation",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-protein-supp-morton",
+        "claimId": "c-protein-supplementation-works",
+        "doi": "10.1136/bjsports-2017-097608",
+        "authors": "Morton RW, Murphy KT, McKellar SR, Schoenfeld BJ, Henselmans M, Helms E, Aragon AA, Devries MC, Banfield L, Krieger JW, Phillips SM",
+        "year": 2018,
+        "journal": "British Journal of Sports Medicine",
+        "n": 1863,
+        "population": "mixed",
+        "effectSize": "Fat-free mass +0.30 kg and one-repetition maximum +2.49 kg over the no-supplement condition, pooled across 49 randomised controlled trials.",
+        "ci": "Fat-free mass 95% CI 0.09 to 0.52 kg; 1RM strength 95% CI 0.64 to 4.33 kg; muscle fibre cross-sectional area 95% CI 51 to 570 um2",
+        "figures": [
+          {
+            "label": "randomised trials pooled",
+            "value": 49
+          },
+          {
+            "label": "participants",
+            "value": 1863
+          },
+          {
+            "label": "added fat-free mass",
+            "value": 0.3,
+            "unit": "kg"
+          },
+          {
+            "label": "added 1RM strength",
+            "value": 2.49,
+            "unit": "kg"
+          },
+          {
+            "label": "added muscle fibre cross-sectional area",
+            "value": 310,
+            "unit": "um2"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-protein-timing-distribution-matters",
+    "statement": "Spreading protein into 20-40 g doses every three to four hours, including around training, may still add something total intake alone does not",
+    "grade": "C",
+    "status": "contested",
+    "domain": "protein-timing",
+    "predicates": null,
+    "clusterId": "protein-timing",
+    "phrasingKey": "protein-timing-distribution",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-timing-distribution-issn",
+        "claimId": "c-protein-timing-distribution-matters",
+        "doi": "10.1186/s12970-017-0189-4",
+        "authors": "Kerksick CM, Arent S, Schoenfeld BJ, Stout JR, Campbell B, Wilborn CD, Taylor L, Kalman D, Smith-Ryan AE, Kreider RB, and others",
+        "year": 2017,
+        "journal": "Journal of the International Society of Sports Nutrition",
+        "n": null,
+        "population": "mixed",
+        "effectSize": "No pooled effect estimate. This is an expert position stand reasoning from acute muscle-protein-synthesis measurements, not from chronic hypertrophy trials. It recommends 20-40 g doses (0.25-0.40 g/kg) every three to four hours, and notes post-exercise protein raises synthesis rates. The same document names meeting total daily intake as the primary emphasis.",
+        "ci": null,
+        "figures": [
+          {
+            "label": "recommended protein dose per feeding, lower bound",
+            "value": 20,
+            "unit": "g"
+          },
+          {
+            "label": "recommended protein dose per feeding, upper bound",
+            "value": 40,
+            "unit": "g"
+          },
+          {
+            "label": "recommended hours between feedings, lower bound",
+            "value": 3,
+            "unit": "h"
+          },
+          {
+            "label": "recommended hours between feedings, upper bound",
+            "value": 4,
+            "unit": "h"
+          }
+        ],
+        "quote": "Post-exercise ingestion (immediately to 2-h post) of high-quality protein sources stimulates robust increases in MPS"
+      },
+      {
+        "id": "cit-timing-distribution-pooled",
+        "claimId": "c-protein-timing-distribution-matters",
+        "doi": "10.1186/1550-2783-10-53",
+        "authors": "Schoenfeld BJ, Aragon AA, Krieger JW",
+        "year": 2013,
+        "journal": "Journal of the International Society of Sports Nutrition",
+        "n": 525,
+        "population": "unstated",
+        "effectSize": "Before covariates were controlled, the same meta-analysis that refuted timing did find a small-to-moderate pooled effect on hypertrophy. That uncontrolled estimate is the strongest quantitative footing this side has, and its authors attribute it to total protein intake rather than timing.",
+        "ci": null,
+        "figures": [
+          {
+            "label": "subjects in the hypertrophy analysis",
+            "value": 525
+          },
+          {
+            "label": "studies in the hypertrophy analysis",
+            "value": 23
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-protein-timing-total-intake-dominates",
+    "statement": "Once total daily protein is accounted for, when you eat it around training stops predicting muscle or strength gains",
+    "grade": "A",
+    "status": "contested",
+    "domain": "protein-timing",
+    "predicates": {
+      "!=": [
+        {
+          "var": "proteinPerKg7d"
+        },
+        null
+      ]
+    },
+    "clusterId": "protein-timing",
+    "phrasingKey": "protein-timing-total-dominates",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-timing-total-schoenfeld",
+        "claimId": "c-protein-timing-total-intake-dominates",
+        "doi": "10.1186/1550-2783-10-53",
+        "authors": "Schoenfeld BJ, Aragon AA, Krieger JW",
+        "year": 2013,
+        "journal": "Journal of the International Society of Sports Nutrition",
+        "n": 525,
+        "population": "unstated",
+        "effectSize": "A simple pooled analysis showed a small-to-moderate effect of timing on hypertrophy, but in the full meta-regression controlling for covariates no significant difference remained for either strength or hypertrophy. Total protein intake was the strongest predictor of effect-size magnitude.",
+        "ci": null,
+        "figures": [
+          {
+            "label": "subjects in the hypertrophy analysis",
+            "value": 525
+          },
+          {
+            "label": "studies in the hypertrophy analysis",
+            "value": 23
+          },
+          {
+            "label": "effect sizes in the hypertrophy analysis",
+            "value": 132
+          },
+          {
+            "label": "subjects in the strength analysis",
+            "value": 478
+          },
+          {
+            "label": "studies in the strength analysis",
+            "value": 20
+          }
+        ],
+        "quote": "total protein intake was the strongest predictor of ES magnitude"
+      }
+    ]
+  },
+  {
     "id": "c-volume-dose-response",
     "statement": "More weekly sets per muscle produce more hypertrophy, with each additional set adding less than the one before",
     "grade": "A",
