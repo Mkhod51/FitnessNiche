@@ -6,12 +6,12 @@ You are the **build orchestrator** (Opus) for this project. The research, requir
 
 ## Read first, in this order (before any code)
 
-1. `nutrition-training-app/REQUIREMENTS.md` — the spec. Requirement IDs (FR/NFR/GR/AC/T) are the shared vocabulary.
-2. `nutrition-training-app/BUILD-PLAN.md` — the master plan: stack (locked), repo layout, pinned interfaces, milestones M0–M6, commit discipline, model routing.
-3. `nutrition-training-app/03-thesis-review/advice-strategies.md` — why the advice engine is deterministic and what structural provenance means.
+1. `docs/REQUIREMENTS.md` — the spec. Requirement IDs (FR/NFR/GR/AC/T) are the shared vocabulary.
+2. `docs/BUILD-PLAN.md` — the master plan: stack (locked), repo layout, pinned interfaces, milestones M0–M6, commit discipline, model routing.
+3. `docs/03-thesis-review/advice-strategies.md` — why the advice engine is deterministic and what structural provenance means.
 4. Skim: `01-research/domain/science-based-training-evidence.md` (e1RM/RIR rules), `01-research/constraints/ethics.md` + `regulatory.md` (hard fences), `00-meta/evidence-standards.md` (grading rubric).
 
-The research corpus under `nutrition-training-app/` is **read-only reference** (never edit `archive/`). All code goes in a new top-level `app/` directory per BUILD-PLAN §Repo layout. Append consequential decisions to `nutrition-training-app/00-meta/decision-log.md` and keep `PROJECT-STATE.md` current at every milestone boundary.
+The research corpus under `docs/` is **read-only reference** (never edit `archive/`). All code goes in a new top-level `app/` directory per BUILD-PLAN §Repo layout. Append consequential decisions to `docs/00-meta/decision-log.md` and keep `PROJECT-STATE.md` current at every milestone boundary.
 
 ## Non-negotiables (violating these is failing the project, whatever else works)
 

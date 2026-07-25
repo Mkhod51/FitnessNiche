@@ -23,10 +23,10 @@ Last known green: **typecheck clean · 26/26 unit · build OK · 5/5 e2e**.
 ## Read for context, in this order
 
 1. `PRODUCT.md` (repo root) — durable product truth, written 2026-07-25. Seven product principles; principle 7 is the design mandate for this milestone.
-2. `nutrition-training-app/REQUIREMENTS.md` — the spec. FR/NFR/GR/T/AC/DM/OQ IDs are the shared vocabulary.
-3. `nutrition-training-app/BUILD-PLAN.md` §M1 — the milestone's checklist and gate.
-4. `nutrition-training-app/00-meta/evidence-standards.md` — **the [A]–[D] grading rubric. You will apply this by hand to every claim.**
-5. `nutrition-training-app/03-thesis-review/advice-strategies.md` and `wave1-d-credibility-risk.md` — the D1–D7 risk register that justifies the whole design.
+2. `docs/REQUIREMENTS.md` — the spec. FR/NFR/GR/T/AC/DM/OQ IDs are the shared vocabulary.
+3. `docs/BUILD-PLAN.md` §M1 — the milestone's checklist and gate.
+4. `docs/00-meta/evidence-standards.md` — **the [A]–[D] grading rubric. You will apply this by hand to every claim.**
+5. `docs/03-thesis-review/advice-strategies.md` and `wave1-d-credibility-risk.md` — the D1–D7 risk register that justifies the whole design.
 6. `app/CLAUDE.md` — standing rules, tenets, commit style.
 7. `.superpowers/sdd/progress.md` — ledger, decisions, open debt D6–D10.
 

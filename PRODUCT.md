@@ -2,7 +2,7 @@
 
 <!-- impeccable:product-schema 1 -->
 
-Derived from `nutrition-training-app/REQUIREMENTS.md` (the build's source of truth), the Phase 3 thesis review, and two confirmed answers from the developer on 2026-07-25. Requirement IDs (FR/NFR/GR/T/AC/DM/OQ) are the shared vocabulary across every document here — use them rather than paraphrasing.
+Derived from `docs/REQUIREMENTS.md` (the build's source of truth), the Phase 3 thesis review, and two confirmed answers from the developer on 2026-07-25. Requirement IDs (FR/NFR/GR/T/AC/DM/OQ) are the shared vocabulary across every document here — use them rather than paraphrasing.
 
 ## Platform
 
@@ -74,10 +74,10 @@ Positioned explicitly *against* the confident-directive content ecosystem — wh
 ## Evidence on Hand
 
 **Real and available now:**
-- `nutrition-training-app/REQUIREMENTS.md` — v1 requirements, the build's source of truth.
-- `nutrition-training-app/03-thesis-review/` — the thesis review, findings, advice strategies, feasibility, and the D1–D7 credibility risk register.
-- `nutrition-training-app/01-research/` — incumbent teardowns (MyFitnessPal, Cronometer, MacroFactor), the science-based-lifter segment, abandonment research, ethics/regulatory constraints, and the technical findings.
-- `nutrition-training-app/00-meta/evidence-standards.md` — the [A]–[D] grading rubric.
+- `docs/REQUIREMENTS.md` — v1 requirements, the build's source of truth.
+- `docs/03-thesis-review/` — the thesis review, findings, advice strategies, feasibility, and the D1–D7 credibility risk register.
+- `docs/01-research/` — incumbent teardowns (MyFitnessPal, Cronometer, MacroFactor), the science-based-lifter segment, abandonment research, ethics/regulatory constraints, and the technical findings.
+- `docs/00-meta/evidence-standards.md` — the [A]–[D] grading rubric.
 - Working M0 app in `app/`: SQLite-on-OPFS persistence proven on desktop Chromium *and* on a real iPhone, PWA precache, 56 hand-authored exercises with muscle contributions.
 
 **Absences that future work must not paper over:**

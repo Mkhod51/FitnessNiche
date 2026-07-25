@@ -1,8 +1,8 @@
 # CLAUDE.md — Evidence-Graded Lifting & Nutrition PWA
 
-Standing context for every session in this repo. The spec is `../nutrition-training-app/REQUIREMENTS.md`; the plan is `../nutrition-training-app/BUILD-PLAN.md`. Requirement IDs (FR/NFR/GR/AC/T) are the shared vocabulary — cite them in commits and PR-style summaries.
+Standing context for every session in this repo. The spec is `../docs/REQUIREMENTS.md`; the plan is `../docs/BUILD-PLAN.md`. Requirement IDs (FR/NFR/GR/AC/T) are the shared vocabulary — cite them in commits and PR-style summaries.
 
-`../nutrition-training-app/` is **read-only reference**. Never edit anything under `archive/`.
+`../docs/` holds the research corpus, build docs, and platform-gate procedure. The research corpus (`00-meta/`, `01-research/`, `03-thesis-review/`, `04-sources/`, `archive/`) is **read-only reference — never edit `archive/`**. Build-facing docs (`REQUIREMENTS.md`, `BUILD-PLAN.md`, `PROJECT-STATE.md`, `00-meta/decision-log.md`, `ios-gate.md`, `superpowers/plans/`) are updated as the build progresses — that's expected, not a violation of the read-only rule above.
 
 ## What this product is
 
@@ -23,7 +23,7 @@ A combined lift + nutrition tracker whose differentiator is **honest, evidence-g
 
 Local-first React PWA. SQLite (WASM) on-device is the source of truth; a thin sync layer replicates to a Cloudflare Worker + D1. The advice engine is a **deterministic predicate evaluator** over a hand-curated claim base bundled as versioned data. Pure domain logic lives in `src/domain/` and `src/advice/` and must stay framework-free and unit-testable.
 
-Full layout, locked stack, and pinned type signatures: `../nutrition-training-app/BUILD-PLAN.md` (§Repo layout, §Interfaces). **Do not deviate from the locked stack** without logging a decision and asking the user.
+Full layout, locked stack, and pinned type signatures: `../docs/BUILD-PLAN.md` (§Repo layout, §Interfaces). **Do not deviate from the locked stack** without logging a decision and asking the user.
 
 ## How we work
 

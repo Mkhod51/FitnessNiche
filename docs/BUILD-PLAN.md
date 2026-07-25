@@ -61,7 +61,11 @@ Code lives in the existing git repo (`FitnessNiche/`), sibling to the research:
 
 ```
 FitnessNiche/
-├── nutrition-training-app/        # research corpus (read-only reference; never edit archive/)
+├── docs/                       # research corpus + build docs (read-only reference; never edit archive/)
+│   ├── REQUIREMENTS.md, BUILD-PLAN.md, PROJECT-STATE.md, decision-log.md, etc. — build-facing
+│   ├── 00-meta/ 01-research/ 03-thesis-review/ 04-sources/ archive/ — the research corpus proper
+│   ├── ios-gate.md                # human platform-gate procedure (M0)
+│   └── superpowers/plans/         # milestone task plans (subagent-driven-development)
 └── app/
     ├── CLAUDE.md                  # tenets, guardrails, commit rules for every session
     ├── package.json  vite.config.ts  tsconfig.json  tailwind.config.ts
