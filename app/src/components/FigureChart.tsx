@@ -66,48 +66,81 @@ function SampleMarks({ n }: { n: number }): ReactElement {
   );
 }
 
+// Figures only go on a shared axis when they are actually commensurable. Grouping
+// by unit is what makes that decidable: "0.30 kg" and "2.49 kg" belong on one
+// scale, while "49 trials", "1863 participants" and "310 um2" do not. Plotting
+// them together put 1863 at full width and squashed every real effect size to a
+// sliver — a graphic that said the effects were nothing. Unitless figures are
+// counts of unrelated things and never share an axis.
+function groupPlottable(figures: Figure[]): Map<string, Figure[]> {
+  const byUnit = new Map<string, Figure[]>();
+  for (const f of figures) {
+    if (!f.unit) continue;
+    const g = byUnit.get(f.unit) ?? [];
+    g.push(f);
+    byUnit.set(f.unit, g);
+  }
+  // One value alone has nothing to be compared against, so a bar would be pure
+  // decoration; it reads better as a number.
+  for (const [unit, g] of byUnit) if (g.length < 2) byUnit.delete(unit);
+  return byUnit;
+}
+
 // Hand-rolled SVG, per the locked architecture decision (GR-3: no charting
 // library, no publisher figure — extracted numbers only, re-plotted here).
-// Only ever mounted when `figures` is non-empty; the zero baseline is always
-// in the domain so a value sitting on or across it is seen to do so.
-function ZeroLinePlot({ figures }: { figures: Figure[] }): ReactElement {
-  const width = 260;
-  const rowHeight = 22;
-  const padding = 10;
-  const height = figures.length * rowHeight + padding * 2;
-
+// Labels are HTML rather than SVG <text> so they stay at a readable size and
+// are selectable; only the bar itself is drawn.
+function UnitPlot({ unit, figures }: { unit: string; figures: Figure[] }): ReactElement {
   const values = figures.map((f) => f.value);
   const min = Math.min(0, ...values);
   const max = Math.max(0, ...values);
   const span = max - min || 1;
-  const plotWidth = width - padding * 2;
-  const scale = (v: number) => padding + ((v - min) / span) * plotWidth;
-  const zeroX = scale(0);
+  const pct = (v: number) => ((v - min) / span) * 100;
+  const zero = pct(0);
 
   return (
-    <svg
-      data-testid="figure-plot"
-      viewBox={`0 0 ${width} ${height}`}
-      className="mt-2 w-full text-ink"
-      role="img"
-      aria-label="extracted figures plotted against a zero baseline"
-    >
-      <line x1={zeroX} y1={2} x2={zeroX} y2={height - 2} stroke="currentColor" strokeWidth={1.5} />
-      {figures.map((figure, i) => {
-        const y = padding + i * rowHeight;
-        const barX1 = Math.min(zeroX, scale(figure.value));
-        const barX2 = Math.max(zeroX, scale(figure.value));
+    <div data-testid="figure-plot" data-unit={unit}>
+      <span className="block font-mono text-[9px] uppercase tracking-[0.12em] text-ink-faint">
+        measured in {unit}
+      </span>
+      {figures.map((f) => {
+        const x = pct(f.value);
         return (
-          <g key={figure.label}>
-            <text x={padding} y={y - 2} fontSize={8} className="font-mono" fill="currentColor">
-              {figure.label}
-              {figure.unit ? ` (${figure.unit})` : ''} — {figure.value}
-            </text>
-            <rect x={barX1} y={y} width={Math.max(barX2 - barX1, 1)} height={8} fill="currentColor" opacity={0.85} />
-          </g>
+          <div key={f.label} className="mt-1.5">
+            <span className="block font-mono text-[10px] text-ink">
+              {f.label} — {f.value} {unit}
+            </span>
+            <svg viewBox="0 0 100 8" preserveAspectRatio="none" className="mt-0.5 h-2 w-full text-ink" role="presentation">
+              {/* the zero baseline is always in the domain, so a value sitting on
+                  or crossing it is seen to do so */}
+              <line x1={zero} y1={0} x2={zero} y2={8} stroke="currentColor" strokeWidth={0.6} />
+              <rect
+                x={Math.min(zero, x)}
+                y={2}
+                width={Math.max(Math.abs(x - zero), 0.6)}
+                height={4}
+                fill="currentColor"
+                opacity={0.85}
+              />
+            </svg>
+          </div>
         );
       })}
-    </svg>
+    </div>
+  );
+}
+
+// Anything not on a shared axis still has to be readable — as a number, not a bar.
+function FigureValues({ figures }: { figures: Figure[] }): ReactElement {
+  return (
+    <div data-testid="figure-values" className="flex flex-col gap-1">
+      {figures.map((f) => (
+        <span key={f.label} className="font-mono text-[10px] text-ink">
+          {f.label} — <span className="tabular-nums">{f.value}</span>
+          {f.unit ? ` ${f.unit}` : ''}
+        </span>
+      ))}
+    </div>
   );
 }
 
@@ -137,7 +170,20 @@ export function FigureChart({ citation }: { citation: Citation }): ReactElement 
       <FieldRow testId="figure-effect-size" label="effect size" value={effectSize ?? NOT_STATED} mono={!!effectSize} />
       <FieldRow testId="figure-ci" label="confidence interval" value={ci ?? NOT_EXTRACTED} />
 
-      {figures.length > 0 && <ZeroLinePlot figures={figures} />}
+      {figures.length > 0 &&
+        (() => {
+          const plotted = groupPlottable(figures);
+          const plottedLabels = new Set([...plotted.values()].flat().map((f) => f.label));
+          const rest = figures.filter((f) => !plottedLabels.has(f.label));
+          return (
+            <div className="flex flex-col gap-3">
+              {[...plotted].map(([unit, group]) => (
+                <UnitPlot key={unit} unit={unit} figures={group} />
+              ))}
+              {rest.length > 0 && <FigureValues figures={rest} />}
+            </div>
+          );
+        })()}
     </div>
   );
 }
