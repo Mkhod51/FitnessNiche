@@ -1,6 +1,6 @@
 # Project State
 
-**Updated:** 2026-07-24 · **Phase:** Build — M0 of `BUILD-PLAN.md`, on top of completed Phase 1–3 research/planning · **Stage:** M0 is code-complete on branch `m0-skeleton` (not merged to `main`), blocked on a human running the TA-1 iOS gate — nothing proceeds to M1 until that verdict lands
+**Updated:** 2026-07-25 · **Phase:** Build — M0 of `BUILD-PLAN.md` complete, on top of completed Phase 1–3 research/planning · **Stage:** **M0 is done and merged to `main`. The TA-1 iOS gate PASSED on a real iPhone (`opfs-sahpool`) on 2026-07-25** — the offline-first premise holds and no Expo/React Native pivot is needed. M1 (the A+C interaction on real claims) is cleared to start.
 
 **Structure note:** `04-sources/` (renamed from the prior sources dir to clear the numbering for `03-thesis-review/`), `archive/phase1-ideation/` (consolidated Phase 1 ideation archive), `03-thesis-review/` (new, empty, Phase 3 output). Full detail in `MIGRATION.md`.
 
@@ -56,9 +56,9 @@ Code-complete on branch `m0-skeleton`, **not merged to `main`**. Delivered and v
 
 Three decisions from this milestone are logged in `00-meta/decision-log.md` (#7–9): the stack resolving newer than planned (accepted, version currency only); the non-OPFS fallback shipping in-memory-only rather than the IndexedDB fallback BUILD-PLAN specified (a scoped, deliberate deviation that must close before M2 introduces user writes); and four review-caught defects that would each have caused silent data loss or a hang.
 
-**Not done: the TA-1 platform gate.** `docs/ios-gate.md` is written but a human has not yet run it on a real iPhone. **M0 is not complete until that verdict comes back.** If storage reads `memory-fallback` on-device, that's the TA-1 revisit: pivot the app shell to Expo/React Native, with `src/domain` and `src/advice` carrying over unchanged because they're framework-free.
+**TA-1 platform gate: PASSED (2026-07-25).** Run on a real iPhone over an HTTPS tunnel per `docs/ios-gate.md`; storage read `opfs-sahpool` on-device, surviving force-quit and airplane-mode relaunch. The riskiest assumption in the whole plan — that SQLite on OPFS actually persists in iOS Safari — is now measured rather than assumed, in week 1 rather than week 10. **No Expo/React Native pivot needed; the PWA shell stands.** Result table and a "before you conclude anything" checklist are in `docs/ios-gate.md`. Note for anyone re-running it: `exercise-count: 56` does *not* confirm persistence (memory-fallback re-seeds to 56 on every load) — `storage-mode` is the only field that distinguishes the two.
 
-**Next action, before anything else: run `docs/ios-gate.md` on a real iPhone.**
+**Next action: M1 — the A+C interaction on real claims** (`BUILD-PLAN.md` §M1), the risk-retiring milestone. Carry D6 with it: the non-OPFS fallback is still in-memory-only and must close before M2 introduces user writes.
 
 ## Constraints in force (non-negotiable)
 

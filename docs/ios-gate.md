@@ -94,5 +94,14 @@ around a `memory-fallback` reading with clever code; report it.
 
 | iOS version | Storage mode observed | Survived force-quit? | Survived airplane mode? | Notes |
 |---|---|---|---|---|
-| | | | | |
+| (not recorded) | `opfs-sahpool` | yes | yes | Run 2026-07-25 on a real iPhone, served over an HTTPS tunnel (Route A). **PASS — the platform premise holds.** A first attempt read `memory-fallback`; that was a mis-run of the procedure, not a device limitation, and the reading corrected to `opfs-sahpool` once the steps were followed as written. |
+
+### If you get `memory-fallback`, read this before concluding anything
+
+The first attempt on this device reported `memory-fallback` and it was procedural, so check these before treating a bad reading as a real finding:
+
+- **`exercise-count: 56` does NOT confirm persistence.** In memory-fallback mode the database is rebuilt on every load — migrations rerun, seeding reruns, and the count lands on 56 every time. `56` is guaranteed in *both* modes. `storage-mode` is the only field that distinguishes them.
+- **Private Browsing has no OPFS at all**, so it always reads `memory-fallback` regardless of whether persistence works normally.
+- **Standalone vs Safari tab are different storage contexts** on iOS. Check the reading in the home-screen app, not just the Safari tab you installed it from.
+- **The real reason is currently swallowed.** `app/src/db/sqlite.worker.ts` logs the underlying exception with `console.warn` and then reports only the mode. To see it: connect the iPhone to the Mac by cable, Safari → Develop → *your phone* → inspect the page, and read the warning. Do that before declaring a TA-1 pivot — the difference between "iOS cannot do this" and "this iOS version cannot do this" is a shell rewrite.
 
