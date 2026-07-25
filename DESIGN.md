@@ -69,7 +69,7 @@ signal, not decoration.
 | `--paper-sunk` | `#F6F3EB` | the evidence panel, so depth reads as a change of surface not a shadow |
 | `--ink` | `#141414` | advice, claims, figures |
 | `--ink-soft` | `#57534A` | source lines, secondary prose |
-| `--ink-faint` | `#7A7568` | field labels, units, meta |
+| `--ink-faint` | `#767162` | field labels, units, meta |
 | `--rule` | `#E6E1D4` | hairline separators |
 | `--rule-strong` | `#DAD5C7` | unfilled confidence slots |
 
@@ -178,7 +178,11 @@ is read in short glances and movement costs legibility. Any motion added later h
   text.
 - Body text ≥16px. Labels may go smaller only because they are uppercase, tracked, and
   never carry unique information.
-- Every ramp colour meets 4.5:1 against `--paper`.
+- Every colour above meets 4.5:1 against `--paper`, checked rather than eyeballed:
+  A 7.57 · B 4.64 · C 4.86 · D 5.60 · ink 17.65 · ink-soft 7.34 · ink-faint 4.67.
+  `--ink-faint` started at `#7A7568` and measured 4.40 — it was darkened rather than
+  waved through, because it carries 9px uppercase labels that get no large-text
+  exemption. Re-run the check on any token change; the ramp has little headroom.
 
 ---
 
