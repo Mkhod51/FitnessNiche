@@ -26,7 +26,11 @@ export function searchClaims(query: string, claims: Claim[]): AdviceItem[] {
   if (query.trim() === '') return [];
 
   const index = buildIndex(claims);
-  const hits = index.search(query, { prefix: true, fuzzy: 0.2 });
+  // combineWith 'AND': a domain like "protein-timing" tokenizes into "protein"
+  // and "timing", and OR'd terms turned that into a match against almost every
+  // protein claim in the base — the same relevance failure the "don't index
+  // citations" rule exists to prevent, just arriving from a different field.
+  const hits = index.search(query, { prefix: true, fuzzy: 0.2, combineWith: 'AND' });
   const byId = new Map(claims.map((c) => [c.id, c]));
 
   const selected = new Map<string, Claim>();

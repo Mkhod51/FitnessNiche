@@ -123,6 +123,14 @@ describe('searchClaims', () => {
     expect(out.map((i) => i.claimId)).toContain('c-rest');
   });
 
+  it('requires every query word to match, so a hyphenated domain name does not pull in unrelated claims', () => {
+    // "protein-timing" tokenizes into "protein" and "timing". OR-combined terms
+    // would match c-protein-dose (has "protein") and c-rest (statement mentions
+    // neither, but a looser corpus could) — only the actual cluster should match.
+    const out = searchClaims('protein-timing', claims);
+    expect(out.map((i) => i.claimId).sort()).toEqual(['c-timing-against', 'c-timing-for']);
+  });
+
   it('does not match a query that only appears in a citation field', () => {
     // The ambiguity note in the brief: indexing citation text would let a query
     // match an author's surname and surface an unrelated claim. Only statement
