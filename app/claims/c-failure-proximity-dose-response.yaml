@@ -1,0 +1,33 @@
+id: c-failure-proximity-dose-response
+statement: >-
+  Muscle growth tends to increase the closer sets are taken to failure, while
+  strength looks much the same across a wide range of reps-in-reserve
+grade: B
+status: settled
+domain: failure-proximity
+predicates: null
+clusterId: null
+phrasingKey: failure-proximity-dose
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-failure-dose-robinson
+    claimId: c-failure-proximity-dose-response
+    doi: 10.1007/s40279-024-02069-2
+    authors: Robinson ZP, Pelland JC, Remmert JF, Refalo MC, Jukic I, Steele J, Zourdos MC
+    year: 2024
+    journal: Sports Medicine
+    n: null
+    population: mixed
+    effectSize: >-
+      For hypertrophy the marginal slopes for estimated reps-in-reserve were
+      negative with intervals excluding zero; for strength the intervals
+      contained zero. Graded down from the strength of its design because the
+      authors report only modest model fit, estimated reps-in-reserve from study
+      descriptions rather than measuring it, and describe the analysis as
+      exploratory.
+    ci: null
+    figures: []
+    quote: >-
+      caution is warranted when interpreting the present analysis due to its
+      exploratory nature

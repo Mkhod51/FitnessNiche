@@ -1,0 +1,35 @@
+id: c-failure-small-hypertrophy-edge-when-trained
+statement: >-
+  In lifters who already train, sets taken to failure show a small hypertrophy
+  advantage that does not appear in untrained beginners
+grade: B
+status: settled
+domain: failure-proximity
+predicates: null
+clusterId: null
+phrasingKey: failure-trained-edge
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-failure-trained-grgic
+    claimId: c-failure-small-hypertrophy-edge-when-trained
+    doi: 10.1016/j.jshs.2021.01.007
+    authors: Grgic J, Schoenfeld BJ, Orazem J, Sabol F
+    year: 2022
+    journal: Journal of Sport and Health Science
+    n: null
+    population: trained
+    effectSize: >-
+      In the resistance-trained subgroup only, training to failure favoured
+      hypertrophy with ES 0.15. This is a subgroup analysis inside a single
+      meta-analysis and its interval only just clears zero, so it carries much
+      less weight than the headline null result it sits beside.
+    ci: 95% CI 0.03 to 0.26
+    figures:
+      - label: effect size favouring failure, resistance-trained only
+        value: 0.15
+      - label: lower bound of the confidence interval
+        value: 0.03
+      - label: upper bound of the confidence interval
+        value: 0.26
+    quote: null

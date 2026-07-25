@@ -1,0 +1,39 @@
+id: c-deloads-not-evidence-backed
+statement: >-
+  Planned deload weeks are widely prescribed but barely studied, and the one
+  controlled trial in trained lifters found they cost strength without helping
+  muscle growth
+grade: B
+status: settled
+domain: deloads
+predicates: null
+clusterId: null
+phrasingKey: deloads-unsupported
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-deload-coleman
+    claimId: c-deloads-not-evidence-backed
+    doi: 10.7717/peerj.16777
+    authors: Coleman M, Burke R, Augustin F, Pinero A, Maldonado J, Fisher JP, Israetel M, Androulakis Korakakis P, Swinton P, Oberlin D, Schoenfeld BJ
+    year: 2024
+    journal: PeerJ
+    n: 39
+    population: trained
+    effectSize: >-
+      A one-week deload at the midpoint of a nine-week programme produced no
+      appreciable difference in muscle size, local endurance or power, while the
+      continuously-training group showed greater gains in both isometric and
+      dynamic lower-body strength. This is a single trial of 39 people; no
+      meta-analysis of deloading in trained lifters exists to weigh it against.
+    ci: null
+    figures:
+      - label: participants
+        value: 39
+      - label: deload length
+        value: 1
+        unit: week
+      - label: programme length
+        value: 9
+        unit: weeks
+    quote: null

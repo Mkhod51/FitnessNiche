@@ -1,0 +1,37 @@
+id: c-failure-not-required
+statement: >-
+  Taking sets to failure is not required for strength or muscle growth, and
+  stopping short does not appear to cost you either
+grade: A
+status: settled
+domain: failure-proximity
+predicates: null
+clusterId: null
+phrasingKey: failure-not-required
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-failure-grgic
+    claimId: c-failure-not-required
+    doi: 10.1016/j.jshs.2021.01.007
+    authors: Grgic J, Schoenfeld BJ, Orazem J, Sabol F
+    year: 2022
+    journal: Journal of Sport and Health Science
+    n: null
+    population: mixed
+    effectSize: >-
+      No significant difference between training to failure and stopping short,
+      for strength (ES -0.09) or hypertrophy (ES 0.22). Both confidence
+      intervals cross zero.
+    ci: >-
+      Strength 95% CI -0.22 to 0.05; hypertrophy 95% CI -0.11 to 0.55
+    figures:
+      - label: studies pooled
+        value: 15
+      - label: effect size, strength
+        value: -0.09
+      - label: effect size, hypertrophy
+        value: 0.22
+    quote: >-
+      Training to muscle failure does not seem to be required for gains in
+      strength and muscle size
