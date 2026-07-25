@@ -20,7 +20,7 @@ function CitationBlock({ citation }: { citation: Citation }): ReactElement {
         href={doiUrl}
         target="_blank"
         rel="noreferrer"
-        className="font-mono text-[11px] text-ink-soft underline"
+        className="mt-1 inline-flex min-h-[44px] items-center font-mono text-[11px] text-ink-soft underline"
       >
         {doiUrl}
       </a>
