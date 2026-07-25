@@ -74,13 +74,27 @@ null — do not fill the blank with a plausible-sounding guess.
   field standing between a claim and being unverifiable, so it's validated
   against a DOI-shaped regex, not just "any string".
 - **`authors`**, **`year`**, **`journal`** — bibliographic fields, taken
-  directly from the paper.
+  directly from the paper. **`year` is whatever CrossRef registers as the
+  publication year**, which is not always the year printed on the journal
+  issue: a paper published online in December 2025 often carries a February
+  2026 issue date. CrossRef is the DOI registry and the thing we verify
+  against, so it is the tiebreaker. Pick one authority and stay consistent
+  rather than deciding case by case.
 - **`n`** — sample size, as a positive integer, or `null` if the source
   didn't state one you could read. Never estimate n from a description
   like "a large cohort".
-- **`population`** — `trained` | `untrained` | `mixed`. Whichever the study
-  population actually was — this is a first-class field in the evidence
-  panel precisely because population changes what a finding generalizes to.
+- **`population`** — `trained` | `untrained` | `mixed` | `unstated`.
+  Whichever the study population actually was — this is a first-class field
+  in the evidence panel precisely because population changes what a finding
+  generalizes to. **Use `unstated` when the source you could actually read
+  never said.** That is common: much of this literature is paywalled and
+  plenty of abstracts describe the intervention without describing the
+  subjects. `unstated` is the honest value and the UI renders it as such —
+  guessing `mixed` to fill the slot is the same inference the null rule
+  above forbids, and it quietly defeats FR-CLAIM-5, which can only drop a
+  grade for a population mismatch you can actually see. If a claim is
+  *about* trained lifters and every citation behind it is `unstated`, that
+  is a signal to grade down, not a detail to wave through.
 - **`effectSize`** — free-text description of the effect (e.g. "+1.2 kg
   lean mass, d=0.4"), or `null` if the paper doesn't give you one you can
   read directly.

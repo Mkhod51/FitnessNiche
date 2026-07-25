@@ -132,9 +132,14 @@ describe('claimSchema', () => {
 
   // --- population enum ---
 
-  it('rejects a population outside trained/untrained/mixed', () => {
+  it('rejects a population outside the known set', () => {
     const bad = { ...valid, citations: [{ ...valid.citations[0], population: 'athletes' }] };
     expect(() => claimSchema.parse(bad)).toThrow();
+  });
+
+  it.each(['trained', 'untrained', 'mixed', 'unstated'])('accepts population %s', (population) => {
+    const ok = { ...valid, citations: [{ ...valid.citations[0], population }] };
+    expect(() => claimSchema.parse(ok)).not.toThrow();
   });
 
   // --- n positivity ---

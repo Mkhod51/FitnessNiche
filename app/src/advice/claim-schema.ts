@@ -26,7 +26,7 @@ const citationSchema = z.object({
   // null is legitimate and load-bearing: it means "not stated in a source we read".
   // Leaving it null is honest; filling it from a secondary source's description is not.
   n: z.number().int().positive().nullable(),
-  population: z.enum(['trained', 'untrained', 'mixed']),
+  population: z.enum(['trained', 'untrained', 'mixed', 'unstated']),
   effectSize: z.string().min(1).nullable(),
   ci: z.string().min(1).nullable(),
   figures: z.array(figureSchema),

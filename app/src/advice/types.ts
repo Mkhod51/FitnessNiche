@@ -1,6 +1,14 @@
 export type Grade = 'A' | 'B' | 'C' | 'D';
 
-export type Population = 'trained' | 'untrained' | 'mixed';
+/**
+ * 'unstated' is not a cop-out, it is the honest reading of a paywalled corpus: much
+ * of this literature is closed access and plenty of abstracts never say who was
+ * studied. FR-ADV-8 makes population a first-class field, and "the source we read
+ * did not say" is a truthful value for it. Guessing 'mixed' to fill the slot would
+ * be exactly the inference the curation rules forbid — and it would quietly defeat
+ * FR-CLAIM-5, which can only drop a grade for a population mismatch you can see.
+ */
+export type Population = 'trained' | 'untrained' | 'mixed' | 'unstated';
 
 /** A single extracted number, re-plotted in our own chart style (GR-3). */
 export interface Figure {
