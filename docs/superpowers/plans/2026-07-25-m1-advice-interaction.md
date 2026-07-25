@@ -1136,49 +1136,89 @@ git commit -m "evaluate claim predicates against user state, and pull both sides
 
 ---
 
-## Task 7a: `GradeChip` and `ClaimCard`
+## Task 7a: `ConfidenceTicks` and `ClaimCard`
 
 **Files:**
-- Create: `app/src/components/GradeChip.tsx`, `app/src/components/GradeChip.test.tsx`
+- Create: `app/src/components/ConfidenceTicks.tsx`, `app/src/components/ConfidenceTicks.test.tsx`
 - Create: `app/src/components/ClaimCard.tsx`, `app/src/components/ClaimCard.test.tsx`
+- Modify: `app/src/index.css` (design tokens)
 
 **Interfaces:**
-- Consumes: `Claim`, `Grade` from `src/advice/types.ts`; `GRADE_LANGUAGE`, `renderHeadline` from `src/advice/language.ts`; `DESIGN.md` for all visual treatment.
-- Produces: `<GradeChip grade={Grade} />` and `<ClaimCard claim={Claim} />` from their respective modules. `<ClaimCard>` renders a root element carrying `data-claim-id={claim.id}`. Tasks 8 and 9 mount `ClaimCard`; Task 10 asserts on `data-claim-id`.
+- Consumes: `Claim`, `Grade` from `src/advice/types.ts`; `GRADE_LANGUAGE` from `src/advice/language.ts`; `DESIGN.md` (repo root) for all visual treatment and tokens.
+- Produces: `<ConfidenceTicks grade={Grade} />` and `<ClaimCard claim={Claim} cluster={Claim[]?} />`. `ClaimCard` renders a root carrying `data-claim-id={claim.id}`. Tasks 8, 9 and 10 depend on both.
 
-**Hard constraint:** neither component may contain a literal grade word, verb, DOI, author name, journal name, or year. Every such string arrives as data — from the `Claim` prop or from `GRADE_LANGUAGE`. Task 10 enforces this at source level; write it correctly the first time.
+**Renamed from BUILD-PLAN's `GradeChip`, deliberately.** DESIGN.md bans rendering a grade as a standalone pill badge — that skimmable affordance is the thing the chosen direction exists to refuse. The component is a four-slot counter, so `ConfidenceTicks` is what it is. Log the rename in the decision log at milestone end.
 
-- [ ] **Step 1: Write the failing tests**
+**Read `DESIGN.md` before writing code.** It is the contract for tokens, type roles, the fixed vertical order of the card, and the prohibitions. Do not invent colours or sizes.
 
-`app/src/components/GradeChip.test.tsx`:
+**Hard constraint:** neither component may contain a literal grade word, verb, DOI, author name, journal name, or year. Every such string arrives from the `Claim` prop or from `GRADE_LANGUAGE`. Task 10 enforces this at source level.
+
+- [ ] **Step 1: Add the design tokens**
+
+In `app/src/index.css`, inside Tailwind v4's `@theme`, declare exactly the tokens from DESIGN.md §Colour: `--paper #FBFAF7`, `--paper-sunk #F6F3EB`, `--ink #141414`, `--ink-soft #57534A`, `--ink-faint #767162`, `--rule #E6E1D4`, `--rule-strong #DAD5C7`, `--conf-a #1F5C3D`, `--conf-b #5B7B3A`, `--conf-c #8A6A00`, `--conf-d #6B6459`, `--flag #B0453A`. Use these values verbatim — they were contrast-checked and `--ink-faint` in particular was already corrected once for failing 4.5:1.
+
+- [ ] **Step 2: Write the failing `ConfidenceTicks` tests**
 
 ```tsx
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { GradeChip } from './GradeChip';
+import { ConfidenceTicks } from './ConfidenceTicks';
 import { GRADE_LANGUAGE } from '../advice/language';
 import type { Grade } from '../advice/types';
 
-const GRADES: Grade[] = ['A', 'B', 'C', 'D'];
+const FILLED: Record<Grade, number> = { A: 4, B: 3, C: 2, D: 1 };
 
-describe('GradeChip', () => {
-  it('renders the grade letter and its calibrated label for every grade', () => {
-    for (const g of GRADES) {
-      const { unmount } = render(<GradeChip grade={g} />);
-      expect(screen.getByTestId('grade-chip')).toHaveTextContent(g);
-      expect(screen.getByTestId('grade-chip')).toHaveTextContent(GRADE_LANGUAGE[g].chipLabel);
-      unmount();
-    }
+describe('ConfidenceTicks', () => {
+  it.each(['A', 'B', 'C', 'D'] as Grade[])('fills %s slots to match the grade', (g) => {
+    render(<ConfidenceTicks grade={g} />);
+    const el = screen.getByTestId('confidence-ticks');
+    expect(within(el).getAllByTestId('tick')).toHaveLength(4);
+    expect(within(el).getAllByTestId('tick-filled')).toHaveLength(FILLED[g]);
   });
 
-  it('gives screen readers the grade meaning, not just the letter', () => {
-    render(<GradeChip grade="C" />);
-    expect(screen.getByTestId('grade-chip')).toHaveAccessibleName(/limited evidence/i);
+  it.each(['A', 'B', 'C', 'D'] as Grade[])('always renders the words for %s, never the count alone', (g) => {
+    // DESIGN.md: colour is redundant to the count and the label. Strip the hue and the
+    // card must still read correctly, so the label is not optional.
+    render(<ConfidenceTicks grade={g} />);
+    expect(screen.getByTestId('confidence-ticks')).toHaveTextContent(GRADE_LANGUAGE[g].chipLabel);
+  });
+
+  it('gives assistive tech the meaning, not the geometry', () => {
+    render(<ConfidenceTicks grade="C" />);
+    expect(screen.getByTestId('confidence-ticks')).toHaveAccessibleName(/limited evidence/i);
+  });
+
+  it('takes a grade, not a caption — the words come from the grade map', () => {
+    // Guards T1: a caller must not be able to pass its own wording in.
+    render(<ConfidenceTicks grade="A" />);
+    expect(screen.getByTestId('confidence-ticks')).not.toHaveTextContent(/limited evidence/i);
   });
 });
 ```
 
-`app/src/components/ClaimCard.test.tsx`:
+- [ ] **Step 3: Run to verify failure**
+
+```bash
+npm test -- --run src/components
+```
+
+Expected: FAIL, module not found.
+
+- [ ] **Step 4: Implement `ConfidenceTicks`**
+
+Signature: `export function ConfidenceTicks({ grade }: { grade: Grade }): React.ReactElement;`
+
+Four slot elements each carrying `data-testid="tick"`; filled ones additionally carry `data-testid="tick-filled"` and the grade's ramp colour; unfilled use `--rule-strong`. Render `GRADE_LANGUAGE[grade].chipLabel` as visible text in the label style from DESIGN.md §Type. Give the wrapper an accessible name carrying the label. **No `grade` prop may be interpolated into a string** — index the map.
+
+- [ ] **Step 5: Run to verify pass, then commit**
+
+```bash
+npm test -- --run src/components
+git add app/src/components app/src/index.css
+git commit -m "count the confidence in four slots instead of stamping a badge"
+```
+
+- [ ] **Step 6: Write the failing `ClaimCard` tests**
 
 ```tsx
 import { render, screen, within } from '@testing-library/react';
@@ -1189,21 +1229,14 @@ import type { Claim } from '../advice/types';
 const claim: Claim = {
   id: 'c-test-volume',
   statement: 'More weekly sets produce more growth, with diminishing returns',
-  grade: 'C',
-  status: 'settled',
-  domain: 'volume',
-  predicates: null,
-  clusterId: null,
-  phrasingKey: 'test-volume',
-  supersededBy: null,
-  lastReviewed: '2026-07-25',
-  citations: [
-    {
-      id: 'cit-1', claimId: 'c-test-volume', doi: '10.1080/02640414.2016.1210197',
-      authors: 'Someone A', year: 2017, journal: 'Journal of Sports Sciences',
-      n: 42, population: 'trained', effectSize: null, ci: null, figures: [], quote: null,
-    },
-  ],
+  grade: 'C', status: 'settled', domain: 'volume',
+  predicates: null, clusterId: null, phrasingKey: 'test-volume',
+  supersededBy: null, lastReviewed: '2026-07-25',
+  citations: [{
+    id: 'cit-1', claimId: 'c-test-volume', doi: '10.1080/02640414.2016.1210197',
+    authors: 'Someone A', year: 2017, journal: 'Journal of Sports Sciences',
+    n: 42, population: 'trained', effectSize: null, ci: null, figures: [], quote: null,
+  }],
 };
 
 describe('ClaimCard', () => {
@@ -1212,80 +1245,80 @@ describe('ClaimCard', () => {
     expect(screen.getByTestId('claim-card')).toHaveAttribute('data-claim-id', 'c-test-volume');
   });
 
-  it('shows the statement', () => {
+  it('shows the statement as the card\'s own advice line', () => {
     render(<ClaimCard claim={claim} />);
-    expect(screen.getByText(/more weekly sets produce more growth/i)).toBeInTheDocument();
+    expect(screen.getByTestId('claim-statement')).toHaveTextContent(/more weekly sets produce more growth/i);
   });
 
-  it('shows the grade chip in the default state, without any interaction', () => {
+  it('shows the confidence in the default state, with no interaction', () => {
     // PRODUCT.md principle 7: nuance is the default state, not a disclosure layer.
     render(<ClaimCard claim={claim} />);
+    expect(within(screen.getByTestId('claim-card')).getByTestId('confidence-ticks')).toBeVisible();
+  });
+
+  it('orders advice, then confidence, then source — the order is the argument', () => {
+    // DESIGN.md fixes this order: the reader must meet the confidence before the
+    // citation, because a citation alone reads as proof.
+    render(<ClaimCard claim={claim} />);
     const card = screen.getByTestId('claim-card');
-    expect(within(card).getByTestId('grade-chip')).toBeVisible();
+    const order = [...card.querySelectorAll('[data-testid]')]
+      .map((n) => n.getAttribute('data-testid'))
+      .filter((t) => t === 'claim-statement' || t === 'confidence-ticks' || t === 'claim-source');
+    expect(order).toEqual(['claim-statement', 'confidence-ticks', 'claim-source']);
+  });
+
+  it('renders the source from the claim record', () => {
+    render(<ClaimCard claim={claim} />);
+    const src = screen.getByTestId('claim-source');
+    expect(src).toHaveTextContent('Someone A');
+    expect(src).toHaveTextContent('2017');
+  });
+
+  it('does not show study detail until it is asked for', () => {
+    // The user's explicit architecture: figures and caveats are layer 3, never layer 1.
+    render(<ClaimCard claim={claim} />);
+    expect(screen.queryByTestId('figure-n')).toBeNull();
+    expect(screen.queryByText('10.1080/02640414.2016.1210197')).toBeNull();
   });
 
   it('renders both sides when given a contested cluster', () => {
     const a: Claim = { ...claim, id: 'c-timing-for', status: 'contested', clusterId: 'protein-timing',
-      statement: 'Peri-workout protein timing matters' };
+      statement: 'Peri-workout protein timing matters',
+      citations: [{ ...claim.citations[0], claimId: 'c-timing-for' }] };
     const b: Claim = { ...claim, id: 'c-timing-against', status: 'contested', clusterId: 'protein-timing',
-      statement: 'Total daily protein dominates timing',
+      statement: 'Total daily protein dominates timing', grade: 'A',
       citations: [{ ...claim.citations[0], claimId: 'c-timing-against' }] };
     render(<ClaimCard claim={a} cluster={[a, b]} />);
     expect(screen.getByText(/peri-workout protein timing matters/i)).toBeInTheDocument();
     expect(screen.getByText(/total daily protein dominates timing/i)).toBeInTheDocument();
-  });
-
-  it('labels a contested card as contested without an interaction', () => {
-    const a: Claim = { ...claim, id: 'c-a', status: 'contested', clusterId: 'k' };
-    const b: Claim = { ...claim, id: 'c-b', status: 'contested', clusterId: 'k' };
-    render(<ClaimCard claim={a} cluster={[a, b]} />);
     expect(screen.getByTestId('contested-marker')).toBeVisible();
   });
 
-  it('gives every side of a contested cluster its own claim id attribute', () => {
+  it('gives every side of a contested cluster its own claim id and its own confidence', () => {
     const a: Claim = { ...claim, id: 'c-a', status: 'contested', clusterId: 'k' };
-    const b: Claim = { ...claim, id: 'c-b', status: 'contested', clusterId: 'k' };
+    const b: Claim = { ...claim, id: 'c-b', status: 'contested', clusterId: 'k', grade: 'A' };
     render(<ClaimCard claim={a} cluster={[a, b]} />);
-    const ids = screen.getAllByTestId('claim-side').map((el) => el.getAttribute('data-claim-id'));
-    expect(ids.sort()).toEqual(['c-a', 'c-b']);
+    const sides = screen.getAllByTestId('claim-side');
+    expect(sides.map((el) => el.getAttribute('data-claim-id')).sort()).toEqual(['c-a', 'c-b']);
+    for (const side of sides) expect(within(side).getByTestId('confidence-ticks')).toBeVisible();
   });
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [ ] **Step 7: Run to verify failure, then implement `ClaimCard`**
+
+Signature: `export function ClaimCard({ claim, cluster }: { claim: Claim; cluster?: Claim[] }): React.ReactElement;`
+
+Follow DESIGN.md §Components exactly: fixed vertical order (statement → confidence → source → affordance), hairline separators rather than shadows, no rounded corners, paper ground. The source line renders authors, journal, year and — where `n` is not null — the sample size. **Do not render the DOI, figures, effect size or CI on the card**; those belong to Task 7b's evidence panel behind a tap.
+
+When `cluster` has more than one member, render the contested variant: a `contested-marker` and one `claim-side` per member, each with its own `data-claim-id` and its own `ConfidenceTicks`, at equal visual weight. Neither side indented, greyed, or ordered by grade.
+
+- [ ] **Step 8: Run to verify pass, full suite, commit**
 
 ```bash
-npm test -- --run src/components
-```
-
-Expected: FAIL — cannot resolve the modules.
-
-- [ ] **Step 3: Implement both components**
-
-Props are pinned as:
-
-```tsx
-export function GradeChip({ grade }: { grade: Grade }): React.ReactElement;
-export function ClaimCard({ claim, cluster }: { claim: Claim; cluster?: Claim[] }): React.ReactElement;
-```
-
-`GradeChip` must render both the letter and `GRADE_LANGUAGE[grade].chipLabel`, with an accessible name carrying the meaning — a bare letter is meaningless to a screen reader and to a glancing lifter alike. Colour alone must never be the grade signal (NFR-6 contrast, and colour-blind users). Visual treatment per `DESIGN.md`.
-
-`ClaimCard` renders the decisive default — the statement — with the chip at equal prominence in the same visual band, never below the fold of the card and never behind a tap. When `cluster` is supplied and has more than one member, render the contested variant: a `data-testid="contested-marker"` label plus one `data-testid="claim-side"` element per cluster member, each carrying its own `data-claim-id`. Both sides get equal visual weight — steelmanned, not one side with a hedge (FR-ADV-6).
-
-- [ ] **Step 4: Run the tests to verify they pass**
-
-```bash
-npm test -- --run src/components
-```
-
-Expected: PASS.
-
-- [ ] **Step 5: Commit**
-
-```bash
+npm test -- --run && npm run typecheck
 git add app/src/components
-git commit -m "show the grade next to the claim, at the same weight, before anyone taps"
+git commit -m "put the advice first, the confidence under it, and the paper below that"
 ```
 
 ---
