@@ -13,6 +13,17 @@ const CERTAINTY_WORDS = [
   'settled science', 'always', 'never fails', 'optimal',
 ];
 
+/**
+ * Whole-word match, not substring. A plain `includes` flags 'certain' inside
+ * 'uncertainty' — a word that asserts the exact opposite — which would push the
+ * copy away from the most accurate term available for a [B] claim. Word
+ * boundaries also mean an honest 'unproven' or 'disproven' passes while a bare
+ * 'proven' still fails, which is the distinction this guard is actually for.
+ */
+function assertsCertainty(text: string, word: string): boolean {
+  return new RegExp(`\\b${word}\\b`).test(text);
+}
+
 function claimWith(grade: Grade): Claim {
   return {
     id: 'c-test-x',
@@ -72,7 +83,7 @@ describe('renderHeadline', () => {
     for (const g of GRADES) {
       const out = renderHeadline(claimWith(g)).toLowerCase();
       for (const word of CERTAINTY_WORDS) {
-        expect(out, `grade ${g} rendered the certainty word "${word}"`).not.toContain(word);
+        expect(assertsCertainty(out, word), `grade ${g} rendered the certainty word "${word}"`).toBe(false);
       }
     }
   });
@@ -82,7 +93,7 @@ describe('renderHeadline', () => {
     for (const claim of CLAIMS) {
       const out = renderHeadline(claim).toLowerCase();
       for (const word of CERTAINTY_WORDS) {
-        expect(out, `${claim.id} rendered "${word}"`).not.toContain(word);
+        expect(assertsCertainty(out, word), `${claim.id} rendered "${word}"`).toBe(false);
       }
     }
   });
