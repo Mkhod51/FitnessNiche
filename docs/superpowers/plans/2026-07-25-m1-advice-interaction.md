@@ -1469,6 +1469,14 @@ npm test -- --run src/features
 
 Expected: FAIL.
 
+**DESIGN.md and architecture requirements decided after this task was first written:**
+
+- Read `DESIGN.md` (repo root) before writing code. Warm paper ground, single column, hairline separators between cards, no shadows, no rounded corners. Tokens are in `app/src/index.css` under Tailwind v4 `@theme`, namespaced `--color-*`, so utilities read `bg-paper`, `text-ink`, `text-ink-faint`. **Add no new colours.**
+- **Mobile is the design target, not a breakpoint.** Author single-column first; let it breathe on wider screens with a max reading measure. Nothing essential off the first screenful of a card.
+- **The developer's three-layer architecture is binding.** Layer 1 advice, layer 2 source plus confidence, layer 3 study detail *only when asked*. `ClaimCard` and `EvidencePanel` already implement all three — the feed composes them and must not surface figures, DOIs, or effect sizes at feed level.
+- **The empty state is the honest centre of this screen, not a placeholder.** M1 has no logging, so nothing on this page is earned by the user's data. Say that plainly in the copy, in the app's own voice, and offer the evidence base as what it *can* do today. Do not use a spinner, do not imply data is coming, and **do not invent a single number about the user.**
+- Grouping: render all of `CLAIMS` grouped by `domain` with a small label per group. Contested claims sharing a `clusterId` collapse into ONE `ClaimCard` with its `cluster` prop, never two competing cards.
+
 - [ ] **Step 3: Implement `AdviceFeed.tsx`**
 
 The feed calls `evaluateClaims(EMPTY_SNAPSHOT, CLAIMS)` for the rule-triggered section, which correctly yields nothing at M1, and separately renders all of `CLAIMS` grouped by `domain` as the browse surface. Contested claims are grouped by `clusterId` and passed to `ClaimCard` as a `cluster`, so both sides render in one card rather than as two competing cards.
