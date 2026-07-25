@@ -5,6 +5,11 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // The iOS gate (docs/ios-gate.md) serves this build to a real iPhone through an
+  // HTTPS tunnel, and vite's host check rejects the tunnel's hostname by default.
+  // A leading dot matches subdomains, so this allows any *.loca.lt tunnel without
+  // switching the check off entirely.
+  preview: { allowedHosts: ['.loca.lt', '.trycloudflare.com'] },
   plugins: [
     react(),
     tailwindcss(),
