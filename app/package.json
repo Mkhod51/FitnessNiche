@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "claims": "node scripts/build-claims.ts"
   },
   "dependencies": {
     "@sqlite.org/sqlite-wasm": "^3.53.0-build1",
