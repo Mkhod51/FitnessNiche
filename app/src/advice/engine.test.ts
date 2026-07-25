@@ -114,6 +114,20 @@ describe('evaluateClaims', () => {
     expect(evaluateClaims(cutting, [a, b])).toHaveLength(2);
   });
 
+  it('does not fire on a predicate that returns a truthy non-boolean', () => {
+    // json-logic returns the computed VALUE, not a boolean: `{var: 'deficitWeeks'}`
+    // evaluates to 6 here. Firing on anything truthy would let a sloppily authored
+    // predicate surface advice the rule never actually earned, so the evaluator
+    // requires a genuine `true`. Guards the `=== true` in matches().
+    const c = claim({ predicates: { var: 'deficitWeeks' } });
+    expect(evaluateClaims(cutting, [c])).toEqual([]);
+  });
+
+  it('does not fire on a predicate that returns a non-empty string', () => {
+    const c = claim({ predicates: { var: 'goal' } });
+    expect(evaluateClaims(cutting, [c])).toEqual([]);
+  });
+
   it('never throws on a malformed predicate — it declines to fire and stays quiet', () => {
     const c = claim({ predicates: { notAnOperator: [1, 2] } });
     expect(() => evaluateClaims(cutting, [c])).not.toThrow();
