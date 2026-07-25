@@ -1000,9 +1000,10 @@ describe('evaluateClaims', () => {
     expect(evaluateClaims(cutting, [c])).toEqual([]);
   });
 
-  it('fires nothing at all against the empty snapshot', () => {
-    // M1 ships with no logging. If a claim fires against an empty database it is
-    // asserting something about a user the app knows nothing about.
+  it('still evaluates predicates normally against the empty snapshot', () => {
+    // EMPTY_SNAPSHOT has goal 'maintain', so a predicate written to match it does
+    // match. This proves the empty snapshot is a real snapshot, not a dead object —
+    // which is what makes the next test's silence meaningful rather than vacuous.
     expect(evaluateClaims(EMPTY_SNAPSHOT, [claim({ predicates: { '==': [{ var: 'goal' }, 'maintain'] } })]))
       .toHaveLength(1);
   });
