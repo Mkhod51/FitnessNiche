@@ -176,14 +176,30 @@ export const CLAIMS: Claim[] = [
         "authors": "Grgic J, Schoenfeld BJ, Orazem J, Sabol F",
         "year": 2022,
         "journal": "Journal of Sport and Health Science",
-        "n": null,
+        "n": 394,
         "population": "mixed",
-        "effectSize": "No significant difference between training to failure and stopping short, for strength (ES -0.09) or hypertrophy (ES 0.22). Both confidence intervals cross zero.",
+        "effectSize": "No significant difference between training to failure and stopping short, for strength (ES -0.09) or hypertrophy (ES 0.22). Both confidence intervals cross zero. n is the pooled strength analysis (394); the hypertrophy analysis pooled a separate, smaller 219 participants, so the size half of this claim rests on less data than the strength half. Six of the fifteen studies used resistance-trained participants and the rest used untrained ones.",
         "ci": "Strength 95% CI -0.22 to 0.05; hypertrophy 95% CI -0.11 to 0.55",
         "figures": [
           {
             "label": "studies pooled",
             "value": 15
+          },
+          {
+            "label": "participants, strength analysis",
+            "value": 394
+          },
+          {
+            "label": "participants, hypertrophy analysis",
+            "value": 219
+          },
+          {
+            "label": "median study sample size",
+            "value": 25
+          },
+          {
+            "label": "studies using resistance-trained participants",
+            "value": 6
           },
           {
             "label": "effect size, strength",
@@ -247,7 +263,7 @@ export const CLAIMS: Claim[] = [
         "journal": "Journal of Sport and Health Science",
         "n": null,
         "population": "trained",
-        "effectSize": "In the resistance-trained subgroup only, training to failure favoured hypertrophy with ES 0.15. This is a subgroup analysis inside a single meta-analysis and its interval only just clears zero, so it carries much less weight than the headline null result it sits beside.",
+        "effectSize": "In the resistance-trained subgroup only, training to failure favoured hypertrophy with ES 0.15. This is a subgroup analysis inside a single meta-analysis and its interval only just clears zero, so it carries much less weight than the headline null result it sits beside. The trained subgroup is drawn from six of the fifteen studies; the paper does not report a participant count for that subgroup alone, so n stays unstated even though the pooled hypertrophy analysis it came from had 219.",
         "ci": "95% CI 0.03 to 0.26",
         "figures": [
           {
@@ -261,6 +277,14 @@ export const CLAIMS: Claim[] = [
           {
             "label": "upper bound of the confidence interval",
             "value": 0.26
+          },
+          {
+            "label": "studies contributing resistance-trained participants",
+            "value": 6
+          },
+          {
+            "label": "participants in the full hypertrophy analysis",
+            "value": 219
           }
         ],
         "quote": null

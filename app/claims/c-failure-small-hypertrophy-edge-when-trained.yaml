@@ -23,7 +23,10 @@ citations:
       In the resistance-trained subgroup only, training to failure favoured
       hypertrophy with ES 0.15. This is a subgroup analysis inside a single
       meta-analysis and its interval only just clears zero, so it carries much
-      less weight than the headline null result it sits beside.
+      less weight than the headline null result it sits beside. The trained
+      subgroup is drawn from six of the fifteen studies; the paper does not
+      report a participant count for that subgroup alone, so n stays unstated
+      even though the pooled hypertrophy analysis it came from had 219.
     ci: 95% CI 0.03 to 0.26
     figures:
       - label: effect size favouring failure, resistance-trained only
@@ -32,4 +35,8 @@ citations:
         value: 0.03
       - label: upper bound of the confidence interval
         value: 0.26
+      - label: studies contributing resistance-trained participants
+        value: 6
+      - label: participants in the full hypertrophy analysis
+        value: 219
     quote: null

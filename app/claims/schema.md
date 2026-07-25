@@ -1,5 +1,10 @@
 # Authoring a claim by hand
 
+> **Looking for the workflow rather than the field list?** See
+> [ADDING-A-CLAIM.md](ADDING-A-CLAIM.md) — how to find a paper, verify its DOI,
+> extract figures, grade it, and amend a claim later. This file is the
+> reference for what each field *means*; that one is the procedure.
+
 This is the doc you read before writing a claim file. A claim is a YAML
 document that mirrors the `Claim` type in `src/advice/types.ts` 1:1 and is
 validated against `claimSchema` (`src/advice/claim-schema.ts`) by
