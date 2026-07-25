@@ -98,17 +98,24 @@ FitnessNiche/
 
 ## Interfaces pinned now (type-consistency contract for all milestones)
 
+Fields that aren't always known (`n`, `effectSize`, `ci`, `quote`, `clusterId`,
+`supersededBy`) are required-but-nullable (e.g. `string | null`), not optional
+(`string?`) — an explicit `null` forces the claim author to decide rather than forget a
+field, and YAML/JSON have no notion of an absent key that survives a round trip cleanly.
+
 ```ts
 // src/advice/types.ts
 type Grade = 'A' | 'B' | 'C' | 'D';
+type Population = 'trained' | 'untrained' | 'mixed';
+interface Figure { label: string; value: number; unit?: string; }
 interface Citation { id: string; claimId: string; doi: string; authors: string; year: number;
-  journal: string; n: number; population: 'trained'|'untrained'|'mixed';
-  effectSize?: string; ci?: string; figures?: { label: string; value: number; unit?: string }[];
-  quote?: string; }
+  journal: string; n: number | null; population: Population;
+  effectSize: string | null; ci: string | null; figures: Figure[];
+  quote: string | null; }
 interface Claim { id: string; statement: string; grade: Grade; status: 'settled'|'contested';
   domain: string; predicates: JsonLogicRule | null;        // null = only surfaced via search
-  clusterId?: string;                                       // contested claims share a cluster
-  phrasingKey: string; supersededBy?: string; lastReviewed: string; citations: Citation[]; }
+  clusterId: string | null;                                 // contested claims share a cluster
+  phrasingKey: string; supersededBy: string | null; lastReviewed: string; citations: Citation[]; }
 interface UserStateSnapshot { goal: 'cut'|'bulk'|'maintain'; deficitWeeks: number;
   weightTrend: 'down_fast'|'down'|'flat'|'up'|'unknown';
   e1rmTrend: 'up'|'holding'|'down'|'insufficient_data';
