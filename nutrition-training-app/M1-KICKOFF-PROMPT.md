@@ -58,12 +58,23 @@ The **risk-retiring milestone**. If this interaction doesn't feel honest *and* p
 
 This is the moat and the single most dangerous surface in the product. **Fabricating a citation is worse than shipping nothing.**
 
-**Tooling reality — no scholarly MCP is connected.** Do not assume one exists. Use `WebSearch` and `WebFetch` against the curation-time sources REQUIREMENTS TA-5 already names:
+**Available tooling.** Three MCP servers are configured for this work — `perplexity`, `firecrawl`, and `playwright` — alongside `WebSearch` and `WebFetch`. If they don't appear in your tool list, they are scoped to the wrong project; check with `claude mcp list` and see the note at the end of this section.
+
+The curation-time sources REQUIREMENTS TA-5 names remain the authority:
 - **OpenAlex** (`api.openalex.org`) — CC0 metadata, abstracts, citation graph. The backbone.
 - **Europe PMC** — open-access full text where available.
 - **CrossRef** — DOI resolution.
 
-Before starting, spend one call on `mcp__mcp-registry__search_mcp_registry` to check whether a literature/PubMed connector is available to this user; if one is, use it. If not, proceed with WebSearch/WebFetch and say so. Other MCPs present in this environment (Gmail, media generation, browser control) are irrelevant here — do not reach for them to manufacture evidence.
+**How to use each tool — this distinction is the whole ballgame:**
+
+- **Perplexity is a discovery tool, never an evidence tool.** It is an LLM with web search: its output is *generated prose that carries citations*, and it can mis-attribute a finding, merge two studies, or state a sample size that appears nowhere in the paper. Use it to find *which* papers exist on a question and to surface candidate DOIs. **Never copy a number, a grade, a population, or a conclusion out of a Perplexity answer into a claim record.** Every DOI it hands you gets independently resolved against OpenAlex or CrossRef; every extracted figure comes from the paper itself. If a Perplexity summary and the source disagree, the source wins and the summary was noise.
+- **Firecrawl** is the right tool for turning a real paper or Europe PMC record into readable text you can extract from. Numbers pulled from a Firecrawl scrape of the actual source are legitimate evidence; numbers pulled from a search-engine summary are not.
+- **Playwright MCP** is not a curation tool. It's useful later in the milestone for driving the advice feed in a real browser during the Impeccable design loop. Don't confuse it with the project's own Playwright e2e harness in `app/e2e/`, which stays the source of truth for tests.
+- **WebFetch** against `api.openalex.org` and `api.crossref.org` is often faster and more reliable than any of the above for straight DOI resolution and metadata. Prefer it for verification.
+
+**The verification rule that follows from all of this:** a claim record may only contain numbers you traced to the source document. The chain must be *discovery → resolve the DOI → read the source → extract*. Skipping the middle two steps is how a product whose premise is "structurally incapable of fabricating a citation" ends up shipping a fabricated citation, and no test in this repo would catch it.
+
+**If the MCPs are missing from your session:** they're configured under the `/Users/mkhoder` project scope in `~/.claude.json`, not under this repo, so a session started here won't load them. Either add them to this project's scope or promote them to user scope (`claude mcp add --scope user ...`). Proceed with WebSearch/WebFetch if they're unavailable, and say so rather than pretending you searched.
 
 **Hard rules, non-negotiable:**
 1. **Every DOI must resolve.** If you cannot fetch a real record for it, the citation does not go in the file.
