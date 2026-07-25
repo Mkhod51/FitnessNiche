@@ -1398,6 +1398,16 @@ npm test -- --run src/components
 
 Expected: FAIL.
 
+**DESIGN.md requirements for this task, decided after the plan was first written:**
+
+- The panel opens on `--paper-sunk` (`bg-paper-sunk`), so depth reads as a change of surface rather than a shadow. Field rows are a mono label above a serif value.
+- **Sample size renders as countable marks, one mark per 100 participants**, with a hatched partial mark for the remainder and a visible "each mark = 100 people" key. This is Isotype's founding rule and the reason the world was chosen: quantity is shown by repeating a mark, never by scaling one. A bar whose length encodes n is a defect here.
+- **Population is its own named field** with a human label, never a parenthetical (FR-ADV-8).
+- **Confidence intervals plot against a visible zero line**, so an interval crossing zero is *seen* to cross it. Several real claims in this base have intervals that cross zero and that fact is the honest content.
+- **The panel carries the full author list.** `ClaimCard` deliberately shortens it to `First A et al.` for the card, so the complete list has to live here or it is lost. Import `shortenAuthors` from `./ClaimCard` only if you need it; the panel should print `citation.authors` in full.
+- `ClaimCard` already renders an empty native `<details>` with the summary text `see the evidence`. Fill it with `EvidencePanel` and change that summary wording if a better phrase serves the layer-2-to-layer-3 step; keep it a native `<details>`/`<summary>`.
+- Tokens exist in `app/src/index.css` under Tailwind v4's `@theme` and are namespaced `--color-*`, so the utilities are `bg-paper-sunk`, `text-ink-faint`, `bg-conf-a`, `text-flag`, and so on. **Do not add new colours.**
+
 - [ ] **Step 3: Implement both components**
 
 `FigureChart` is hand-rolled SVG per the locked architecture decision — no charting library. Keep it small: a labelled value strip with a CI whisker when `ci` is present. It must degrade honestly: no figures means no SVG, but n and population still render.
