@@ -1,0 +1,37 @@
+id: c-volume-strength-diminishing-returns
+statement: >-
+  Strength gains keep rising with weekly volume too, but they flatten off much
+  faster than muscle size does
+grade: B
+status: settled
+domain: volume
+predicates:
+  some:
+    - var: muscleSets
+    - ">":
+        - var: sets
+        - 20
+clusterId: null
+phrasingKey: volume-strength-diminishing
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-volume-strength-pelland
+    claimId: c-volume-strength-diminishing-returns
+    doi: 10.1007/s40279-025-02344-w
+    authors: Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC
+    year: 2026
+    journal: Sports Medicine
+    n: 2058
+    population: mixed
+    effectSize: >-
+      Both hypertrophy and strength slopes were positive with 100% posterior
+      probability, but the authors report diminishing returns for strength as
+      considerably more pronounced.
+    ci: null
+    figures:
+      - label: studies pooled
+        value: 67
+      - label: participants
+        value: 2058
+    quote: null

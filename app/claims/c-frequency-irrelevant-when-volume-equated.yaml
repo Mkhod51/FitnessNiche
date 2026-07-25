@@ -1,0 +1,49 @@
+id: c-frequency-irrelevant-when-volume-equated
+statement: >-
+  Once weekly volume is matched, how many sessions you split it across makes
+  little difference to muscle growth
+grade: A
+status: settled
+domain: frequency
+predicates: null
+clusterId: null
+phrasingKey: frequency-volume-equated
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-frequency-schoenfeld
+    claimId: c-frequency-irrelevant-when-volume-equated
+    doi: 10.1080/02640414.2018.1555906
+    authors: Schoenfeld BJ, Grgic J, Krieger J
+    year: 2019
+    journal: Journal of Sports Sciences
+    n: null
+    population: mixed
+    effectSize: >-
+      No significant difference between higher and lower frequency on a
+      volume-equated basis, including in the resistance-trained subgroup.
+    ci: null
+    figures:
+      - label: studies pooled
+        value: 25
+    quote: >-
+      there is strong evidence that resistance training frequency does not
+      significantly or meaningfully impact muscle hypertrophy when volume is equated
+  - id: cit-frequency-pelland
+    claimId: c-frequency-irrelevant-when-volume-equated
+    doi: 10.1007/s40279-025-02344-w
+    authors: Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC
+    year: 2026
+    journal: Sports Medicine
+    n: 2058
+    population: mixed
+    effectSize: >-
+      Posterior probability that the frequency-hypertrophy slope exceeds zero was
+      below 100%, which the authors read as compatible with negligible effects.
+    ci: null
+    figures:
+      - label: studies pooled
+        value: 67
+      - label: participants
+        value: 2058
+    quote: null

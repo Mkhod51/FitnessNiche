@@ -1,0 +1,35 @@
+id: c-frequency-helps-strength
+statement: >-
+  Strength is the exception: spreading the same volume over more sessions does
+  tend to improve strength, though the returns shrink
+grade: B
+status: settled
+domain: frequency
+predicates: null
+clusterId: null
+phrasingKey: frequency-strength
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-frequency-strength-pelland
+    claimId: c-frequency-helps-strength
+    doi: 10.1007/s40279-025-02344-w
+    authors: Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC
+    year: 2026
+    journal: Sports Medicine
+    n: 2058
+    population: mixed
+    effectSize: >-
+      Posterior probability that the frequency-strength slope exceeds zero: 100%,
+      with diminishing returns. This contrasts with the same model's hypertrophy
+      result, where the effect was compatible with negligible.
+    ci: null
+    figures:
+      - label: studies pooled
+        value: 67
+      - label: participants
+        value: 2058
+      - label: posterior probability of a positive frequency-strength slope
+        value: 100
+        unit: "%"
+    quote: null

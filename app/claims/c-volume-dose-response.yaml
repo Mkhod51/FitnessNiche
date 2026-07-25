@@ -1,0 +1,65 @@
+id: c-volume-dose-response
+statement: >-
+  More weekly sets per muscle produce more hypertrophy, with each additional set
+  adding less than the one before
+grade: A
+status: settled
+domain: volume
+predicates:
+  some:
+    - var: muscleSets
+    - "<":
+        - var: sets
+        - 10
+clusterId: null
+phrasingKey: volume-dose-response
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-volume-dose-pelland
+    claimId: c-volume-dose-response
+    doi: 10.1007/s40279-025-02344-w
+    authors: Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC
+    year: 2026
+    journal: Sports Medicine
+    n: 2058
+    population: mixed
+    effectSize: >-
+      Posterior probability that the volume-hypertrophy slope exceeds zero: 100%.
+      Best-fit model shows diminishing returns.
+    ci: null
+    figures:
+      - label: studies pooled
+        value: 67
+      - label: participants
+        value: 2058
+      - label: posterior probability of a positive volume-hypertrophy slope
+        value: 100
+        unit: "%"
+    quote: null
+  - id: cit-volume-dose-schoenfeld
+    claimId: c-volume-dose-response
+    doi: 10.1080/02640414.2016.1210197
+    authors: Schoenfeld BJ, Ogborn D, Krieger JW
+    year: 2017
+    journal: Journal of Sports Sciences
+    n: null
+    population: unstated
+    effectSize: >-
+      Each additional weekly set was associated with an effect-size increase of
+      0.023, corresponding to a 0.37% greater gain in muscle size.
+    ci: null
+    figures:
+      - label: treatment groups
+        value: 34
+      - label: studies pooled
+        value: 15
+      - label: effect size added per weekly set
+        value: 0.023
+      - label: extra muscle gain per weekly set
+        value: 0.37
+        unit: "%"
+      - label: gain difference, higher vs lower volume
+        value: 3.9
+        unit: "%"
+    quote: null
