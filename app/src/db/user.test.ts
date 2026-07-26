@@ -15,7 +15,10 @@ let testDz: ReturnType<typeof drizzle>;
 
 vi.mock('./client', async () => {
   const actual = await vi.importActual<typeof import('./client')>('./client');
-  return { ...actual, getDrizzle: () => testDz };
+  // getUser() opens the store itself before reading, so the boot has to be
+  // stubbed too — these tests supply their own in-memory engine below and
+  // must not spin up the real worker.
+  return { ...actual, getDrizzle: () => testDz, initDb: async () => 'memory-fallback' as const };
 });
 
 async function makeTestDb() {
