@@ -167,7 +167,7 @@ export function FigureChart({ citation }: { citation: Citation }): ReactElement 
       </div>
 
       <FieldRow testId="figure-population" label="population" value={POPULATION_LABEL[population]} />
-      <FieldRow testId="figure-effect-size" label="effect size" value={effectSize ?? NOT_STATED} mono={!!effectSize} />
+      <FieldRow testId="figure-effect-size" label="effect size" value={effectSize ?? NOT_EXTRACTED} />
       <FieldRow testId="figure-ci" label="confidence interval" value={ci ?? NOT_EXTRACTED} />
 
       {figures.length > 0 &&

@@ -10,9 +10,13 @@ import type { Claim, Citation } from '../advice/types';
  * This shortens a stored string for display; it never invents one.
  */
 export function shortenAuthors(authors: string): string {
-  const [first, ...rest] = authors.split(',').map((a) => a.trim()).filter(Boolean);
-  if (!first) return authors;
-  return rest.length > 0 ? `${first} et al.` : first;
+  const names = authors.split(',').map((a) => a.trim()).filter(Boolean);
+  if (names.length === 0) return authors;
+  if (names.length === 1) return names[0];
+  // Two authors are both named — "Murphy C et al." for a two-author paper is simply
+  // wrong, and this audience cites papers.
+  if (names.length === 2) return `${names[0]} & ${names[1]}`;
+  return `${names[0]} et al.`;
 }
 
 // DESIGN.md §Type: source lines are italic serif; sample size is a count, so it

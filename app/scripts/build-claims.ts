@@ -40,7 +40,23 @@ export function buildClaims(sources: ClaimSource[]): Claim[] {
     seen.add(c.id);
   }
 
+  // Citation ids key the evidence panel's React list within a single claim, so a
+  // collision there silently drops a source and the claim renders fewer papers than
+  // it stores. Across claims they may repeat — two claims can cite the same paper.
   for (const c of claims) {
+    const citationIds = new Set<string>();
+    for (const cit of c.citations) {
+      if (citationIds.has(cit.id)) {
+        throw new Error(`${c.id}: duplicate citation id "${cit.id}" within one claim`);
+      }
+      citationIds.add(cit.id);
+    }
+  }
+
+  for (const c of claims) {
+    if (c.supersededBy === c.id) {
+      throw new Error(`${c.id}: supersededBy points at itself`);
+    }
     if (c.supersededBy !== null && !seen.has(c.supersededBy)) {
       throw new Error(`${c.id}: supersededBy points at ${c.supersededBy}, which does not exist`);
     }
@@ -49,6 +65,15 @@ export function buildClaims(sources: ClaimSource[]): Claim[] {
   // FR-ADV-6: a contested claim alone in its cluster renders one side and calls it
   // nuance. That is the exact failure this product exists to refuse, so it is a
   // build error rather than a lint warning.
+  // The UI decides "contested" from cluster size alone, so a settled claim sharing a
+  // clusterId would be rendered under a "contested — both sides shown" banner and
+  // misrepresented as a live controversy.
+  for (const c of claims) {
+    if (c.clusterId !== null && c.status !== 'contested') {
+      throw new Error(`${c.id}: only a contested claim may carry a clusterId (status is "${c.status}")`);
+    }
+  }
+
   const clusterSizes = new Map<string, number>();
   for (const c of claims) {
     if (c.clusterId) clusterSizes.set(c.clusterId, (clusterSizes.get(c.clusterId) ?? 0) + 1);
