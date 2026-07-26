@@ -10,30 +10,35 @@ import type { Database, BindingSpec } from '@sqlite.org/sqlite-wasm';
 import { drizzle } from 'drizzle-orm/sqlite-proxy';
 import { eq } from 'drizzle-orm';
 import { runMigrations, type Exec } from './migrate';
-import { makeProxyCallback } from './client';
+import { makeProxyCallback, type ExecWithChanges } from './client';
 import * as schema from './schema';
 
-async function makeRealExec(): Promise<Exec> {
+async function makeRealExec(): Promise<ExecWithChanges> {
   const sqlite3 = await sqlite3InitModule();
   const db: Database = new sqlite3.oo1.DB(':memory:');
-  // Mirrors sqlite.worker.ts exactly: `method` is accepted but ignored.
+  // Mirrors sqlite.worker.ts exactly: `method` is accepted but ignored, and
+  // `changes` (D8) comes from db.changes() right after the exec call.
   return async (sql, params = [], _method) => {
-    const rows = db.exec({ sql, bind: params as BindingSpec, rowMode: 'array', returnValue: 'resultRows' });
-    return (rows ?? []) as unknown[][];
+    const rows = (db.exec({ sql, bind: params as BindingSpec, rowMode: 'array', returnValue: 'resultRows' }) ?? []) as unknown[][];
+    return { rows, changes: db.changes() as number };
   };
 }
 
 describe('drizzle-orm/sqlite-proxy contract against a real sqlite engine', () => {
-  let exec: Exec;
+  let exec: ExecWithChanges;
 
   beforeAll(async () => {
     exec = await makeRealExec();
-    await runMigrations(exec);
+    // runMigrations only wants a rows array (the `Exec` contract) — adapt
+    // the richer real exec down to that rather than widening `Exec` for a
+    // caller that never needed a row count.
+    const execRows: Exec = async (sql, params, method) => (await exec(sql, params ?? [], method ?? 'all')).rows;
+    await runMigrations(execRows);
   });
 
   it('rejects the brief-literal adapter (rows[0] ?? []) — .get() with no match must be undefined, not a blank row', async () => {
     const buggyDz = drizzle(async (sql, params, method) => {
-      const rows = await exec(sql, params, method);
+      const { rows } = await exec(sql, params, method);
       return { rows: method === 'get' ? (rows[0] ?? []) : rows };
     }, { schema });
 
@@ -70,5 +75,22 @@ describe('drizzle-orm/sqlite-proxy contract against a real sqlite engine', () =>
 
     const missing = await dz.select().from(schema.users).where(eq(schema.users.id, 'nobody')).get();
     expect(missing).toBeUndefined();
+  });
+
+  it('D8: .run() reports db.changes() — non-zero for an insert, zero for a no-op update', async () => {
+    const dz = drizzle(makeProxyCallback(exec), { schema });
+
+    // drizzle's SqliteRemoteResult type only declares `rows` — `.changes` is
+    // what the proxy callback actually returns at runtime (D8), so assert
+    // against that runtime shape rather than widen drizzle's own type.
+    const inserted = (await dz.insert(schema.users).values({ id: 'u2', updatedAt: '2026-01-01T00:00:00.000Z' }).run()) as { changes: number };
+    expect(inserted.changes).toBeGreaterThan(0);
+
+    const noopUpdate = (await dz
+      .update(schema.users)
+      .set({ updatedAt: '2026-02-01T00:00:00.000Z' })
+      .where(eq(schema.users.id, 'nobody-matches-this'))
+      .run()) as { changes: number };
+    expect(noopUpdate.changes).toBe(0);
   });
 });

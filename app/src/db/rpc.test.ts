@@ -18,10 +18,20 @@ describe('rpc', () => {
     const a = rpc.exec('select 1', [], 'all');
     const b = rpc.exec('select 2', [], 'all');
     // reply out of order to prove correlation is by id, not arrival order
-    w.reply({ id: 2, ok: true, kind: 'exec', rows: [[2]] });
-    w.reply({ id: 1, ok: true, kind: 'exec', rows: [[1]] });
-    expect(await a).toEqual([[1]]);
-    expect(await b).toEqual([[2]]);
+    w.reply({ id: 2, ok: true, kind: 'exec', rows: [[2]], changes: 0 });
+    w.reply({ id: 1, ok: true, kind: 'exec', rows: [[1]], changes: 1 });
+    // D8: exec() resolves rows AND changes (db.changes()), not just rows.
+    expect(await a).toEqual({ rows: [[1]], changes: 1 });
+    expect(await b).toEqual({ rows: [[2]], changes: 0 });
+  });
+
+  it('flush() posts a flush request and resolves once the worker acks it', async () => {
+    const w = new FakeWorker();
+    const rpc = createRpc(w as unknown as Worker);
+    const p = rpc.flush();
+    expect(w.posted).toEqual([{ id: 1, kind: 'flush' }]);
+    w.reply({ id: 1, ok: true, kind: 'flush' });
+    await expect(p).resolves.toBeUndefined();
   });
 
   it('rejects when the worker reports an error', async () => {
