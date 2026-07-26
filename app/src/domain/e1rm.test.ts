@@ -50,14 +50,23 @@ describe('setE1rm', () => {
   });
 
   it('agrees on effective reps: 5 reps @ RIR 0 equals 3 reps @ RIR 2 (both 5 effective reps)', () => {
-    const expected = 100 * (1 + (5 - 1) / 30);
+    // Published Epley on effective reps: 100 * (1 + 5/30) = 116.67, not a shifted
+    // variant. Pinned against the literal formula so a future "smoothing" of the
+    // curve cannot silently move every estimate while still calling itself Epley.
+    const expected = 100 * (1 + 5 / 30);
+    expect(expected).toBeCloseTo(116.667, 3);
     expect(setE1rm(100, 5, 0)).toBe(expected);
     expect(setE1rm(100, 3, 2)).toBe(expected);
   });
 
   it('a true single is its own 1RM exactly', () => {
+    // A performed single is measured, not estimated, so it is returned exactly
+    // rather than run through Epley (which would report 103.3 for a 100kg single).
     expect(setE1rm(100, 1, 0)).toBe(100);
     expect(setE1rm(62.5, 1, 0)).toBe(62.5);
+    // ...and the seam is deliberate: two effective reps is an estimate again.
+    expect(setE1rm(100, 2, 0)).toBe(100 * (1 + 2 / 30));
+    expect(setE1rm(100, 1, 1)).toBe(100 * (1 + 2 / 30));
   });
 
   it('rejects zero or negative weight', () => {
