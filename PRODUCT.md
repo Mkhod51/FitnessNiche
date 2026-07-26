@@ -65,7 +65,7 @@ Positioned explicitly *against* the confident-directive content ecosystem — wh
 
 ## Brand Commitments
 
-**The name is an open decision.** `REQUIREMENTS.md` records "Working name: TBD" and the developer confirmed on 2026-07-25 that the shipped title "Evidence-graded training log" is a scaffold placeholder. Do not treat it as brand truth, build a wordmark from it, or design a lockup around it. No logo, wordmark, palette, or typographic commitment exists.
+**The name is confirmed: MyoStat**, decided by the developer on 2026-07-26. It replaces the M0 scaffold placeholder "Evidence-graded training log" everywhere that string functioned as the product's name (browser tab title, PWA install name, package name) — see `00-meta/decision-log.md` for the full list of what changed. **No logo, wordmark, palette, or typographic lockup exists yet** — the name is settled as a word, not as a visual identity. Do not design a lockup, choose a brand typeface, or commit brand colours from this alone; that remains a separate, deliberate design decision if and when the developer asks for one.
 
 **The one confirmed voice constraint is mechanical, not stylistic:** advice phrasing is generated from the evidence grade via a fixed map, so the product's register is set by the grade rather than chosen per sentence. Everything the app says about certainty must be traceable to a stored grade.
 

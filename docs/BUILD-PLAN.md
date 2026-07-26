@@ -1,4 +1,4 @@
-# Master Build Plan — Evidence-Graded Lifting & Nutrition PWA
+# Master Build Plan — MyoStat (Evidence-Graded Lifting & Nutrition PWA)
 
 > **For agentic workers:** This is the top-level plan. Before coding each milestone, the orchestrator MUST expand it into a detailed task plan using `superpowers:writing-plans`, then execute via `superpowers:subagent-driven-development` (fresh Sonnet subagent per task, review between tasks). Milestone tasks below use checkbox syntax for tracking.
 

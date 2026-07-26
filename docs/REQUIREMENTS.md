@@ -1,7 +1,7 @@
 # Requirements — Evidence-Graded Lifting & Nutrition App
 
 **Status:** v1 requirements, derived from three phases of research/ideation in this repo. Source of truth for the build.
-**Working name:** TBD. **Owner:** solo developer (UK). **Target:** demonstrable portfolio v1 in ~2–3 months.
+**Name:** MyoStat (confirmed 2026-07-26; was "Working name: TBD"). **Owner:** solo developer (UK). **Target:** demonstrable portfolio v1 in ~2–3 months.
 **Build tool:** Claude Code.
 
 Requirement IDs are stable references (FR-#, NFR-#, DM-#, GR-#). Evidence grades [A]–[D] follow [00-meta/evidence-standards.md](00-meta/evidence-standards.md). Rationale links point at the research that justifies each block — no requirement here is justified by "users would like it."

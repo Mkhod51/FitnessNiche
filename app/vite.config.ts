@@ -17,9 +17,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Evidence-graded training log',
-        short_name: 'Training log',
-        description: 'Lift and nutrition tracking with graded, cited evidence.',
+        name: 'MyoStat',
+        short_name: 'MyoStat',
+        description: 'MyoStat — lift and nutrition tracking with graded, cited evidence.',
         theme_color: '#0a0a0a',
         background_color: '#0a0a0a',
         display: 'standalone',
