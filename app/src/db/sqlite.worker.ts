@@ -9,10 +9,19 @@ let sqlite3Static: Sqlite3Static | null = null;
 
 // D6: OPFS SAHPool is single-connection — a second tab can't get the pool
 // lock and falls back to `:memory:`, which has no persistence of its own.
-// This debounce exports the whole (in-memory) database to IndexedDB after a
-// mutating write so that fallback mode survives a reload, without paying the
-// O(db) cost of `sqlite3_js_db_export` on every single insert.
-const SNAPSHOT_DEBOUNCE_MS = 250;
+// After a mutating write this exports the whole (in-memory) database to
+// IndexedDB so fallback mode survives a reload.
+//
+// The coalescing window is 0, not a "safe" 250ms, and that is deliberate.
+// Measured in a real second tab against the seeded database, a full
+// sqlite3_js_db_export plus the IndexedDB put costs 0.5-1.0 ms. The real usage
+// scene writes roughly one set every 90 seconds, so a longer window saves
+// nothing measurable and buys a window in which closing the tab loses the write
+// this whole mechanism exists to protect. A 0ms timeout still coalesces a burst
+// of statements issued in one synchronous turn (a multi-insert transaction),
+// which is the only batching that was ever worth having.
+// Revisit only if the database grows enough for that 0.5 ms to move.
+const SNAPSHOT_DEBOUNCE_MS = 0;
 let snapshotTimer: ReturnType<typeof setTimeout> | null = null;
 
 function exportSnapshot(): Uint8Array {
