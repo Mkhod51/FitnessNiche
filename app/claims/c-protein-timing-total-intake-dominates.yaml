@@ -1,0 +1,43 @@
+id: c-protein-timing-total-intake-dominates
+statement: >-
+  Once total daily protein is accounted for, when you eat it around training
+  stops predicting muscle or strength gains
+grade: A
+status: contested
+domain: protein-timing
+predicates:
+  "!=":
+    - var: proteinPerKg7d
+    - null
+clusterId: protein-timing
+phrasingKey: protein-timing-total-dominates
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-timing-total-schoenfeld
+    claimId: c-protein-timing-total-intake-dominates
+    doi: 10.1186/1550-2783-10-53
+    authors: Schoenfeld BJ, Aragon AA, Krieger JW
+    year: 2013
+    journal: Journal of the International Society of Sports Nutrition
+    n: 525
+    population: unstated
+    effectSize: >-
+      A simple pooled analysis showed a small-to-moderate effect of timing on
+      hypertrophy, but in the full meta-regression controlling for covariates no
+      significant difference remained for either strength or hypertrophy. Total
+      protein intake was the strongest predictor of effect-size magnitude.
+    ci: null
+    figures:
+      - label: subjects in the hypertrophy analysis
+        value: 525
+      - label: studies in the hypertrophy analysis
+        value: 23
+      - label: effect sizes in the hypertrophy analysis
+        value: 132
+      - label: subjects in the strength analysis
+        value: 478
+      - label: studies in the strength analysis
+        value: 20
+    quote: >-
+      total protein intake was the strongest predictor of ES magnitude

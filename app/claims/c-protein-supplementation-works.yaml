@@ -1,0 +1,42 @@
+id: c-protein-supplementation-works
+statement: >-
+  Adding protein to an otherwise adequate diet produces a real but modest
+  increase in lean mass and strength while you are lifting
+grade: A
+status: settled
+domain: protein-dose
+predicates: null
+clusterId: null
+phrasingKey: protein-supplementation
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-protein-supp-morton
+    claimId: c-protein-supplementation-works
+    doi: 10.1136/bjsports-2017-097608
+    authors: Morton RW, Murphy KT, McKellar SR, Schoenfeld BJ, Henselmans M, Helms E, Aragon AA, Devries MC, Banfield L, Krieger JW, Phillips SM
+    year: 2018
+    journal: British Journal of Sports Medicine
+    n: 1863
+    population: mixed
+    effectSize: >-
+      Fat-free mass +0.30 kg and one-repetition maximum +2.49 kg over the
+      no-supplement condition, pooled across 49 randomised controlled trials.
+    ci: >-
+      Fat-free mass 95% CI 0.09 to 0.52 kg; 1RM strength 95% CI 0.64 to 4.33 kg;
+      muscle fibre cross-sectional area 95% CI 51 to 570 um2
+    figures:
+      - label: randomised trials pooled
+        value: 49
+      - label: participants
+        value: 1863
+      - label: added fat-free mass
+        value: 0.3
+        unit: kg
+      - label: added 1RM strength
+        value: 2.49
+        unit: kg
+      - label: added muscle fibre cross-sectional area
+        value: 310
+        unit: um2
+    quote: null

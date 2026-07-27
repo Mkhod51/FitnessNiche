@@ -1,0 +1,37 @@
+id: c-protein-helps-trained-more
+statement: >-
+  Training experience increases how much extra protein helps, while getting
+  older reduces it
+grade: B
+status: settled
+domain: protein-dose
+predicates: null
+clusterId: null
+phrasingKey: protein-trained-benefit
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-protein-trained-morton
+    claimId: c-protein-helps-trained-more
+    doi: 10.1136/bjsports-2017-097608
+    authors: Morton RW, Murphy KT, McKellar SR, Schoenfeld BJ, Henselmans M, Helms E, Aragon AA, Devries MC, Banfield L, Krieger JW, Phillips SM
+    year: 2018
+    journal: British Journal of Sports Medicine
+    n: 1863
+    population: mixed
+    effectSize: >-
+      Supplementation was more effective in resistance-trained participants by
+      0.75 kg of fat-free mass (p = 0.03); the benefit fell by 0.01 kg per year
+      of age (p = 0.002). Both are covariate subgroup findings within one
+      meta-regression, not separately replicated.
+    ci: >-
+      Resistance-trained advantage 95% CI 0.09 to 1.40 kg; effect of age 95% CI
+      -0.02 to -0.00 kg per year
+    figures:
+      - label: extra fat-free mass in resistance-trained participants
+        value: 0.75
+        unit: kg
+      - label: fat-free mass benefit lost per year of age
+        value: -0.01
+        unit: kg/year
+    quote: null

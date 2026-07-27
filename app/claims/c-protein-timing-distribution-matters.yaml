@@ -1,0 +1,64 @@
+id: c-protein-timing-distribution-matters
+statement: >-
+  Spreading protein into 20-40 g doses every three to four hours, including
+  around training, may still add something total intake alone does not
+grade: C
+status: contested
+domain: protein-timing
+predicates: null
+clusterId: protein-timing
+phrasingKey: protein-timing-distribution
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-timing-distribution-issn
+    claimId: c-protein-timing-distribution-matters
+    doi: 10.1186/s12970-017-0189-4
+    authors: Kerksick CM, Arent S, Schoenfeld BJ, Stout JR, Campbell B, Wilborn CD, Taylor L, Kalman D, Smith-Ryan AE, Kreider RB, and others
+    year: 2017
+    journal: Journal of the International Society of Sports Nutrition
+    n: null
+    population: mixed
+    effectSize: >-
+      No pooled effect estimate. This is an expert position stand reasoning from
+      acute muscle-protein-synthesis measurements, not from chronic hypertrophy
+      trials. It recommends 20-40 g doses (0.25-0.40 g/kg) every three to four
+      hours, and notes post-exercise protein raises synthesis rates. The same
+      document names meeting total daily intake as the primary emphasis.
+    ci: null
+    figures:
+      - label: recommended protein dose per feeding, lower bound
+        value: 20
+        unit: g
+      - label: recommended protein dose per feeding, upper bound
+        value: 40
+        unit: g
+      - label: recommended hours between feedings, lower bound
+        value: 3
+        unit: h
+      - label: recommended hours between feedings, upper bound
+        value: 4
+        unit: h
+    quote: >-
+      Post-exercise ingestion (immediately to 2-h post) of high-quality protein
+      sources stimulates robust increases in MPS
+  - id: cit-timing-distribution-pooled
+    claimId: c-protein-timing-distribution-matters
+    doi: 10.1186/1550-2783-10-53
+    authors: Schoenfeld BJ, Aragon AA, Krieger JW
+    year: 2013
+    journal: Journal of the International Society of Sports Nutrition
+    n: 525
+    population: unstated
+    effectSize: >-
+      Before covariates were controlled, the same meta-analysis that refuted
+      timing did find a small-to-moderate pooled effect on hypertrophy. That
+      uncontrolled estimate is the strongest quantitative footing this side has,
+      and its authors attribute it to total protein intake rather than timing.
+    ci: null
+    figures:
+      - label: subjects in the hypertrophy analysis
+        value: 525
+      - label: studies in the hypertrophy analysis
+        value: 23
+    quote: null

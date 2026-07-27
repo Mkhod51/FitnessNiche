@@ -1,0 +1,42 @@
+id: c-protein-dose-plateau
+statement: >-
+  Past roughly 1.6 g of protein per kg of bodyweight a day, more protein stops
+  adding measurable lean mass
+grade: B
+status: settled
+domain: protein-dose
+predicates:
+  and:
+    - "!=":
+        - var: proteinPerKg7d
+        - null
+    - "<":
+        - var: proteinPerKg7d
+        - 1.6
+clusterId: null
+phrasingKey: protein-dose-plateau
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-protein-plateau-morton
+    claimId: c-protein-dose-plateau
+    doi: 10.1136/bjsports-2017-097608
+    authors: Morton RW, Murphy KT, McKellar SR, Schoenfeld BJ, Henselmans M, Helms E, Aragon AA, Devries MC, Banfield L, Krieger JW, Phillips SM
+    year: 2018
+    journal: British Journal of Sports Medicine
+    n: 1863
+    population: mixed
+    effectSize: >-
+      Two-phase break-point analysis placed the plateau at a total intake of
+      1.62 g/kg/day, beyond which supplementation produced no further gain in
+      fat-free mass.
+    ci: null
+    figures:
+      - label: intake where added protein stops helping
+        value: 1.62
+        unit: g/kg/day
+      - label: randomised trials pooled
+        value: 49
+      - label: participants
+        value: 1863
+    quote: null
