@@ -74,12 +74,15 @@ null — do not fill the blank with a plausible-sounding guess.
   field standing between a claim and being unverifiable, so it's validated
   against a DOI-shaped regex, not just "any string".
 - **`authors`**, **`year`**, **`journal`** — bibliographic fields, taken
-  directly from the paper. **`year` is whatever CrossRef registers as the
-  publication year**, which is not always the year printed on the journal
-  issue: a paper published online in December 2025 often carries a February
-  2026 issue date. CrossRef is the DOI registry and the thing we verify
-  against, so it is the tiebreaker. Pick one authority and stay consistent
-  rather than deciding case by case.
+  directly from the paper. **`year` is the journal issue year — the version
+  of record, as PubMed indexes it — not CrossRef's registered date.** The
+  two disagree often, because CrossRef registers the online-first date: the
+  protein-dose meta-analysis is registered 2017 but is universally cited as
+  Morton 2018, and the volume/frequency meta-regression is registered 2025
+  against a February 2026 issue. Use the year a reader will see when they
+  look the paper up, or the citation we render won't match the one they
+  find. CrossRef remains the authority for whether the DOI *resolves* — it
+  is just not the authority for how the paper is cited.
 - **`n`** — sample size, as a positive integer, or `null` if the source
   didn't state one you could read. Never estimate n from a description
   like "a large cohort".
