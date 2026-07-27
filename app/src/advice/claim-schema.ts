@@ -1,7 +1,14 @@
 import { z } from 'zod';
 
 const doi = z.string().regex(/^10\.\d{4,9}\/\S+$/, 'must be a bare DOI, e.g. 10.1080/02640414.2016.1210197');
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be an ISO date, YYYY-MM-DD');
+// regex only checks shape (2026-13-45 would pass); FR-CLAIM-4 needs a date a human
+// actually reviewed against, so round-trip through Date.UTC to catch calendar nonsense
+// (month 13, Feb 30, non-leap Feb 29) — it already knows how many days are in each month.
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be an ISO date, YYYY-MM-DD').refine((s) => {
+  const [y, m, d] = s.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+}, 'must be a real calendar date');
 
 const figureSchema = z.object({
   label: z.string().min(1),
@@ -36,7 +43,7 @@ export const claimSchema = z
     predicates: z.record(z.string(), z.unknown()).nullable(),
     clusterId: z.string().min(1).nullable(),
     phrasingKey: z.string().min(1),
-    supersededBy: z.string().nullable(),
+    supersededBy: z.string().min(1).nullable(),
     lastReviewed: isoDate,
     // FR-ADV-1: a claim with no citation is not a claim.
     citations: z.array(citationSchema).min(1),
