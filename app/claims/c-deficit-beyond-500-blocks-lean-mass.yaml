@@ -1,0 +1,41 @@
+id: c-deficit-beyond-500-blocks-lean-mass
+statement: >-
+  Around a 500 kcal per day deficit is where gaining lean mass stops being
+  realistic, so a larger deficit trades muscle for speed
+grade: B
+status: settled
+domain: energy-balance
+predicates:
+  and:
+    - "==":
+        - var: goal
+        - cut
+    - ">=":
+        - var: deficitWeeks
+        - 4
+clusterId: null
+phrasingKey: deficit-500-threshold
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-deficit-500-murphy
+    claimId: c-deficit-beyond-500-blocks-lean-mass
+    doi: 10.1111/sms.14075
+    authors: Murphy C, Koehler K
+    year: 2022
+    journal: Scandinavian Journal of Medicine and Science in Sports
+    n: null
+    population: unstated
+    effectSize: >-
+      A meta-regression across the pooled studies placed the point where lean-mass
+      gains were prevented at an energy deficit of about 500 kcal per day. This is
+      one regression estimate from one paper, and a population-level threshold
+      rather than a personal one.
+    ci: null
+    figures:
+      - label: daily deficit at which lean-mass gain was prevented
+        value: 500
+        unit: kcal/day
+    quote: >-
+      individuals performing RT to preserve LM during weight loss should avoid
+      energy deficits >500 kcal day-1

@@ -1,0 +1,50 @@
+id: c-strength-holds-through-a-deficit
+statement: >-
+  Strength appears to hold up better than muscle size does in an energy deficit,
+  though the strength comparison is a non-significant result rather than a
+  demonstrated equivalence
+grade: B
+status: settled
+domain: energy-balance
+predicates:
+  and:
+    - "==":
+        - var: goal
+        - cut
+    - ">=":
+        - var: deficitWeeks
+        - 4
+    - "==":
+        - var: e1rmTrend
+        - holding
+clusterId: null
+phrasingKey: strength-robust-to-deficit
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-strength-deficit-murphy
+    claimId: c-strength-holds-through-a-deficit
+    doi: 10.1111/sms.14075
+    authors: Murphy C, Koehler K
+    year: 2022
+    journal: Scandinavian Journal of Medicine and Science in Sports
+    n: null
+    population: unstated
+    effectSize: >-
+      Strength gains did not differ significantly between deficit and control
+      (ES -0.31, p = 0.28) in the same analysis where lean-mass gains were
+      significantly impaired, and a matched second analysis found near-identical
+      strength gains either way (0.84 in deficit versus 0.81 at maintenance).
+      Graded down deliberately: a non-significant result with a point estimate of
+      -0.31 and no reported interval is a failure to detect a difference, not
+      evidence that there is none, and it remains compatible with a real strength
+      cost this analysis was underpowered to see.
+    ci: null
+    figures:
+      - label: effect size on strength, deficit vs control
+        value: -0.31
+      - label: strength effect size while in a deficit
+        value: 0.84
+      - label: strength effect size at maintenance
+        value: 0.81
+    quote: null

@@ -5,6 +5,269 @@ import type { Claim } from '../advice/types.ts';
 
 export const CLAIMS: Claim[] = [
   {
+    "id": "c-deficit-beyond-500-blocks-lean-mass",
+    "statement": "Around a 500 kcal per day deficit is where gaining lean mass stops being realistic, so a larger deficit trades muscle for speed",
+    "grade": "B",
+    "status": "settled",
+    "domain": "energy-balance",
+    "predicates": {
+      "and": [
+        {
+          "==": [
+            {
+              "var": "goal"
+            },
+            "cut"
+          ]
+        },
+        {
+          ">=": [
+            {
+              "var": "deficitWeeks"
+            },
+            4
+          ]
+        }
+      ]
+    },
+    "clusterId": null,
+    "phrasingKey": "deficit-500-threshold",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-deficit-500-murphy",
+        "claimId": "c-deficit-beyond-500-blocks-lean-mass",
+        "doi": "10.1111/sms.14075",
+        "authors": "Murphy C, Koehler K",
+        "year": 2022,
+        "journal": "Scandinavian Journal of Medicine and Science in Sports",
+        "n": null,
+        "population": "unstated",
+        "effectSize": "A meta-regression across the pooled studies placed the point where lean-mass gains were prevented at an energy deficit of about 500 kcal per day. This is one regression estimate from one paper, and a population-level threshold rather than a personal one.",
+        "ci": null,
+        "figures": [
+          {
+            "label": "daily deficit at which lean-mass gain was prevented",
+            "value": 500,
+            "unit": "kcal/day"
+          }
+        ],
+        "quote": "individuals performing RT to preserve LM during weight loss should avoid energy deficits >500 kcal day-1"
+      }
+    ]
+  },
+  {
+    "id": "c-deficit-impairs-lean-mass",
+    "statement": "Training in an energy deficit blunts how much lean mass you gain compared with training at maintenance",
+    "grade": "A",
+    "status": "settled",
+    "domain": "energy-balance",
+    "predicates": {
+      "and": [
+        {
+          "==": [
+            {
+              "var": "goal"
+            },
+            "cut"
+          ]
+        },
+        {
+          ">=": [
+            {
+              "var": "deficitWeeks"
+            },
+            3
+          ]
+        }
+      ]
+    },
+    "clusterId": null,
+    "phrasingKey": "deficit-impairs-lean-mass",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-deficit-lean-murphy",
+        "claimId": "c-deficit-impairs-lean-mass",
+        "doi": "10.1111/sms.14075",
+        "authors": "Murphy C, Koehler K",
+        "year": 2022,
+        "journal": "Scandinavian Journal of Medicine and Science in Sports",
+        "n": null,
+        "population": "unstated",
+        "effectSize": "Lean-mass gains were impaired when resistance training was performed in an energy deficit versus a non-deficit control (ES -0.57, p = 0.02). A second, separately matched analysis agreed in direction (ES -0.11, p = 0.03, against control ES 0.20, p < 0.001).",
+        "ci": null,
+        "figures": [
+          {
+            "label": "effect size on lean mass, deficit vs control",
+            "value": -0.57
+          },
+          {
+            "label": "minimum intervention length included",
+            "value": 3,
+            "unit": "weeks"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-deloads-not-evidence-backed",
+    "statement": "Planned deload weeks are widely prescribed but barely studied, and the one controlled trial in trained lifters found they cost strength without helping muscle growth",
+    "grade": "B",
+    "status": "settled",
+    "domain": "deloads",
+    "predicates": null,
+    "clusterId": null,
+    "phrasingKey": "deloads-unsupported",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-deload-coleman",
+        "claimId": "c-deloads-not-evidence-backed",
+        "doi": "10.7717/peerj.16777",
+        "authors": "Coleman M, Burke R, Augustin F, Pinero A, Maldonado J, Fisher JP, Israetel M, Androulakis Korakakis P, Swinton P, Oberlin D, Schoenfeld BJ",
+        "year": 2024,
+        "journal": "PeerJ",
+        "n": 39,
+        "population": "trained",
+        "effectSize": "A one-week deload at the midpoint of a nine-week programme produced no appreciable difference in muscle size, local endurance or power, while the continuously-training group showed greater gains in both isometric and dynamic lower-body strength. This is a single trial of 39 people; no meta-analysis of deloading in trained lifters exists to weigh it against.",
+        "ci": null,
+        "figures": [
+          {
+            "label": "participants",
+            "value": 39
+          },
+          {
+            "label": "deload length",
+            "value": 1,
+            "unit": "week"
+          },
+          {
+            "label": "programme length",
+            "value": 9,
+            "unit": "weeks"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-failure-not-required",
+    "statement": "Taking sets to failure is not required for strength or muscle growth, and stopping short does not appear to cost you either",
+    "grade": "A",
+    "status": "settled",
+    "domain": "failure-proximity",
+    "predicates": null,
+    "clusterId": null,
+    "phrasingKey": "failure-not-required",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-failure-grgic",
+        "claimId": "c-failure-not-required",
+        "doi": "10.1016/j.jshs.2021.01.007",
+        "authors": "Grgic J, Schoenfeld BJ, Orazem J, Sabol F",
+        "year": 2022,
+        "journal": "Journal of Sport and Health Science",
+        "n": null,
+        "population": "mixed",
+        "effectSize": "No significant difference between training to failure and stopping short, for strength (ES -0.09) or hypertrophy (ES 0.22). Both confidence intervals cross zero.",
+        "ci": "Strength 95% CI -0.22 to 0.05; hypertrophy 95% CI -0.11 to 0.55",
+        "figures": [
+          {
+            "label": "studies pooled",
+            "value": 15
+          },
+          {
+            "label": "effect size, strength",
+            "value": -0.09
+          },
+          {
+            "label": "effect size, hypertrophy",
+            "value": 0.22
+          }
+        ],
+        "quote": "Training to muscle failure does not seem to be required for gains in strength and muscle size"
+      }
+    ]
+  },
+  {
+    "id": "c-failure-proximity-dose-response",
+    "statement": "Muscle growth tends to increase the closer sets are taken to failure, while strength looks much the same across a wide range of reps-in-reserve",
+    "grade": "B",
+    "status": "settled",
+    "domain": "failure-proximity",
+    "predicates": null,
+    "clusterId": null,
+    "phrasingKey": "failure-proximity-dose",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-failure-dose-robinson",
+        "claimId": "c-failure-proximity-dose-response",
+        "doi": "10.1007/s40279-024-02069-2",
+        "authors": "Robinson ZP, Pelland JC, Remmert JF, Refalo MC, Jukic I, Steele J, Zourdos MC",
+        "year": 2024,
+        "journal": "Sports Medicine",
+        "n": null,
+        "population": "mixed",
+        "effectSize": "For hypertrophy the marginal slopes for estimated reps-in-reserve were negative with intervals excluding zero; for strength the intervals contained zero. Graded down from the strength of its design because the authors report only modest model fit, estimated reps-in-reserve from study descriptions rather than measuring it, and describe the analysis as exploratory.",
+        "ci": null,
+        "figures": [],
+        "quote": "caution is warranted when interpreting the present analysis due to its exploratory nature"
+      }
+    ]
+  },
+  {
+    "id": "c-failure-small-hypertrophy-edge-when-trained",
+    "statement": "In lifters who already train, sets taken to failure show a small hypertrophy advantage that does not appear in untrained beginners",
+    "grade": "B",
+    "status": "settled",
+    "domain": "failure-proximity",
+    "predicates": null,
+    "clusterId": null,
+    "phrasingKey": "failure-trained-edge",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-failure-trained-grgic",
+        "claimId": "c-failure-small-hypertrophy-edge-when-trained",
+        "doi": "10.1016/j.jshs.2021.01.007",
+        "authors": "Grgic J, Schoenfeld BJ, Orazem J, Sabol F",
+        "year": 2022,
+        "journal": "Journal of Sport and Health Science",
+        "n": null,
+        "population": "trained",
+        "effectSize": "In the resistance-trained subgroup only, training to failure favoured hypertrophy with ES 0.15. This is a subgroup analysis inside a single meta-analysis and its interval only just clears zero, so it carries much less weight than the headline null result it sits beside.",
+        "ci": "95% CI 0.03 to 0.26",
+        "figures": [
+          {
+            "label": "effect size favouring failure, resistance-trained only",
+            "value": 0.15
+          },
+          {
+            "label": "lower bound of the confidence interval",
+            "value": 0.03
+          },
+          {
+            "label": "upper bound of the confidence interval",
+            "value": 0.26
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
     "id": "c-frequency-helps-strength",
     "statement": "Strength is the exception: spreading the same volume over more sessions does tend to improve strength, though the returns shrink",
     "grade": "B",
@@ -204,7 +467,7 @@ export const CLAIMS: Claim[] = [
   },
   {
     "id": "c-protein-supplementation-works",
-    "statement": "Adding protein to an otherwise adequate diet produces a real but modest increase in lean mass and strength while you are lifting",
+    "statement": "Supplementing protein while you lift produces a real but modest increase in lean mass and strength",
     "grade": "A",
     "status": "settled",
     "domain": "protein-dose",
@@ -379,6 +642,142 @@ export const CLAIMS: Claim[] = [
           }
         ],
         "quote": "total protein intake was the strongest predictor of ES magnitude"
+      }
+    ]
+  },
+  {
+    "id": "c-rest-at-least-60-seconds",
+    "statement": "Resting more than about a minute between sets is mildly better for growth than resting less, and past roughly 90 seconds it stops mattering",
+    "grade": "B",
+    "status": "settled",
+    "domain": "rest-intervals",
+    "predicates": null,
+    "clusterId": null,
+    "phrasingKey": "rest-interval-60s",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-rest-singer",
+        "claimId": "c-rest-at-least-60-seconds",
+        "doi": "10.3389/fspor.2024.1429789",
+        "authors": "Singer A, Wolf M, Generoso L, Arias E, Delcastillo K, Echevarria E, Martinez A, Androulakis Korakakis P, Refalo MC, Swinton PA, Schoenfeld BJ",
+        "year": 2024,
+        "journal": "Frontiers in Sports and Active Living",
+        "n": null,
+        "population": "unstated",
+        "effectSize": "Central estimates favoured longer rest for the arm (0.13) and thigh (0.17) and marginally favoured shorter rest for the whole body (-0.08). Every one of those controlled credible intervals crosses zero, so the direction is consistent but the effect is not clearly distinguishable from none.",
+        "ci": "Arm 95% CrI -0.27 to 0.51; thigh 95% CrI -0.13 to 0.43; whole body 95% CrI -0.45 to 0.29",
+        "figures": [
+          {
+            "label": "standardised mean difference, arm",
+            "value": 0.13
+          },
+          {
+            "label": "standardised mean difference, thigh",
+            "value": 0.17
+          },
+          {
+            "label": "standardised mean difference, whole body",
+            "value": -0.08
+          },
+          {
+            "label": "measurements pooled",
+            "value": 19
+          },
+          {
+            "label": "studies pooled",
+            "value": 9
+          }
+        ],
+        "quote": null
+      },
+      {
+        "id": "cit-rest-grgic",
+        "claimId": "c-rest-at-least-60-seconds",
+        "doi": "10.1080/17461391.2017.1340524",
+        "authors": "Grgic J, Lazinica B, Mikulic P, Krieger JW, Schoenfeld BJ",
+        "year": 2017,
+        "journal": "European Journal of Sport Science",
+        "n": null,
+        "population": "mixed",
+        "effectSize": "A qualitative systematic review of six studies with no pooled estimate. It reports that both short and long rest may work, with a possible advantage to longer rest in trained participants, and explicitly calls the evidence base sparse.",
+        "ci": null,
+        "figures": [
+          {
+            "label": "studies reviewed",
+            "value": 6
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-strength-holds-through-a-deficit",
+    "statement": "Strength appears to hold up better than muscle size does in an energy deficit, though the strength comparison is a non-significant result rather than a demonstrated equivalence",
+    "grade": "B",
+    "status": "settled",
+    "domain": "energy-balance",
+    "predicates": {
+      "and": [
+        {
+          "==": [
+            {
+              "var": "goal"
+            },
+            "cut"
+          ]
+        },
+        {
+          ">=": [
+            {
+              "var": "deficitWeeks"
+            },
+            4
+          ]
+        },
+        {
+          "==": [
+            {
+              "var": "e1rmTrend"
+            },
+            "holding"
+          ]
+        }
+      ]
+    },
+    "clusterId": null,
+    "phrasingKey": "strength-robust-to-deficit",
+    "supersededBy": null,
+    "lastReviewed": "2026-07-25",
+    "citations": [
+      {
+        "id": "cit-strength-deficit-murphy",
+        "claimId": "c-strength-holds-through-a-deficit",
+        "doi": "10.1111/sms.14075",
+        "authors": "Murphy C, Koehler K",
+        "year": 2022,
+        "journal": "Scandinavian Journal of Medicine and Science in Sports",
+        "n": null,
+        "population": "unstated",
+        "effectSize": "Strength gains did not differ significantly between deficit and control (ES -0.31, p = 0.28) in the same analysis where lean-mass gains were significantly impaired, and a matched second analysis found near-identical strength gains either way (0.84 in deficit versus 0.81 at maintenance). Graded down deliberately: a non-significant result with a point estimate of -0.31 and no reported interval is a failure to detect a difference, not evidence that there is none, and it remains compatible with a real strength cost this analysis was underpowered to see.",
+        "ci": null,
+        "figures": [
+          {
+            "label": "effect size on strength, deficit vs control",
+            "value": -0.31
+          },
+          {
+            "label": "strength effect size while in a deficit",
+            "value": 0.84
+          },
+          {
+            "label": "strength effect size at maintenance",
+            "value": 0.81
+          }
+        ],
+        "quote": null
       }
     ]
   },

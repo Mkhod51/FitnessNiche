@@ -1,0 +1,41 @@
+id: c-deficit-impairs-lean-mass
+statement: >-
+  Training in an energy deficit blunts how much lean mass you gain compared with
+  training at maintenance
+grade: A
+status: settled
+domain: energy-balance
+predicates:
+  and:
+    - "==":
+        - var: goal
+        - cut
+    - ">=":
+        - var: deficitWeeks
+        - 3
+clusterId: null
+phrasingKey: deficit-impairs-lean-mass
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-deficit-lean-murphy
+    claimId: c-deficit-impairs-lean-mass
+    doi: 10.1111/sms.14075
+    authors: Murphy C, Koehler K
+    year: 2022
+    journal: Scandinavian Journal of Medicine and Science in Sports
+    n: null
+    population: unstated
+    effectSize: >-
+      Lean-mass gains were impaired when resistance training was performed in an
+      energy deficit versus a non-deficit control (ES -0.57, p = 0.02). A second,
+      separately matched analysis agreed in direction (ES -0.11, p = 0.03,
+      against control ES 0.20, p < 0.001).
+    ci: null
+    figures:
+      - label: effect size on lean mass, deficit vs control
+        value: -0.57
+      - label: minimum intervention length included
+        value: 3
+        unit: weeks
+    quote: null

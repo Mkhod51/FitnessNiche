@@ -1,0 +1,59 @@
+id: c-rest-at-least-60-seconds
+statement: >-
+  Resting more than about a minute between sets is mildly better for growth than
+  resting less, and past roughly 90 seconds it stops mattering
+grade: B
+status: settled
+domain: rest-intervals
+predicates: null
+clusterId: null
+phrasingKey: rest-interval-60s
+supersededBy: null
+lastReviewed: 2026-07-25
+citations:
+  - id: cit-rest-singer
+    claimId: c-rest-at-least-60-seconds
+    doi: 10.3389/fspor.2024.1429789
+    authors: Singer A, Wolf M, Generoso L, Arias E, Delcastillo K, Echevarria E, Martinez A, Androulakis Korakakis P, Refalo MC, Swinton PA, Schoenfeld BJ
+    year: 2024
+    journal: Frontiers in Sports and Active Living
+    n: null
+    population: unstated
+    effectSize: >-
+      Central estimates favoured longer rest for the arm (0.13) and thigh (0.17)
+      and marginally favoured shorter rest for the whole body (-0.08). Every one
+      of those controlled credible intervals crosses zero, so the direction is
+      consistent but the effect is not clearly distinguishable from none.
+    ci: >-
+      Arm 95% CrI -0.27 to 0.51; thigh 95% CrI -0.13 to 0.43; whole body 95% CrI
+      -0.45 to 0.29
+    figures:
+      - label: standardised mean difference, arm
+        value: 0.13
+      - label: standardised mean difference, thigh
+        value: 0.17
+      - label: standardised mean difference, whole body
+        value: -0.08
+      - label: measurements pooled
+        value: 19
+      - label: studies pooled
+        value: 9
+    quote: null
+  - id: cit-rest-grgic
+    claimId: c-rest-at-least-60-seconds
+    doi: 10.1080/17461391.2017.1340524
+    authors: Grgic J, Lazinica B, Mikulic P, Krieger JW, Schoenfeld BJ
+    year: 2017
+    journal: European Journal of Sport Science
+    n: null
+    population: mixed
+    effectSize: >-
+      A qualitative systematic review of six studies with no pooled estimate. It
+      reports that both short and long rest may work, with a possible advantage to
+      longer rest in trained participants, and explicitly calls the evidence base
+      sparse.
+    ci: null
+    figures:
+      - label: studies reviewed
+        value: 6
+    quote: null
