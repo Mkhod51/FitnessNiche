@@ -758,6 +758,15 @@ describe('renderHeadline', () => {
     }
   });
 
+  it('reads as a grammatical sentence rather than a statement bolted to a fragment', () => {
+    // Guards the join, not the vocabulary: 'Statement — is well-supported.' is what
+    // you get if a verb keeps a leading 'is', and it reads as broken English on
+    // every card in the feed.
+    expect(renderHeadline(claimWith('A'))).toBe(
+      'Training more produces more growth — well-supported.',
+    );
+  });
+
   it('includes the claim statement verbatim', () => {
     expect(renderHeadline(claimWith('A'))).toContain('Training more produces more growth');
   });
@@ -809,22 +818,22 @@ export interface GradeLanguage {
 
 export const GRADE_LANGUAGE = {
   A: {
-    verb: 'is well-supported',
+    verb: 'well-supported',
     confidence: 'Meta-analysis or replicated trials point the same way.',
     chipLabel: 'well-supported',
   },
   B: {
-    verb: 'is supported, with some uncertainty',
+    verb: 'supported, with real uncertainty',
     confidence: 'One good study, or consistent observational evidence. Not yet replicated.',
     chipLabel: 'some uncertainty',
   },
   C: {
-    verb: 'is suggested, on limited evidence',
+    verb: 'suggested, on limited evidence',
     confidence: 'Mechanism, small studies, or expert consensus without trial evidence behind it.',
     chipLabel: 'limited evidence',
   },
   D: {
-    verb: 'is anecdotal',
+    verb: 'anecdotal',
     confidence: 'Industry material or individual reports. Treat as a starting point, not a finding.',
     chipLabel: 'anecdotal',
   },
