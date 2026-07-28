@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactElement } from 'react';
 import { ConsentGate } from '../onboarding/ConsentGate';
 import { getWeightHistory, logWeight, type WeightReading } from '../../db/weights';
 
-const INPUT_CLASS = 'mt-1 min-h-[44px] w-full border border-rule bg-paper px-3 font-mono text-[16px] text-ink';
+const INPUT_CLASS = 'mt-1 min-h-[44px] w-full border border-rule bg-paper px-3 font-figure tabular-nums text-[16px] text-ink';
 const LABEL_CLASS = 'block font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 
 /**
@@ -81,7 +81,7 @@ function LoggingSurface(): ReactElement {
                 <span className="font-serif text-[13px] text-ink-soft">
                   {new Date(r.measuredAt).toLocaleDateString()}
                 </span>
-                <span className="font-mono text-[13px] text-ink">{r.valueKg}kg</span>
+                <span className="font-figure tabular-nums text-[13px] text-ink">{r.valueKg}kg</span>
               </li>
             ))}
           </ul>

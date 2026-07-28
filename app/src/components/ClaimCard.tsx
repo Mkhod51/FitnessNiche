@@ -28,7 +28,7 @@ function SourceLine({ citation }: { citation: Citation }): ReactElement {
       {citation.n !== null && (
         <>
           {' '}
-          &middot; <span className="font-mono not-italic">n={citation.n}</span>
+          &middot; <span className="font-figure tabular-nums not-italic">n={citation.n}</span>
         </>
       )}
     </p>

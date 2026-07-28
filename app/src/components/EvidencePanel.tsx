@@ -20,7 +20,7 @@ function CitationBlock({ citation }: { citation: Citation }): ReactElement {
         href={doiUrl}
         target="_blank"
         rel="noreferrer"
-        className="mt-1 inline-flex min-h-[44px] items-center font-mono text-[11px] text-ink-soft underline"
+        className="mt-1 inline-flex min-h-[44px] items-center font-sans text-[11px] text-ink-soft underline"
       >
         {doiUrl}
       </a>
@@ -59,7 +59,7 @@ export function EvidencePanel({ claim }: { claim: Claim }): ReactElement {
         {language.confidence}
       </p>
 
-      <p data-testid="evidence-last-reviewed" className="mt-2 font-mono text-[9px] uppercase tracking-[0.12em] text-ink-faint">
+      <p data-testid="evidence-last-reviewed" className="mt-2 font-sans text-[9px] uppercase tracking-[0.12em] text-ink-faint">
         last reviewed {claim.lastReviewed}
       </p>
 
