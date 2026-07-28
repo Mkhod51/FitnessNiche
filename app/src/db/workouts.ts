@@ -78,6 +78,38 @@ export async function finishWorkout(id: string, now: Date = new Date()): Promise
   await db.update(workouts).set({ finishedAt: nowIso, updatedAt: nowIso }).where(eq(workouts.id, id)).run();
 }
 
+/** Names a session. Separate from finishing, so a session can be named while it runs. */
+export async function renameWorkout(id: string, name: string, now: Date = new Date()): Promise<void> {
+  const db = getDrizzle();
+  await db
+    .update(workouts)
+    .set({ name: name.trim() || null, updatedAt: now.toISOString() })
+    .where(eq(workouts.id, id))
+    .run();
+}
+
+/**
+ * The exercises a past session contained, in the order they were first worked.
+ *
+ * This is what "pick up a previous session" actually needs. Carrying only the
+ * name across would leave the user re-adding the same five exercises by hand,
+ * which is the friction the affordance exists to remove.
+ *
+ * It reads a workout that genuinely happened rather than a saved template —
+ * NG3 rules out programme-template authoring for v1, and this stays the right
+ * side of that line because there is nothing to author.
+ */
+export async function getWorkoutExerciseIds(workoutId: string): Promise<string[]> {
+  const rows = await getSetsForWorkout(workoutId);
+  const order: string[] = [];
+  [...rows]
+    .sort((a, b) => a.performedAt.localeCompare(b.performedAt))
+    .forEach((s) => {
+      if (!order.includes(s.exerciseId)) order.push(s.exerciseId);
+    });
+  return order;
+}
+
 /**
  * Finished sessions, most recent first — the "repeat a previous session" list.
  * Excludes the open one, which the caller resumes rather than repeats.
