@@ -33,7 +33,7 @@
 - **GR-3:** figures re-plotted from extracted numbers; never embed publisher figure images; no bulk ingestion of proprietary tables.
 - **GR-4:** no individualized MEV/MRV; no phone-camera velocity autoregulation; deloads never dressed as evidence-backed.
 - **FR-SIG-1:** e1RM = regression over many points; only sets with RIR ≤ 3 and reps ≤ 10 qualify; always shown with a confidence band; noise-floor honesty (FR-SIG-2).
-- **FR-LOG-3:** approximate logging is the default path; gram precision optional depth.
+- **FR-LOG-3:** gram entry is the primary control, with a serving/portion selector beside it; quick-add, recents and barcode stay first-class. *(Amended 2026-07-28 — see REQUIREMENTS.md FR-LOG-3 for the evidence traded and the reversal trigger.)*
 - **NFR-1/2:** offline-first, append-log + LWW sync, **no CRDTs/OT**.
 - **NFR-4/GR-5:** explicit separate health-data consent before logging; export + delete; on-device by default.
 - Evidence grading per [00-meta/evidence-standards.md](00-meta/evidence-standards.md); claim curation quality per FR-CLAIM-5.
