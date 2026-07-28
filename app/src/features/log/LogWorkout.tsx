@@ -8,7 +8,7 @@ import {
   getRecentWorkouts,
   getLastSetForExercise,
   getOpenSessionSets,
-  getWorkoutExerciseIds,
+  getWorkoutTemplate,
   renameWorkout,
   logSet,
   type Workout,
@@ -165,15 +165,37 @@ function LoggingSurface(): ReactElement {
 
   async function handleStart(name: string | null, repeatOf?: string) {
     const created = await startWorkout(name);
-    // "Pick up a previous session" means the exercises come back too. Carrying
-    // only the name would leave the user re-adding the same lifts by hand,
-    // which is the friction the affordance exists to remove.
-    const carried = repeatOf ? await getWorkoutExerciseIds(repeatOf) : [];
+
+    // "Pick up a previous session" lays last time's session out again: the same
+    // exercises, the same number of rows, pre-filled with the weights and reps
+    // you actually did, all UNTICKED. You are about to repeat the workout, not
+    // copy the record of it — so nothing is logged until you tick it.
+    const template = repeatOf ? await getWorkoutTemplate(repeatOf) : [];
+
+    const carriedPending: PendingByExercise = {};
+    const carriedDefaults: Record<string, { weight: string; reps: string }> = {};
+    for (const group of template) {
+      carriedPending[group.exerciseId] = group.sets.map((t) => ({
+        key: newKey(),
+        weight: String(t.weightKg),
+        reps: String(t.reps),
+        rir: null, // RIR describes how a set felt; last week's cannot speak for today's
+        setType: t.setType,
+      }));
+      // Defaults for any row added later come from the last WORKING set, not
+      // the last set full stop — otherwise adding a set after a warm-up would
+      // pre-fill the warm-up's weight.
+      const lastWorking = [...group.sets].reverse().find((t) => t.setType === 'working') ?? group.sets.at(-1);
+      carriedDefaults[group.exerciseId] = lastWorking
+        ? { weight: String(lastWorking.weightKg), reps: String(lastWorking.reps) }
+        : { weight: '', reps: '' };
+    }
+
     setWorkout(created);
     setLogged([]);
-    setExtras(carried);
-    setPending({});
-    setDefaults({});
+    setExtras(template.map((g) => g.exerciseId));
+    setPending(carriedPending);
+    setDefaults(carriedDefaults);
   }
 
   function openFinish() {
