@@ -9,12 +9,14 @@ import {
   getLastSetForExercise,
   getOpenSessionSets,
   getWorkoutTemplate,
+  getRecentExerciseIds,
   renameWorkout,
   logSet,
   type Workout,
   type LoggedSet,
 } from '../../db/workouts';
 import { setE1rm } from '../../domain/e1rm';
+import { ExercisePicker } from '../exercises/ExercisePicker';
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 const FIGURE = 'font-figure tabular-nums';
@@ -78,6 +80,7 @@ function LoggingSurface(): ReactElement {
   const [defaults, setDefaults] = useState<Record<string, { weight: string; reps: string }>>({});
   const [rirFor, setRirFor] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
+  const [recentExercises, setRecentExercises] = useState<string[]>([]);
   const [finishing, setFinishing] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [now, setNow] = useState(() => Date.now());
@@ -91,6 +94,7 @@ function LoggingSurface(): ReactElement {
       setWorkout(open ?? null);
       if (open) setLogged(await getOpenSessionSets());
       else setRecent(await getRecentWorkouts(5));
+      setRecentExercises(await getRecentExerciseIds(6));
     })();
     return () => {
       off = true;
@@ -133,8 +137,10 @@ function LoggingSurface(): ReactElement {
         if (off) return;
         const d = { weight: last ? String(last.weightKg) : '', reps: last ? String(last.reps) : '' };
         setDefaults((prev) => (prev[exId] ? prev : { ...prev, [exId]: d }));
+        // Seed one open row only when the exercise has nothing at all — freshly
+        // added, nothing logged. Never top the queue back up afterwards.
         setPending((prev) =>
-          prev[exId]?.length
+          prev[exId] !== undefined
             ? prev
             : { ...prev, [exId]: [{ key: newKey(), ...d, rir: null, setType: 'working' }] },
         );
@@ -234,11 +240,14 @@ function LoggingSurface(): ReactElement {
       });
       setLogged((prev) => [...prev, created]);
       setRirFor(null);
-      // Only this row leaves. Any other rows you queued stay exactly as typed.
-      setPending((prev) => {
-        const rest = (prev[exId] ?? []).filter((r) => r.key !== row.key);
-        return { ...prev, [exId]: rest.length ? rest : [{ key: newKey(), weight: row.weight, reps: row.reps, rir: null, setType: 'working' }] };
-      });
+      // Only this row leaves, and nothing replaces it. Rows are added
+      // deliberately with "+ Add set"; conjuring a fresh one after every tick
+      // meant the table never emptied and you could not tell what was left to
+      // do from what the app had invented.
+      setPending((prev) => ({
+        ...prev,
+        [exId]: (prev[exId] ?? []).filter((r) => r.key !== row.key),
+      }));
     } finally {
       setBusy(false);
     }
@@ -438,7 +447,7 @@ function LoggingSurface(): ReactElement {
                         {warm ? '—' : (s.rir ?? '–')}
                       </td>
                       <td className="border-b border-rule py-2">
-                        <span className="mx-auto flex h-[28px] w-[28px] items-center justify-center bg-ink text-paper">
+                        <span className="tick-fill mx-auto flex h-[28px] w-[28px] items-center justify-center bg-ink text-paper">
                           <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
                             <path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" strokeWidth={2} />
                           </svg>
@@ -452,7 +461,7 @@ function LoggingSurface(): ReactElement {
                   const warm = row.setType === 'warmup';
                   const number = warm ? 'W' : ++working;
                   return (
-                    <tr key={row.key}>
+                    <tr key={row.key} className="row-open">
                       <td className="border-b border-rule py-1.5">
                         {/* Tapping the set number changes the kind of set, which
                             is where Hevy puts it. Two kinds, so it toggles
@@ -573,38 +582,25 @@ function LoggingSurface(): ReactElement {
       )}
 
       <div className="px-4 pt-5">
-        {picking ? (
-          <select
-            data-testid="add-exercise-select"
-            className="min-h-[48px] w-full border border-rule-strong bg-paper px-3 font-serif text-[15px] text-ink"
-            defaultValue=""
-            onChange={(e) => {
-              const id = e.target.value;
-              if (!id) return;
-              setExtras((prev) => (prev.includes(id) ? prev : [...prev, id]));
-              setPicking(false);
-            }}
-          >
-            <option value="" disabled>
-              Choose an exercise
-            </option>
-            {SEED_EXERCISES.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <button
-            type="button"
-            data-testid="add-exercise-button"
-            onClick={() => setPicking(true)}
-            className={`min-h-[48px] w-full border border-ink font-sans text-[12px] font-semibold uppercase tracking-[0.1em] text-ink ${TAP} active:bg-paper-sunk`}
-          >
-            Add exercise
-          </button>
-        )}
+        <button
+          type="button"
+          data-testid="add-exercise-button"
+          onClick={() => setPicking(true)}
+          className={`min-h-[48px] w-full border border-ink font-sans text-[12px] font-semibold uppercase tracking-[0.1em] text-ink ${TAP} active:bg-paper-sunk`}
+        >
+          Add exercise
+        </button>
       </div>
+
+      <ExercisePicker
+        open={picking}
+        recentIds={recentExercises}
+        onClose={() => setPicking(false)}
+        onPick={(id) => {
+          setExtras((prev) => (prev.includes(id) ? prev : [...prev, id]));
+          setPicking(false);
+        }}
+      />
     </div>
   );
 }

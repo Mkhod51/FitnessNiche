@@ -30,7 +30,7 @@ test('a set logged with the network cut survives a reload', async ({ page, conte
   // is itself an offline write.
   await page.getByTestId('start-workout-button').click();
   await page.getByTestId('add-exercise-button').click();
-  await page.getByTestId('add-exercise-select').selectOption('barbell-bench-press');
+  await page.getByTestId('exercise-row').filter({ hasText: 'Barbell Bench Press' }).first().click();
 
   const weightInput = page.getByTestId('weight-input');
   const repsInput = page.getByTestId('reps-input');
