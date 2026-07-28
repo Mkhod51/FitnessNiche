@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { ConsentGate } from '../onboarding/ConsentGate';
 import { SEED_EXERCISES } from '../../db/seed-exercises';
-import { logSet, getLastSetForExercise, getTodaysSets, type LoggedSet } from '../../db/workouts';
+import { logSet, getLastSetForExercise, getOpenSessionSets, type LoggedSet } from '../../db/workouts';
 
 const INPUT_CLASS = 'mt-1 min-h-[44px] w-full border border-rule bg-paper px-3 font-figure tabular-nums text-[16px] text-ink';
 const LABEL_CLASS = 'block font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
@@ -28,10 +28,10 @@ function LoggingSurface(): ReactElement {
 
   // Load today's already-logged sets on mount, so reopening the screen (or
   // reloading mid-session) still shows the write landed — this reads via
-  // getTodaysSets, which never creates a workout on its own.
+  // getOpenSessionSets, which never creates a workout on its own.
   useEffect(() => {
     let cancelled = false;
-    getTodaysSets().then((existing) => {
+    getOpenSessionSets().then((existing) => {
       if (!cancelled) setLoggedSets(existing);
     });
     return () => {

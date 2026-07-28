@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { LogWorkout } from './LogWorkout';
 import { getUser, type User } from '../../db/user';
-import { getLastSetForExercise, getTodaysSets, logSet, type LoggedSet } from '../../db/workouts';
+import { getLastSetForExercise, getOpenSessionSets, logSet, type LoggedSet } from '../../db/workouts';
 
 vi.mock('../../db/user', async () => {
   const actual = await vi.importActual<typeof import('../../db/user')>('../../db/user');
@@ -11,12 +11,12 @@ vi.mock('../../db/user', async () => {
 
 vi.mock('../../db/workouts', async () => {
   const actual = await vi.importActual<typeof import('../../db/workouts')>('../../db/workouts');
-  return { ...actual, getLastSetForExercise: vi.fn(), getTodaysSets: vi.fn(), logSet: vi.fn() };
+  return { ...actual, getLastSetForExercise: vi.fn(), getOpenSessionSets: vi.fn(), logSet: vi.fn() };
 });
 
 const mockGetUser = vi.mocked(getUser);
 const mockGetLastSetForExercise = vi.mocked(getLastSetForExercise);
-const mockGetTodaysSets = vi.mocked(getTodaysSets);
+const mockGetTodaysSets = vi.mocked(getOpenSessionSets);
 const mockLogSet = vi.mocked(logSet);
 
 const consentedUser: User = {
