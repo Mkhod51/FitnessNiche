@@ -18,12 +18,14 @@ import { setE1rm } from '../../domain/e1rm';
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 const FIGURE = 'font-figure tabular-nums';
-// Text inputs with a decimal keypad, deliberately not type="number": the
-// spinner arrows are unhittable at thumb scale, steal width from the figure,
-// and sprout browser chrome onto a form that is meant to read as printed.
-const CELL =
-  'h-[44px] w-full border border-rule bg-paper px-2 text-right text-[16px] text-ink outline-none focus:border-ink';
 const TAP = 'transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)]';
+
+// Text inputs with a decimal keypad, deliberately not type="number": the
+// spinner arrows are unhittable at thumb scale and put browser chrome on a
+// form meant to read as printed. Width comes from the column, never from the
+// input, so nothing can spill past its cell.
+const CELL =
+  'h-[44px] w-full bg-paper text-center text-[15px] text-ink outline-none border border-rule focus:border-ink';
 
 function exerciseName(exerciseId: string): string {
   return SEED_EXERCISES.find((e) => e.id === exerciseId)?.name ?? exerciseId;
@@ -41,30 +43,40 @@ function elapsed(startedAt: string, now: number): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 }
 
-type LiveRow = {
-  exerciseId: string;
+/**
+ * A row you have not ticked yet. Deliberately UI state and not a database row:
+ * an unticked row holds nothing worth keeping, and persisting it would mean a
+ * nullable performed_at, which SQLite cannot add without rebuilding the table.
+ */
+type PendingRow = {
+  key: string;
   weight: string;
   reps: string;
   rir: number | null;
   setType: 'working' | 'warmup';
 };
 
+type PendingByExercise = Record<string, PendingRow[]>;
+
+let rowSeq = 0;
+const newKey = () => `r${++rowSeq}`;
+
 /**
  * The set-logging surface, in the Hevy idiom, inside the world DESIGN.md
  * commits to.
  *
- * The behaviour of the screen this replaces is kept deliberately: weight and
- * reps default from the previous set of the SAME exercise, the write goes
- * straight to sqlite on tick, and there is no save button to miss (FR-LOG-4).
- * What changed is the layout — a set table instead of one form per set.
+ * Behaviour kept from the screen this replaces: weight and reps default from
+ * the previous set of the SAME exercise, the write goes straight to sqlite on
+ * tick, and there is no save button to miss (FR-LOG-4).
  */
 function LoggingSurface(): ReactElement {
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [recent, setRecent] = useState<Workout[]>([]);
   const [logged, setLogged] = useState<LoggedSet[]>([]);
   const [extras, setExtras] = useState<string[]>([]);
-  const [live, setLive] = useState<LiveRow | null>(null);
-  const [rirOpen, setRirOpen] = useState(false);
+  const [pending, setPending] = useState<PendingByExercise>({});
+  const [defaults, setDefaults] = useState<Record<string, { weight: string; reps: string }>>({});
+  const [rirFor, setRirFor] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [draftName, setDraftName] = useState('');
@@ -103,45 +115,65 @@ function LoggingSurface(): ReactElement {
     extras.forEach((id) => {
       if (!order.includes(id)) order.push(id);
     });
+    Object.keys(pending).forEach((id) => {
+      if (!order.includes(id)) order.push(id);
+    });
     return order;
-  }, [logged, extras]);
+  }, [logged, extras, pending]);
 
-  const currentExerciseId = live?.exerciseId ?? groups[groups.length - 1] ?? null;
-
-  // A live row for whichever exercise is current, pre-filled from that
-  // exercise's OWN last set — never a global last set.
+  // Every exercise on screen keeps at least one open row, and each exercise
+  // carries its OWN last set as the default — never a global last set.
   useEffect(() => {
-    if (!workout || !currentExerciseId || live) return;
+    if (!workout) return;
     let off = false;
     void (async () => {
-      const last = await getLastSetForExercise(currentExerciseId);
-      if (off) return;
-      setLive({
-        exerciseId: currentExerciseId,
-        weight: last ? String(last.weightKg) : '',
-        reps: last ? String(last.reps) : '',
-        rir: null, // RIR never carries over — it describes one set, not a plan
-        setType: 'working',
-      });
+      for (const exId of groups) {
+        if (defaults[exId] !== undefined) continue;
+        const last = await getLastSetForExercise(exId);
+        if (off) return;
+        const d = { weight: last ? String(last.weightKg) : '', reps: last ? String(last.reps) : '' };
+        setDefaults((prev) => (prev[exId] ? prev : { ...prev, [exId]: d }));
+        setPending((prev) =>
+          prev[exId]?.length
+            ? prev
+            : { ...prev, [exId]: [{ key: newKey(), ...d, rir: null, setType: 'working' }] },
+        );
+      }
     })();
     return () => {
       off = true;
     };
-  }, [workout, currentExerciseId, live]);
+  }, [workout, groups, defaults]);
 
   const workingCount = logged.filter((s) => s.setType === 'working').length;
   const hasWarmup = logged.some((s) => s.setType === 'warmup');
 
+  function patchRow(exId: string, key: string, patch: Partial<PendingRow>) {
+    setPending((prev) => ({
+      ...prev,
+      [exId]: (prev[exId] ?? []).map((r) => (r.key === key ? { ...r, ...patch } : r)),
+    }));
+  }
+
+  function addRow(exId: string) {
+    const d = defaults[exId] ?? { weight: '', reps: '' };
+    setPending((prev) => ({
+      ...prev,
+      [exId]: [...(prev[exId] ?? []), { key: newKey(), ...d, rir: null, setType: 'working' }],
+    }));
+  }
+
   async function handleStart(name: string | null, repeatOf?: string) {
     const created = await startWorkout(name);
     // "Pick up a previous session" means the exercises come back too. Carrying
-    // only the name would leave the user re-adding the same five lifts by hand,
+    // only the name would leave the user re-adding the same lifts by hand,
     // which is the friction the affordance exists to remove.
     const carried = repeatOf ? await getWorkoutExerciseIds(repeatOf) : [];
     setWorkout(created);
     setLogged([]);
     setExtras(carried);
-    setLive(null);
+    setPending({});
+    setDefaults({});
   }
 
   function openFinish() {
@@ -152,8 +184,8 @@ function LoggingSurface(): ReactElement {
 
   async function handleFinish() {
     if (!workout) return;
-    // Name first, so the session is already named when it is closed and shows
-    // up correctly in the "pick up a previous session" list.
+    // Name first, so the session is already named when it closes and is
+    // recognisable in the "pick up a previous session" list.
     if (draftName.trim() && draftName.trim() !== workout.name) {
       await renameWorkout(workout.id, draftName);
     }
@@ -161,25 +193,30 @@ function LoggingSurface(): ReactElement {
     setWorkout(null);
     setLogged([]);
     setExtras([]);
-    setLive(null);
+    setPending({});
+    setDefaults({});
     setFinishing(false);
     setRecent(await getRecentWorkouts(5));
   }
 
-  async function handleTick() {
-    if (!live || busy) return; // guards a double-tap writing the set twice
+  async function handleTick(exId: string, row: PendingRow) {
+    if (busy) return; // guards a double-tap writing the set twice
     setBusy(true);
     try {
       const created = await logSet({
-        exerciseId: live.exerciseId,
-        weightKg: Number(live.weight) || 0,
-        reps: Number(live.reps) || 0,
-        rir: live.rir, // FR-LOG-1: blank stays null, never defaulted to a number
-        setType: live.setType,
+        exerciseId: exId,
+        weightKg: Number(row.weight) || 0,
+        reps: Number(row.reps) || 0,
+        rir: row.rir, // FR-LOG-1: blank stays null, never defaulted to a number
+        setType: row.setType,
       });
       setLogged((prev) => [...prev, created]);
-      setRirOpen(false);
-      setLive(null); // the effect opens a fresh row, defaulting back to working
+      setRirFor(null);
+      // Only this row leaves. Any other rows you queued stay exactly as typed.
+      setPending((prev) => {
+        const rest = (prev[exId] ?? []).filter((r) => r.key !== row.key);
+        return { ...prev, [exId]: rest.length ? rest : [{ key: newKey(), weight: row.weight, reps: row.reps, rir: null, setType: 'working' }] };
+      });
     } finally {
       setBusy(false);
     }
@@ -190,7 +227,7 @@ function LoggingSurface(): ReactElement {
     const warmups = logged.length - working.length;
     // FR-SIG-1: a set only feeds the 1RM estimate at RIR <= 3 and <= 10 reps,
     // and a set with no RIR cannot be used at all. Saying so plainly is the
-    // honest number here, and it is the one no incumbent shows.
+    // honest number here, and the one no incumbent shows.
     const qualifying = working.filter((s) => s.rir !== null && setE1rm(s.weightKg, s.reps, s.rir) !== null);
     const heaviest = working.reduce<LoggedSet | null>(
       (best, s) => (best === null || s.weightKg > best.weightKg ? s : best),
@@ -222,9 +259,7 @@ function LoggingSurface(): ReactElement {
           <p data-testid="summary-working" className={`${FIGURE} text-[19px] text-ink`}>
             {working.length}
             {warmups > 0 && (
-              <span className="ml-2 text-[14px] text-ink-faint">
-                + {warmups} warm-up, not counted
-              </span>
+              <span className="ml-2 text-[14px] text-ink-faint">+ {warmups} warm-up, not counted</span>
             )}
           </p>
         </section>
@@ -236,8 +271,8 @@ function LoggingSurface(): ReactElement {
           </p>
           {qualifying.length < working.length && (
             <p className="mt-1 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-              The rest went past RIR 3 or 10 reps, or had no RIR recorded, so they cannot be
-              used to estimate a 1RM.
+              The rest went past RIR 3 or 10 reps, or had no RIR recorded, so they cannot be used
+              to estimate a 1RM.
             </p>
           )}
         </section>
@@ -334,22 +369,33 @@ function LoggingSurface(): ReactElement {
         const rows = logged
           .filter((s) => s.exerciseId === exId)
           .sort((a, b) => a.performedAt.localeCompare(b.performedAt));
+        const queue = pending[exId] ?? [];
         let working = 0;
-        const isCurrent = live?.exerciseId === exId;
 
         return (
           <section key={exId} className="border-b border-rule px-4 pt-4 pb-3">
             <h2 className="font-serif text-[17px] leading-[1.3] text-ink">{exerciseName(exId)}</h2>
 
-            <table className="mt-2 w-full border-collapse">
+            <table className="mt-2 w-full table-fixed border-collapse">
+              {/* Widths live here, once, so the header and the body cannot drift
+                  apart — they were sized independently before, which is why the
+                  columns did not line up. */}
+              <colgroup>
+                <col className="w-[30px]" />
+                <col />
+                <col className="w-[68px]" />
+                <col className="w-[56px]" />
+                <col className="w-[46px]" />
+                <col className="w-[48px]" />
+              </colgroup>
               <thead>
                 <tr>
-                  <th className={`${LABEL} w-[34px] border-b border-rule pb-1.5 text-left`}>Set</th>
-                  <th className={`${LABEL} border-b border-rule pb-1.5 text-right`}>Previous</th>
-                  <th className={`${LABEL} w-[86px] border-b border-rule pb-1.5 text-right`}>kg</th>
-                  <th className={`${LABEL} w-[68px] border-b border-rule pb-1.5 text-right`}>Reps</th>
-                  <th className={`${LABEL} w-[56px] border-b border-rule pb-1.5 text-right`}>RIR</th>
-                  <th className="w-[52px] border-b border-rule" />
+                  <th className={`${LABEL} border-b border-rule pb-1.5 text-left`}>Set</th>
+                  <th className={`${LABEL} border-b border-rule pb-1.5 text-left`}>Previous</th>
+                  <th className={`${LABEL} border-b border-rule pb-1.5 text-center`}>kg</th>
+                  <th className={`${LABEL} border-b border-rule pb-1.5 text-center`}>Reps</th>
+                  <th className={`${LABEL} border-b border-rule pb-1.5 text-center`}>RIR</th>
+                  <th className="border-b border-rule" />
                 </tr>
               </thead>
               <tbody>
@@ -358,22 +404,19 @@ function LoggingSurface(): ReactElement {
                   if (!warm) working += 1;
                   return (
                     <tr key={s.id} className={warm ? 'text-ink-faint' : 'text-ink'}>
-                      <td
-                        data-testid="set-number"
-                        className={`${FIGURE} border-b border-rule py-2 text-left text-[15px]`}
-                      >
+                      <td data-testid="set-number" className={`${FIGURE} border-b border-rule py-2 text-left text-[15px]`}>
                         {warm ? 'W' : working}
                       </td>
-                      <td className={`${FIGURE} border-b border-rule py-2 text-right text-[14px] text-ink-faint`}>
+                      <td className={`${FIGURE} border-b border-rule py-2 text-left text-[13px] text-ink-faint`}>
                         &mdash;
                       </td>
-                      <td className={`${FIGURE} border-b border-rule py-2 text-right text-[15px]`}>{s.weightKg}</td>
-                      <td className={`${FIGURE} border-b border-rule py-2 text-right text-[15px]`}>{s.reps}</td>
-                      <td className={`${FIGURE} border-b border-rule py-2 text-right text-[15px]`}>
+                      <td className={`${FIGURE} border-b border-rule py-2 text-center text-[15px]`}>{s.weightKg}</td>
+                      <td className={`${FIGURE} border-b border-rule py-2 text-center text-[15px]`}>{s.reps}</td>
+                      <td className={`${FIGURE} border-b border-rule py-2 text-center text-[15px]`}>
                         {warm ? '—' : (s.rir ?? '–')}
                       </td>
                       <td className="border-b border-rule py-2">
-                        <span className="ml-auto flex h-[30px] w-[30px] items-center justify-center bg-ink text-paper">
+                        <span className="mx-auto flex h-[28px] w-[28px] items-center justify-center bg-ink text-paper">
                           <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
                             <path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" strokeWidth={2} />
                           </svg>
@@ -383,74 +426,93 @@ function LoggingSurface(): ReactElement {
                   );
                 })}
 
-                {isCurrent && live && (
-                  <tr>
-                    <td className={`${FIGURE} border-b border-rule py-2 text-left text-[15px] text-ink`}>
-                      {live.setType === 'warmup' ? 'W' : working + 1}
-                    </td>
-                    <td className={`${FIGURE} border-b border-rule py-2 text-right text-[14px] text-ink-faint`}>
-                      &mdash;
-                    </td>
-                    <td className="w-[86px] border-b border-rule py-1.5 pr-1.5">
-                      <input
-                        data-testid="weight-input"
-                        className={`${FIGURE} ${CELL}`}
-                        type="text"
-                        inputMode="decimal"
-                        enterKeyHint="next"
-                        autoComplete="off"
-                        aria-label="weight in kilograms"
-                        value={live.weight}
-                        onChange={(e) => setLive({ ...live, weight: e.target.value.replace(/[^0-9.]/g, '') })}
-                      />
-                    </td>
-                    <td className="w-[68px] border-b border-rule py-1.5 pr-1.5">
-                      <input
-                        data-testid="reps-input"
-                        className={`${FIGURE} ${CELL}`}
-                        type="text"
-                        inputMode="numeric"
-                        enterKeyHint="done"
-                        autoComplete="off"
-                        aria-label="reps"
-                        value={live.reps}
-                        onChange={(e) => setLive({ ...live, reps: e.target.value.replace(/[^0-9]/g, '') })}
-                      />
-                    </td>
-                    <td className="border-b border-rule py-2 text-right">
-                      {/* Tapping opens tap targets, never a numeric keyboard: a
-                          keyboard is the wrong control at arm's length with wet
-                          hands. Dashed rather than absent, because a field you
-                          cannot see is one that gets skipped forever — and RIR
-                          is what gates the e1RM trend. */}
-                      <button
-                        type="button"
-                        data-testid="rir-cell"
-                        onClick={() => setRirOpen((v) => !v)}
-                        className={`${FIGURE} min-h-[44px] w-[56px] border border-dashed border-rule-strong text-center text-[15px] ${TAP} ${live.rir === null ? 'text-ink-faint' : 'text-ink'}`}
-                      >
-                        {live.rir ?? '–'}
-                      </button>
-                    </td>
-                    <td className="border-b border-rule py-2">
-                      <button
-                        type="button"
-                        data-testid="tick-button"
-                        onClick={() => void handleTick()}
-                        aria-label="save this set"
-                        className={`ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center border border-rule-strong bg-paper text-ink ${TAP} active:bg-ink active:text-paper`}
-                      >
-                        <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden="true">
-                          <path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" strokeWidth={2} />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                )}
+                {queue.map((row) => {
+                  const warm = row.setType === 'warmup';
+                  const number = warm ? 'W' : ++working;
+                  return (
+                    <tr key={row.key}>
+                      <td className="border-b border-rule py-1.5">
+                        {/* Tapping the set number changes the kind of set, which
+                            is where Hevy puts it. Two kinds, so it toggles
+                            rather than opening a sheet for a binary choice. */}
+                        <button
+                          type="button"
+                          data-testid="set-type-toggle"
+                          aria-label={`set ${number}: ${warm ? 'warm-up' : 'working'} set, tap to change`}
+                          onClick={() =>
+                            patchRow(exId, row.key, {
+                              setType: warm ? 'working' : 'warmup',
+                              // A warm-up carries no RIR — rating effort on one
+                              // is meaningless, and a stale value would be fed
+                              // to the e1RM qualification check.
+                              rir: warm ? row.rir : null,
+                            })
+                          }
+                          className={`${FIGURE} min-h-[44px] w-full text-left text-[15px] ${TAP} ${warm ? 'text-ink-faint' : 'text-ink'}`}
+                        >
+                          {number}
+                        </button>
+                      </td>
+                      <td className={`${FIGURE} border-b border-rule py-1.5 text-left text-[13px] text-ink-faint`}>
+                        &mdash;
+                      </td>
+                      <td className="border-b border-rule px-0.5 py-1.5">
+                        <input
+                          data-testid="weight-input"
+                          className={`${FIGURE} ${CELL}`}
+                          type="text"
+                          inputMode="decimal"
+                          autoComplete="off"
+                          aria-label="weight in kilograms"
+                          value={row.weight}
+                          onChange={(e) => patchRow(exId, row.key, { weight: e.target.value.replace(/[^0-9.]/g, '') })}
+                        />
+                      </td>
+                      <td className="border-b border-rule px-0.5 py-1.5">
+                        <input
+                          data-testid="reps-input"
+                          className={`${FIGURE} ${CELL}`}
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="off"
+                          aria-label="reps"
+                          value={row.reps}
+                          onChange={(e) => patchRow(exId, row.key, { reps: e.target.value.replace(/[^0-9]/g, '') })}
+                        />
+                      </td>
+                      <td className="border-b border-rule px-0.5 py-1.5">
+                        <button
+                          type="button"
+                          data-testid="rir-cell"
+                          disabled={warm}
+                          onClick={() => setRirFor(rirFor === row.key ? null : row.key)}
+                          className={`${FIGURE} h-[44px] w-full border border-dashed border-rule-strong text-center text-[15px] ${TAP} ${
+                            warm ? 'opacity-40' : row.rir === null ? 'text-ink-faint' : 'text-ink'
+                          }`}
+                        >
+                          {warm ? '—' : (row.rir ?? '–')}
+                        </button>
+                      </td>
+                      <td className="border-b border-rule py-1.5">
+                        <button
+                          type="button"
+                          data-testid="tick-button"
+                          onClick={() => void handleTick(exId, row)}
+                          aria-label="save this set"
+                          className={`mx-auto flex min-h-[44px] min-w-[44px] items-center justify-center border border-rule-strong bg-paper text-ink ${TAP} active:bg-ink active:text-paper`}
+                        >
+                          <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden="true">
+                            <path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" strokeWidth={2} />
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
 
-            {isCurrent && live && rirOpen && (
+            {rirFor !== null && queue.some((r) => r.key === rirFor) && (
               <div className="mt-2 flex items-center gap-2">
                 <span className={LABEL}>Reps left</span>
                 {[0, 1, 2, 3, 4].map((n) => (
@@ -459,8 +521,8 @@ function LoggingSurface(): ReactElement {
                     type="button"
                     data-testid={`rir-option-${n}`}
                     onClick={() => {
-                      setLive({ ...live, rir: n });
-                      setRirOpen(false);
+                      patchRow(exId, rirFor, { rir: n });
+                      setRirFor(null);
                     }}
                     className={`${FIGURE} min-h-[44px] min-w-[44px] border border-rule-strong text-[15px] text-ink ${TAP} active:bg-ink active:text-paper`}
                   >
@@ -470,56 +532,20 @@ function LoggingSurface(): ReactElement {
               </div>
             )}
 
-            {/* There is always a live row, so "+ Add set" was a no-op that set
-                the pending row to the type it already had — and at 9px with no
-                border neither control read as tappable. What the row actually
-                needs is to say which KIND of set it is, which DESIGN.md
-                specifies as a segmented control. */}
-            {isCurrent && live && (
-              <div className="mt-3 flex items-center justify-between gap-3">
-                <span className={LABEL}>This set</span>
-                <div
-                  className="flex border border-rule-strong"
-                  role="group"
-                  aria-label="set type"
-                >
-                  <button
-                    type="button"
-                    data-testid="set-type-working"
-                    aria-pressed={live.setType === 'working'}
-                    onClick={() => setLive({ ...live, setType: 'working' })}
-                    className={`min-h-[44px] px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.08em] ${TAP} ${
-                      live.setType === 'working' ? 'bg-ink text-paper' : 'bg-paper text-ink-faint'
-                    }`}
-                  >
-                    Working
-                  </button>
-                  <button
-                    type="button"
-                    data-testid="add-warmup-button"
-                    aria-pressed={live.setType === 'warmup'}
-                    // A warm-up carries no RIR — rating effort on a warm-up is
-                    // meaningless, and leaving a stale value would feed it to
-                    // the e1RM qualification check.
-                    onClick={() => setLive({ ...live, setType: 'warmup', rir: null })}
-                    className={`min-h-[44px] border-l border-rule-strong px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.08em] ${TAP} ${
-                      live.setType === 'warmup' ? 'bg-ink text-paper' : 'bg-paper text-ink-faint'
-                    }`}
-                  >
-                    Warm-up
-                  </button>
-                </div>
-              </div>
-            )}
+            <button
+              type="button"
+              data-testid="add-set-button"
+              onClick={() => addRow(exId)}
+              className={`mt-3 min-h-[44px] w-full border border-rule-strong font-sans text-[11px] font-semibold uppercase tracking-[0.08em] text-ink ${TAP} active:bg-paper-sunk`}
+            >
+              + Add set
+            </button>
           </section>
         );
       })}
 
       {hasWarmup && (
-        <p
-          data-testid="warmup-note"
-          className="px-4 pt-3 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft"
-        >
+        <p data-testid="warmup-note" className="px-4 pt-3 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
           Warm-ups aren&rsquo;t counted toward your weekly sets or the 1RM estimate.
         </p>
       )}
@@ -534,7 +560,6 @@ function LoggingSurface(): ReactElement {
               const id = e.target.value;
               if (!id) return;
               setExtras((prev) => (prev.includes(id) ? prev : [...prev, id]));
-              setLive({ exerciseId: id, weight: '', reps: '', rir: null, setType: 'working' });
               setPicking(false);
             }}
           >
