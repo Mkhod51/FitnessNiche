@@ -1,9 +1,13 @@
 import initSql from './migrations/0001_init.sql?raw';
+import trackersSql from './migrations/0002_trackers.sql?raw';
 import type { SqlMethod } from './protocol';
 
 export type Exec = (sql: string, params?: unknown[], method?: SqlMethod) => Promise<unknown[][]>;
 
-const MIGRATIONS: { name: string; sql: string }[] = [{ name: '0001_init', sql: initSql }];
+const MIGRATIONS: { name: string; sql: string }[] = [
+  { name: '0001_init', sql: initSql },
+  { name: '0002_trackers', sql: trackersSql },
+];
 
 // Execution order is array order — a migration appended out of sequence, or
 // a duplicated name, must fail loudly at load time rather than surface as a
