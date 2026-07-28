@@ -32,6 +32,27 @@
   --motion-ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
+/* Pane transition between tabs. Direction is set per-navigation via --pane-from,
+   so moving right brings the incoming pane in from the right — the movement
+   says where you went, which is the only reason it exists.
+
+   Content is visible at the first frame of the animation, never gated behind
+   it: `opacity` starts near-visible and the transform is small. */
+@keyframes pane-enter {
+  from {
+    opacity: 0.4;
+    transform: translate3d(var(--pane-from, 0), 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.pane-enter {
+  animation: pane-enter var(--motion-move) var(--motion-ease) both;
+}
+
 /* Zeroed at the source, so every consumer of the tokens is covered without each
    one remembering to ask. The blanket rule underneath catches anything that
    hard-codes a duration instead of using them.
