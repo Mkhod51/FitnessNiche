@@ -283,6 +283,44 @@ describe('LogWorkout — State B: an open session', () => {
     expect(screen.queryByText(/volume/i)).not.toBeInTheDocument();
   });
 
+  it('the set-type control shows which kind the pending row is, and toggles back', async () => {
+    mockLogSet.mockResolvedValue(makeSet({ id: 'set-2' }));
+    render(<LogWorkout />);
+    await screen.findByTestId('weight-input');
+
+    // Defaults to working, and says so rather than leaving it implicit.
+    expect(screen.getByTestId('set-type-working')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('add-warmup-button')).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(screen.getByTestId('add-warmup-button'));
+    expect(screen.getByTestId('add-warmup-button')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('set-type-working')).toHaveAttribute('aria-pressed', 'false');
+
+    // Toggling back must be possible — the old "+ Add set" could not do this,
+    // because it set the type it was already on.
+    fireEvent.click(screen.getByTestId('set-type-working'));
+    fireEvent.click(screen.getByTestId('tick-button'));
+
+    await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
+    expect(mockLogSet).toHaveBeenCalledWith(expect.objectContaining({ setType: 'working' }));
+  });
+
+  it('marking the pending row as a warm-up clears any RIR already tapped in', async () => {
+    mockLogSet.mockResolvedValue(makeSet({ id: 'set-2', setType: 'warmup' }));
+    render(<LogWorkout />);
+    await screen.findByTestId('weight-input');
+
+    fireEvent.click(screen.getByTestId('rir-cell'));
+    fireEvent.click(await screen.findByTestId('rir-option-2'));
+    fireEvent.click(screen.getByTestId('add-warmup-button'));
+    fireEvent.click(screen.getByTestId('tick-button'));
+
+    await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
+    // A stale RIR on a warm-up would be meaningless, and would be handed to the
+    // e1RM qualification check as if it meant something.
+    expect(mockLogSet).toHaveBeenCalledWith(expect.objectContaining({ setType: 'warmup', rir: null }));
+  });
+
   it('finishing opens a summary before closing the session, not straight after tapping', async () => {
     render(<LogWorkout />);
     await screen.findByTestId('weight-input');
