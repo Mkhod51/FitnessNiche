@@ -314,9 +314,80 @@ a year.
 
 ## Motion
 
-Almost none, deliberately. Disclosure expands without animation by default; the surface
-is read in short glances and movement costs legibility. Any motion added later honours
-`prefers-reduced-motion` and never gates content visibility.
+**Rewritten 2026-07-28.** The original rule was "almost none, deliberately", on the grounds
+that the surface is read in short glances and movement costs legibility. That was too broad:
+it conflated *decorative* motion, which does cost legibility here, with *transitional* motion,
+which is what stops an interface feeling like a slide deck. The app is animated.
+
+**The governing test: motion explains a relationship the static frame cannot.** Where did
+this come from, where did it go, did that register. Motion that answers one of those ships.
+Motion that exists to feel modern does not.
+
+### The scale
+
+| Token | Duration | Use |
+|---|---|---|
+| `--motion-tap` | 120ms | Direct response to a finger: tick fill, tap-target select |
+| `--motion-move` | 200ms | Something changes place or size: tabs, sheet, disclosure |
+| `--motion-settle` | 320ms | Something arrives or a figure re-counts |
+
+Easing is `cubic-bezier(0.2, 0, 0, 1)` — a firm ease-out. **No bounce, no overshoot, no
+spring.** This world is printed matter; paper does not wobble.
+
+### What moves
+
+| Where | What | Why it earns it |
+|---|---|---|
+| **Tab changes** | Outgoing pane fades and shifts 8px toward the leaving edge; incoming does the reverse. `--motion-move` | Direction tells you where you went. Three tabs in a fixed order means left/right is real spatial information |
+| **Set completion tick** | Box fills from the tapped edge, `--motion-tap` | There is no save button, so the tick **is** the receipt that the write reached SQLite. An instant flip reads as "did that register?" — the worst ambiguity in an app promising never to lose a write |
+| **Rest timer** | Remaining bar sweeps continuously | Continuous change *is* the information; a bar jumping in one-second steps is strictly less readable |
+| **Sheet peek → expanded** | Height and content cross-fade, `--motion-move` | A sheet that teleports open breaks the spatial relationship the gesture just created |
+| **New set row** | Height opens from 0, `--motion-move` | Shows the row was added rather than the table having silently reflowed |
+| **RIR tap targets** | Row opens beneath the cell, `--motion-move` | Ties the targets to the cell that summoned them |
+| **Numeric meters** | Marks fill in sequence, `--motion-settle` | Shows a value moved and by how much, instead of substituting a new number silently |
+| **Evidence disclosure** | Panel opens, `--motion-move` | The existing `<details>` behaviour, given a height transition |
+| **Route/screen push** | Slide-and-fade, `--motion-move` | Start → session → finish is a sequence; motion carries the order |
+
+### What still does not move, and why
+
+- **The advice peek never animates *in*.** It may animate when the user expands it. An
+  animated *arrival* is exactly what converts "present" into "interruption", which v1
+  deliberately refuses (Gate 4). This is the single carve-out in an otherwise animated app.
+- **The confidence counter never animates.** Its job is to be read, not noticed — and a grade
+  that draws the eye by moving is the skimmable-badge failure by another route.
+- **No skeletons, shimmers or spinners.** Reads are local and effectively instant; a loading
+  animation dramatises a wait that does not exist and implies a network that is not there.
+- **Nothing fades in on scroll.** Content is present or it is not.
+
+### Rules
+
+- **Transform and opacity first**, so motion stays on the compositor. Height transitions are
+  permitted where they carry meaning (sheet, new row) but are the exception, not the habit.
+- **Motion is never the only carrier of a state change.** Every animated state above is also
+  legible from a static screenshot.
+- **`prefers-reduced-motion: reduce` disables all of it**, and the interface stays completely
+  usable — because of the rule above, nothing is lost but the movement. This is an
+  accessibility requirement, not a courtesy.
+
+---
+
+## Brand marks — a deliberate empty slot
+
+`PRODUCT.md` states that MyoStat is settled **as a word, not as a visual identity**: no logo,
+wordmark, palette or typographic lockup has been decided, and none may be invented here.
+
+So the app ships **no mark**, and the seam for one is built rather than faked:
+
+- A single `Logo` component is the only place a mark may ever appear. Today it renders the
+  wordmark as text in the serif at the appropriate size.
+- It accepts an optional SVG. When real artwork exists, it is dropped in as
+  `src/assets/logo.svg` (and `logo-mark.svg` if a standalone glyph is wanted) and the
+  component switches to it — **no other file changes**.
+- The SVG must use `fill="currentColor"` so it inherits `--color-ink` and therefore works on
+  both grounds without a second asset.
+- Until then: no placeholder glyph, no generic dumbbell icon, no lettermark. **An invented
+  placeholder is worse than an empty slot**, because it quietly becomes the brand by being
+  the thing everyone sees.
 
 ---
 

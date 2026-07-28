@@ -22,6 +22,37 @@
      a coding face made a set of reps read as console output. Pair this with
      the `tabular-nums` utility; the family alone does not align columns. */
   --font-figure: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* DESIGN.md §Motion. Motion explains a relationship the static frame cannot —
+     where a thing came from, where it went, whether a tap registered. Firm
+     ease-out, no bounce: this world is printed matter and paper does not wobble. */
+  --motion-tap: 120ms;
+  --motion-move: 200ms;
+  --motion-settle: 320ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Zeroed at the source, so every consumer of the tokens is covered without each
+   one remembering to ask. The blanket rule underneath catches anything that
+   hard-codes a duration instead of using them.
+
+   Nothing is lost but the movement: DESIGN.md requires every animated state to
+   be legible from a static frame, so this stays fully usable. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-tap: 0ms;
+    --motion-move: 0ms;
+    --motion-settle: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* The dark ground. NOT an inversion — a warm near-black in the paper's own hue
