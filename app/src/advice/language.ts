@@ -16,9 +16,9 @@ export const GRADE_LANGUAGE = {
     chipLabel: 'well-supported',
   },
   B: {
-    verb: 'supported, with real gaps',
+    verb: 'supported, with real uncertainty',
     confidence: 'One good study, or consistent observational evidence. Not yet replicated.',
-    chipLabel: 'some gaps',
+    chipLabel: 'some uncertainty',
   },
   C: {
     verb: 'suggested, on limited evidence',
