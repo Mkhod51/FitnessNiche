@@ -7,6 +7,7 @@ import { LogWorkout } from './features/log/LogWorkout';
 import { LogWeight } from './features/log/LogWeight';
 import { EatDay } from './features/nutrition/EatDay';
 import { GoalSetup } from './features/nutrition/GoalSetup';
+import { Settings } from './features/settings/Settings';
 
 type BootState = StorageMode | 'booting' | `error: ${string}`;
 
@@ -59,17 +60,6 @@ function AnimatedPane({ children }: { children: ReactNode }) {
   );
 }
 
-function SettingsPlaceholder() {
-  return (
-    <div className="mx-auto max-w-[480px] px-4 pt-6">
-      <h1 className="font-serif text-[20px] text-ink">Settings</h1>
-      <p className="mt-2 font-serif text-[15px] leading-[1.45] text-ink-soft">
-        Not built yet. Consent, export, delete and the numbers-hidden state land here.
-      </p>
-    </div>
-  );
-}
-
 function Shell() {
   const [mode, setMode] = useState<BootState>('booting');
 
@@ -112,7 +102,7 @@ function Shell() {
             <Route path="/eat" element={<EatDay />} />
             <Route path="/goal" element={<GoalSetup />} />
             <Route path="/weight" element={<LogWeight />} />
-            <Route path="/settings" element={<SettingsPlaceholder />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </AnimatedPane>
       </main>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
+import { Link } from 'react-router';
 import { ConsentGate } from '../onboarding/ConsentGate';
 import { getUser, type User } from '../../db/user';
 import {
@@ -178,6 +179,13 @@ function DayView(): ReactElement {
               ? 'No target set. Nothing here is compared against anything yet.'
               : `Each mark is ${KCAL_PER_MARK} kcal. The bar fills toward the target; it does not count down from it.`}
           </p>
+          <Link
+            to="/goal"
+            data-testid="goal-link"
+            className={`${LABEL} mt-2 inline-flex min-h-[44px] items-center text-ink ${TAP}`}
+          >
+            {kcalTarget === null ? 'Set a goal ›' : 'Change your goal ›'}
+          </Link>
 
           <div className="mt-4 flex items-baseline justify-between">
             <p className={LABEL}>
