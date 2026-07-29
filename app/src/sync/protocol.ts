@@ -57,24 +57,31 @@ export interface SyncRow {
 
 export interface PushPullRequest {
   /**
-   * Server clock value from the previous successful sync, or null on first run.
-   * The server returns everything it holds with `updatedAt` strictly after this.
+   * The server sequence this client has already seen, or null on first run.
+   * The server returns everything stamped strictly after it.
+   *
+   * A SEQUENCE, not a timestamp, and that is the whole point. `updatedAt` is
+   * written by the device that made the change, so filtering the pull by a
+   * server clock compares two clocks that were never synchronised: a phone
+   * running five minutes slow stamps its rows in the past, the other device's
+   * watermark has already moved beyond them, and those rows are never pulled at
+   * all. Silent data loss across devices, and it needs no clock skew to happen —
+   * a push arriving during another device's request loses the same way.
+   *
+   * The sequence is assigned by the server, on write, from a counter it owns. No
+   * clock takes part in deciding what a device has already seen.
    */
-  since: string | null;
+  since: number | null;
   /** Local rows with pending writes. May be empty — an empty push is a pull. */
   changes: SyncRow[];
 }
 
 export interface PushPullResponse {
   /**
-   * The server's clock at the moment it answered. The client stores this and
+   * The highest sequence this response accounts for. The client stores it and
    * sends it back as `since` next time.
-   *
-   * Deliberately the SERVER's time, never the device's: phone clocks drift, and
-   * a device running fast would set a watermark into the future and then never
-   * pull the rows written in the gap.
    */
-  serverTime: string;
+  serverSeq: number;
   /** Rows the server holds that the client has not seen since `since`. */
   changes: SyncRow[];
   /** Rows the server REJECTED because its copy was newer. Client re-reads these. */
@@ -86,24 +93,49 @@ export interface SyncErrorResponse {
 }
 
 /**
- * Last-write-wins, with the tie broken deterministically.
+ * A stable serialisation of a row's contents, for comparing two versions of it.
+ *
+ * Keys are sorted, so two devices that built the same row in a different column
+ * order still produce the same string. Only used as a tie-break ordering — it is
+ * never stored, never sent, and never shown.
+ */
+export function canonicalise(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'null';
+  if (Array.isArray(value)) return `[${value.map(canonicalise).join(',')}]`;
+  const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${canonicalise(v)}`).join(',')}}`;
+}
+
+/**
+ * Last-write-wins, with the tie broken on content.
  *
  * Two writes landing in the same millisecond is not hypothetical — an import
- * writes a whole session at once, and ISO strings only carry milliseconds. With
- * no tie-break the winner would depend on which side asked first, so the same
- * pair of devices could disagree forever, each certain it was right. Comparing
- * the id when the timestamps match is arbitrary but *stable*, which is the
- * property that matters: both sides independently reach the same answer.
+ * writes a whole session at once, and ISO strings only carry milliseconds.
+ *
+ * The tie-break compares the rows' CONTENT, not their ids. An earlier version
+ * compared ids, which was dead code: this is only ever called with two versions
+ * of the SAME row, so `id > id` is always false and the tie silently resolved to
+ * "whoever the server heard from first". That is not a property both sides can
+ * compute — the server's arrival order decides it — so a client merging locally
+ * and the server merging remotely could reach different answers and stay there.
+ *
+ * Content comparison restores what the tie-break is actually for: the winner is
+ * a pure function of the two rows, so every party independently reaches the same
+ * answer without needing to know who arrived first. Which row wins is arbitrary.
+ * That it is the same one everywhere is not.
  *
  * Returns true when `incoming` should replace `existing`.
  */
 export function incomingWins(
-  incoming: { updatedAt: string; id: string },
-  existing: { updatedAt: string; id: string } | undefined,
+  incoming: { updatedAt: string; data?: Record<string, unknown> },
+  existing: { updatedAt: string; data?: Record<string, unknown> } | undefined,
 ): boolean {
   if (!existing) return true;
   if (incoming.updatedAt !== existing.updatedAt) return incoming.updatedAt > existing.updatedAt;
-  return incoming.id > existing.id;
+  // Identical content is not a conflict — nothing changes either way, and
+  // reporting it as superseded would send the client off to re-read a row it
+  // already has.
+  return canonicalise(incoming.data ?? null) > canonicalise(existing.data ?? null);
 }
 
 /** Single-user bearer auth (BUILD-PLAN §stack). Header name pinned here so both ends agree. */
