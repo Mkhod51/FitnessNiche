@@ -14,7 +14,7 @@ folder with a Vite glob at build time, so a file appearing here is all it takes.
 - **`fill="currentColor"`, no baked hex.** One file then works on the light ground and the
   dark one, inheriting `--color-ink`. A file with `#000` in it goes invisible in dark mode.
 - **Flat.** No gradients, no shadows, no glow, no rounded container. These are `DESIGN.md`
-  prohibitions, and `docs/icon-prompts.md` states the same contract for the app icons.
+  prohibitions, and `docs/brand/icon-prompts.md` states the same contract for the app icons.
 - **Square viewBox**, roughly 24×24 or 48×48. The picker renders it at 44px.
 
 SVG is preferred because it stays sharp and inherits ink. PNG works if that is what the
