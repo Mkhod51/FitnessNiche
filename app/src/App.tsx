@@ -8,14 +8,15 @@ import { LogWeight } from './features/log/LogWeight';
 import { EatDay } from './features/nutrition/EatDay';
 import { GoalSetup } from './features/nutrition/GoalSetup';
 import { Settings } from './features/settings/Settings';
+import { HubIcon, TrainIcon, EatIcon } from './components/icons';
 
 type BootState = StorageMode | 'booting' | `error: ${string}`;
 
 /** Fixed order, so left and right in the pane transition mean something. */
 const TABS = [
-  { to: '/', label: 'Hub', glyph: '◇' },
-  { to: '/train', label: 'Train', glyph: '▮' },
-  { to: '/eat', label: 'Eat', glyph: '◗' },
+  { to: '/', label: 'Hub', Icon: HubIcon },
+  { to: '/train', label: 'Train', Icon: TrainIcon },
+  { to: '/eat', label: 'Eat', Icon: EatIcon },
 ] as const;
 
 const TAB_CLASS =
@@ -110,12 +111,7 @@ function Shell() {
       <nav className="sticky bottom-0 flex border-t border-rule bg-paper" aria-label="sections">
         {TABS.map((t) => (
           <NavLink key={t.to} to={t.to} end={t.to === '/'} className={TAB_CLASS}>
-            <span
-              aria-hidden="true"
-              className="mb-0.5 font-serif text-[17px] leading-none normal-case tracking-normal"
-            >
-              {t.glyph}
-            </span>
+            <t.Icon className="mb-1 h-[19px] w-[19px]" />
             {t.label}
           </NavLink>
         ))}
