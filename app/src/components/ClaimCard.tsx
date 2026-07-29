@@ -1,5 +1,6 @@
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { ConfidenceTicks } from './ConfidenceTicks';
+import { EvidencePanel } from './EvidencePanel';
 import type { Claim, Citation } from '../advice/types';
 
 /**
@@ -35,6 +36,12 @@ function SourceLine({ citation }: { citation: Citation }): ReactElement {
 // affordance — never the DOI, figures, effect size or CI on the card itself.
 function ClaimBody({ claim }: { claim: Claim }): ReactElement {
   const citation = claim.citations[0] as Citation | undefined;
+  // Lazy-mounted, not lazy-rendered: the <details> itself stays fully native
+  // (no controlled `open`, no animation), but the panel's DOM nodes don't
+  // exist until the reader actually opens it — so layer 3 stays opt-in even
+  // to a DOM query, not merely hidden behind CSS.
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+
   return (
     <>
       <p data-testid="claim-statement" className="font-serif text-[17px] leading-[1.3] tracking-[-0.005em] text-ink">
@@ -44,11 +51,11 @@ function ClaimBody({ claim }: { claim: Claim }): ReactElement {
         <ConfidenceTicks grade={claim.grade} />
       </div>
       {citation && <SourceLine citation={citation} />}
-      <details className="mt-2">
+      <details className="mt-2" onToggle={(e) => setEvidenceOpen(e.currentTarget.open)}>
         <summary className="inline-flex min-h-[44px] cursor-pointer select-none items-center font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
           see the evidence
         </summary>
-        {/* Task 7b: EvidencePanel content goes here. */}
+        {evidenceOpen && <EvidencePanel claim={claim} />}
       </details>
     </>
   );
