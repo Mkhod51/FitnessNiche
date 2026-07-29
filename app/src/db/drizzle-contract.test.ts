@@ -62,6 +62,10 @@ describe('drizzle-orm/sqlite-proxy contract against a real sqlite engine', () =>
       {
         id: 'u1',
         goal: 'maintain',
+        calorieTargetKcal: null,
+        proteinTargetG: null,
+        deficitKcal: 0,
+        birthYear: null,
         sex: 'unspecified',
         heightCm: null,
         numbersHidden: false,
