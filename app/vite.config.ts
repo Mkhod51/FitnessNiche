@@ -45,6 +45,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     // Playwright owns e2e/; keep vitest out of it or it will try to run those specs.
-    exclude: ['e2e/**', 'node_modules/**'],
+    // server/ is the sync Worker — a separate package with its own dependencies
+    // (hono, workers-types) and its own vitest. Running its tests from here
+    // resolves them against the APP's dependency tree, where `hono` does not
+    // exist, so the app suite fails on a file the app does not own.
+    exclude: ['e2e/**', 'server/**', 'node_modules/**'],
   },
 });

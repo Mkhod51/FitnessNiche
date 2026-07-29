@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router';
 import { getUser, updateProfile, type User } from '../../db/user';
-import { exportEverything, exportFilename, deleteEverything } from '../../db/export';
+import { exportEverything, exportFilename, exportSetsCsv, exportCsvFilename, deleteEverything } from '../../db/export';
 import { CLAIMS } from '../../generated/claims';
 import { readStoredTheme, applyTheme, type Theme } from '../../theme';
 
@@ -65,11 +65,18 @@ export function Settings(): ReactElement {
 
   async function handleExport() {
     const data = await exportEverything();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+    download(JSON.stringify(data, null, 2), 'application/json', exportFilename());
+  }
+
+  async function handleExportCsv() {
+    download(await exportSetsCsv(), 'text/csv', exportCsvFilename());
+  }
+
+  function download(body: string, type: string, filename: string) {
+    const url = URL.createObjectURL(new Blob([body], { type }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = exportFilename();
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -166,6 +173,42 @@ export function Settings(): ReactElement {
         <span className="font-serif text-[15.5px] text-ink">Export everything</span>
         <span className={LABEL}>JSON ›</span>
       </button>
+
+      {/* Named "training log", not "export", so the two are not mistaken for
+          each other. The JSON above is the portability obligation and is
+          complete; this is a convenience and covers sets only. */}
+      <button type="button" data-testid="export-csv-button" onClick={() => void handleExportCsv()} className={`${ROW} w-full text-left ${TAP} active:bg-paper-sunk`}>
+        <span className="min-w-0">
+          <span className="block font-serif text-[15.5px] text-ink">Export the training log</span>
+          <span className="block font-serif text-[12px] italic leading-[1.4] text-ink-faint">
+            Sets only, for spreadsheets. Not a full export.
+          </span>
+        </span>
+        <span className={LABEL}>CSV ›</span>
+      </button>
+
+      {/* NFR-4/GR-5. The notice states what is actually true of this build —
+          on-device storage, no account, no third party — rather than the
+          boilerplate a hosted app would need. Saying "we may share with
+          partners" here would be false, and a privacy notice that overstates
+          what it collects is its own kind of dishonesty. Revisit when sync
+          ships and data genuinely leaves the device. */}
+      <section data-testid="privacy-notice" className="border-b border-rule px-4 py-4">
+        <p className={LABEL}>Your data</p>
+        <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
+          Everything you log — sets, bodyweight, meals — is stored in a database on this device
+          and nowhere else. There is no account, and nothing is sent to us or to anyone else.
+        </p>
+        <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
+          Workout and bodyweight data is special-category health data under UK GDPR, which is why
+          consent is asked separately before any of it is recorded, and why both buttons above
+          exist: you can take your data out, and you can erase it, without asking anyone.
+        </p>
+        <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
+          Clearing this site&rsquo;s storage in your browser erases it too — there is no copy
+          anywhere for us to restore from.
+        </p>
+      </section>
 
       {/* GR-5 erasure. Destructive controls are --flag TEXT, never a filled red
           button — a filled red target invites the mis-tap it exists to prevent. */}

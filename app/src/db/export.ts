@@ -39,6 +39,61 @@ export function exportFilename(now: Date = new Date()): string {
 }
 
 /**
+ * The training log as CSV, for spreadsheets and for other trackers.
+ *
+ * Deliberately NOT the portability export — that is `exportEverything`, which is
+ * the GR-5/UK-GDPR obligation and has to be complete. This is a convenience, and
+ * it covers sets only. A CSV cannot represent six tables without either
+ * flattening them into something lossy or shipping six files, and a file that
+ * looks like "all your data" while quietly omitting your meals is worse than one
+ * that says plainly what it is. The UI labels it the training log for that
+ * reason.
+ *
+ * Exercise names are resolved from the seed catalogue rather than exported as
+ * ids, since the point of a CSV is that something else can read it.
+ */
+export async function exportSetsCsv(): Promise<string> {
+  const db = getDrizzle();
+  const { SEED_EXERCISES } = await import('./seed-exercises');
+  const nameOf = (id: string) => SEED_EXERCISES.find((e) => e.id === id)?.name ?? id;
+
+  const rows = await db.select().from(sets).orderBy(sets.performedAt);
+  const header = ['performed_at', 'exercise', 'weight_kg', 'reps', 'rir', 'set_type'];
+
+  const body = rows
+    .filter((s) => s.deletedAt === null)
+    .map((s) =>
+      [
+        s.performedAt,
+        nameOf(s.exerciseId),
+        String(s.weightKg),
+        String(s.reps),
+        // An unrecorded RIR stays empty, never 0 — FR-LOG-1 keeps that
+        // distinction everywhere else and a CSV must not quietly invent a value.
+        s.rir === null ? '' : String(s.rir),
+        s.setType,
+      ]
+        .map(csvCell)
+        .join(','),
+    );
+
+  return [header.join(','), ...body].join('\n');
+}
+
+/**
+ * RFC 4180 quoting. Exercise names carry commas and apostrophes, and an
+ * unescaped comma silently shifts every later column in the row — a corruption
+ * that looks like valid data to whatever reads it next.
+ */
+export function csvCell(value: string): string {
+  return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+export function exportCsvFilename(now: Date = new Date()): string {
+  return exportFilename(now).replace(/\.json$/, '-sets.csv');
+}
+
+/**
  * Erasure, and it means erasure.
  *
  * Everything else in this app soft-deletes, because sync is append-log with

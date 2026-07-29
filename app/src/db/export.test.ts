@@ -27,7 +27,7 @@ async function makeTestDb() {
   return drizzle(makeProxyCallback(exec), { schema });
 }
 
-import { exportEverything, exportFilename, deleteEverything } from './export';
+import { exportEverything, exportFilename, exportSetsCsv, exportCsvFilename, csvCell, deleteEverything } from './export';
 import { recordConsent, getUser, LOCAL_USER_ID } from './user';
 import { logSet, startWorkout } from './workouts';
 import { logWeight } from './weights';
@@ -89,6 +89,56 @@ describe('exportEverything — GR-5 data-subject access', () => {
 
   it('names the file by date so successive exports do not overwrite', () => {
     expect(exportFilename(new Date(2026, 6, 29))).toBe('myostat-export-2026-07-29.json');
+  });
+});
+
+describe('exportSetsCsv — the training log, and only that', () => {
+  beforeEach(async () => {
+    testDz = await makeTestDb();
+    await seedSomeUserData();
+  });
+
+  it('writes a header and one row per live set, with the exercise named', async () => {
+    const csv = await exportSetsCsv();
+    const lines = csv.split('\n');
+    expect(lines[0]).toBe('performed_at,exercise,weight_kg,reps,rir,set_type');
+    expect(lines).toHaveLength(2);
+    expect(lines[1]).toContain('Barbell Bench Press');
+    expect(lines[1]).toContain('100');
+  });
+
+  // FR-LOG-1 keeps "not recorded" distinct from zero everywhere else, and a CSV
+  // that writes 0 for an unrecorded RIR invents a value the lifter never gave.
+  it('leaves an unrecorded RIR empty rather than writing zero', async () => {
+    await logSet({ exerciseId: 'barbell-bench-press', weightKg: 60, reps: 8, rir: null });
+    const row = (await exportSetsCsv()).split('\n').find((l) => l.includes(',60,'))!;
+    expect(row).toMatch(/,60,8,,working$/);
+  });
+
+  // Tested directly rather than through a logged set, because the CSV resolves
+  // names from the SEED_EXERCISES constant and not from the exercises table —
+  // nothing in the app reads that table (OPEN-QUESTIONS Q3), so inserting a
+  // comma-laden row into it would prove nothing about this code path.
+  //
+  // An unescaped comma silently shifts every later column, and the result still
+  // looks like valid data to whatever opens the file next.
+  it('quotes fields that would otherwise shift the columns', () => {
+    expect(csvCell('plain')).toBe('plain');
+    expect(csvCell('Row, Bent-Over')).toBe('"Row, Bent-Over"');
+    expect(csvCell('Pendlay "row"')).toBe('"Pendlay ""row"""');
+    expect(csvCell('line\nbreak')).toBe('"line\nbreak"');
+  });
+
+  it('omits soft-deleted sets', async () => {
+    const before = (await exportSetsCsv()).split('\n').length;
+    await testDz.update(schema.sets).set({ deletedAt: new Date().toISOString() }).run();
+    expect((await exportSetsCsv()).split('\n')).toHaveLength(before - 1);
+  });
+
+  it('names the csv distinctly from the json export', () => {
+    const d = new Date('2026-08-03T12:00:00');
+    expect(exportCsvFilename(d)).toBe('myostat-export-2026-08-03-sets.csv');
+    expect(exportFilename(d)).toBe('myostat-export-2026-08-03.json');
   });
 });
 
