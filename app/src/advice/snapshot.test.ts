@@ -42,7 +42,7 @@ const sources: SnapshotSources = {
   weights: Array.from({ length: 30 }, (_, i) => weigh(i * 2, 80 - i * 0.11)),
   sets: Array.from({ length: 24 }, (_, i) => set({ dayOffset: i * 2, weightKg: 100 })),
   exercises: [],
-  proteinPerKg7d: 1.8,
+  food: [],
   now: NOW,
 };
 
@@ -104,7 +104,8 @@ describe('buildSnapshot', () => {
     expect(snapshot.deficitWeeks).toBeGreaterThanOrEqual(4);
     expect(snapshot.weightTrend).toBe('down');
     expect(snapshot.e1rmTrend).not.toBe('insufficient_data');
-    expect(snapshot.proteinPerKg7d).toBe(1.8);
+    // Nothing eaten in the fixture, so the figure is absent rather than zero.
+    expect(snapshot.proteinPerKg7d).toBeNull();
   });
 
   // The regression this file exists for. Before it, these three fields were
@@ -129,6 +130,28 @@ describe('buildSnapshot', () => {
     expect(reconciliation.verdict).toBeDefined();
     expect(primaryExerciseId).toBe('barbell-bench-press');
     expect(reconciliation.observed.weighIns).toBe(30);
+  });
+
+  // The protein half, end to end: food logged on a training day inside the
+  // 7-day window, divided by the latest bodyweight.
+  it('computes protein per kg from food logged on training days', () => {
+    const recentDay = NOW.getTime() - 2 * DAY;
+    const { snapshot } = buildSnapshot({
+      ...sources,
+      weights: [weigh(0, 80)],
+      sets: [{ ...set({}), performedAt: new Date(recentDay).toISOString() }],
+      food: [{ loggedAt: new Date(recentDay + 3_600_000).toISOString(), proteinG: 160 }],
+    });
+    expect(snapshot.proteinPerKg7d).toBeCloseTo(2.0, 5);
+  });
+
+  it('leaves protein null when the food was logged outside the window', () => {
+    const { snapshot } = buildSnapshot({
+      ...sources,
+      weights: [weigh(0, 80)],
+      food: [{ loggedAt: new Date(T0).toISOString(), proteinG: 160 }], // 60 days old
+    });
+    expect(snapshot.proteinPerKg7d).toBeNull();
   });
 
   it('degrades honestly with nothing logged at all', () => {

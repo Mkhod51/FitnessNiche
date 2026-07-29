@@ -12,6 +12,7 @@ vi.mock('../../db/user', async () => {
   return { ...actual, getUser: vi.fn() };
 });
 vi.mock('../../db/weights', () => ({ getWeightHistory: vi.fn() }));
+vi.mock('../../db/nutrition', () => ({ getEntriesSince: vi.fn(async () => []) }));
 vi.mock('../../db/workouts', async () => {
   const actual = await vi.importActual<typeof import('../../db/workouts')>('../../db/workouts');
   return { ...actual, getSetsSince: vi.fn() };

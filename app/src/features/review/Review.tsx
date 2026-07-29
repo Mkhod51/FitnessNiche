@@ -1,9 +1,11 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { ConsentGate } from '../onboarding/ConsentGate';
 import { ClaimCard } from '../../components/ClaimCard';
+import { Meter } from '../../components/Meter';
 import { SEED_EXERCISES } from '../../db/seed-exercises';
 import { getWeightHistory } from '../../db/weights';
 import { getSetsSince } from '../../db/workouts';
+import { getEntriesSince } from '../../db/nutrition';
 import { getUser } from '../../db/user';
 import { CLAIMS } from '../../generated/claims';
 import { buildSnapshot } from '../../advice/snapshot';
@@ -92,7 +94,11 @@ function ConfidenceMarks({ confidence }: { confidence: Reconciliation['confidenc
     <div data-testid="reconcile-confidence" className="flex items-center gap-2">
       <div className="flex gap-[2.5px]" role="img" aria-label={`${confidence} confidence`}>
         {Array.from({ length: 3 }, (_, i) => (
-          <span key={i} className={`h-[10px] w-[18px] ${i < filled ? 'bg-ink' : 'bg-rule-strong'}`} />
+          <span
+            key={i}
+            className={`h-[10px] w-[18px] ${i < filled ? 'mark-fill bg-ink' : 'bg-rule-strong'}`}
+            style={i < filled ? { animationDelay: `calc(var(--motion-tap) * ${i})` } : undefined}
+          />
         ))}
       </div>
       <span className={LABEL}>{confidence} confidence</span>
@@ -103,11 +109,13 @@ function ConfidenceMarks({ confidence }: { confidence: Reconciliation['confidenc
 function ReviewSurface(): ReactElement {
   const [state, setState] = useState<
     | { status: 'loading' }
+    | { status: 'error'; message: string }
     | {
         status: 'ready';
         reconciliation: Reconciliation;
         primaryExerciseId: string | null;
         byMuscle: Record<string, number>;
+        proteinPerKg7d: number | null;
         hidden: boolean;
       }
   >({ status: 'loading' });
@@ -124,7 +132,7 @@ function ReviewSurface(): ReactElement {
         weights: await getWeightHistory(),
         sets: await getSetsSince(windowStart),
         exercises: SEED_EXERCISES,
-        proteinPerKg7d: null,
+        food: (await getEntriesSince(windowStart)).map((e) => ({ loggedAt: e.loggedAt, proteinG: e.proteinG })),
       });
       if (off) return;
       setState({
@@ -132,17 +140,29 @@ function ReviewSurface(): ReactElement {
         reconciliation: built.reconciliation,
         primaryExerciseId: built.primaryExerciseId,
         byMuscle: built.snapshot.weeklySetsByMuscle,
+        proteinPerKg7d: built.snapshot.proteinPerKg7d,
         hidden: user.numbersHidden,
       });
-    })();
+    })().catch((err) => {
+      // A screen that stays blank forever is the worst failure this can have —
+      // it reads as a broken app rather than as a store that could not be read.
+      if (!off) setState({ status: 'error', message: err instanceof Error ? err.message : String(err) });
+    });
     return () => {
       off = true;
     };
   }, []);
 
   if (state.status === 'loading') return <div className="mx-auto max-w-[480px] px-4 pt-5" />;
+  if (state.status === 'error') {
+    return (
+      <p data-testid="review-error" className="mx-auto max-w-[480px] px-4 pt-5 font-serif text-[15px] leading-[1.45] text-flag">
+        Couldn&rsquo;t read your history: {state.message}. Nothing has been changed.
+      </p>
+    );
+  }
 
-  const { reconciliation: r, primaryExerciseId, byMuscle, hidden } = state;
+  const { reconciliation: r, primaryExerciseId, byMuscle, hidden, proteinPerKg7d } = state;
   const copy = VERDICT_COPY[r.verdict];
   const claim: Claim | undefined = copy.claimId ? CLAIMS.find((c) => c.id === copy.claimId) : undefined;
   const liftName = primaryExerciseId
@@ -152,7 +172,7 @@ function ReviewSurface(): ReactElement {
   const weekly = Object.entries(byMuscle).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="mx-auto max-w-[480px] px-4 pt-5 pb-10">
+    <div className="step-in mx-auto max-w-[480px] px-4 pt-5 pb-10">
       <p className={LABEL}>Weekly review</p>
 
       <h1 data-testid="verdict-headline" className="mt-2 font-serif text-[21px] leading-[1.25] tracking-[-0.005em] text-ink">
@@ -166,7 +186,7 @@ function ReviewSurface(): ReactElement {
 
       {/* The reconciliation itself: the two halves as ONE reading, in one
           ledger, rather than two charts left for the reader to combine. */}
-      <section className="mt-6 border-t border-rule pt-4">
+      <section className="figure-settle mt-6 border-t border-rule pt-4">
         <p className={LABEL}>What was measured</p>
 
         <dl className="mt-2">
@@ -211,7 +231,11 @@ function ReviewSurface(): ReactElement {
       {/* The part a pair of charts cannot do. First-class, never a footnote:
           principle 7 says nuance is the default state, not a disclosure layer. */}
       {r.unresolved.length > 0 && (
-        <section data-testid="unresolved-block" className="mt-6 border-t border-rule pt-4">
+        <section
+          data-testid="unresolved-block"
+          className="figure-settle mt-6 border-t border-rule pt-4"
+          style={{ animationDelay: 'calc(var(--motion-settle) * 0.1)' }}
+        >
           <p className={LABEL}>What this cannot see</p>
           <ul className="mt-2">
             {r.unresolved.map((signal) => (
@@ -231,7 +255,10 @@ function ReviewSurface(): ReactElement {
         </section>
       )}
 
-      <section className="mt-6 border-t border-rule pt-4">
+      <section
+        className="figure-settle mt-6 border-t border-rule pt-4"
+        style={{ animationDelay: 'calc(var(--motion-settle) * 0.2)' }}
+      >
         <p className={LABEL}>Sets per muscle, last 7 days</p>
         {weekly.length === 0 ? (
           <p className="mt-2 font-serif text-[14px] leading-[1.45] text-ink-soft">
@@ -240,9 +267,20 @@ function ReviewSurface(): ReactElement {
         ) : (
           <ul className="mt-2">
             {weekly.map(([muscle, sets]) => (
-              <li key={muscle} className="flex items-baseline justify-between gap-3 border-b border-rule py-2">
-                <span className="font-serif text-[14px] text-ink">{muscle.replace(/_/g, ' ')}</span>
-                <span className={`${FIGURE} text-[14px] text-ink`}>{Math.round(sets * 10) / 10}</span>
+              <li key={muscle} data-testid="volume-row" className="border-b border-rule py-2">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="font-serif text-[14px] text-ink">{muscle.replace(/_/g, ' ')}</span>
+                  <span className={`${FIGURE} text-[14px] text-ink`}>{Math.round(sets * 10) / 10}</span>
+                </div>
+                {/* Counted against the studied range, never a personal target.
+                    The meter runs to POPULATION_HIGH so the range itself is the
+                    scale; marks past it go faint rather than red, because
+                    exceeding a population range is not an error (GR-4). */}
+                <Meter
+                  filled={Math.round(sets)}
+                  total={POPULATION_HIGH}
+                  overFrom={POPULATION_HIGH}
+                />
               </li>
             ))}
           </ul>
@@ -254,8 +292,38 @@ function ReviewSurface(): ReactElement {
         </p>
       </section>
 
+      <section
+        className="figure-settle mt-6 border-t border-rule pt-4"
+        style={{ animationDelay: 'calc(var(--motion-settle) * 0.3)' }}
+      >
+        <p className={LABEL}>Protein on training days</p>
+        {hidden ? (
+          <p className="mt-1 font-serif text-[15px] leading-[1.45] text-ink">
+            Logged. Figures are hidden, and your training log is unaffected.
+          </p>
+        ) : proteinPerKg7d === null ? (
+          <p className="mt-1 font-serif text-[14px] leading-[1.45] text-ink-soft">
+            Nothing to measure yet — this needs food logged on a day you trained.
+          </p>
+        ) : (
+          <>
+            <p data-testid="protein-per-kg" className={`${FIGURE} mt-1 text-[24px] text-ink`}>
+              {proteinPerKg7d.toFixed(1)}
+              <span className="ml-1 text-[15px] text-ink-faint">g/kg</span>
+            </p>
+            <p className="mt-1 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
+              Averaged across the training days you logged food on, against your latest bodyweight.
+              Rest days are a different question and are left out of it.
+            </p>
+          </>
+        )}
+      </section>
+
       {claim && (
-        <section className="mt-6 border-t border-rule pt-4">
+        <section
+          className="figure-settle mt-6 border-t border-rule pt-4"
+          style={{ animationDelay: 'calc(var(--motion-settle) * 0.4)' }}
+        >
           <p className={LABEL}>What the evidence says</p>
           <div className="mt-2 border border-rule">
             <ClaimCard claim={claim} />

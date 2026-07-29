@@ -15,6 +15,7 @@
 import { reconcile, type Reconciliation } from '../domain/reconcile';
 import { setE1rm } from '../domain/e1rm';
 import { weeklySetsByMuscle } from '../domain/volume';
+import { proteinPerKgOnTrainingDays } from '../domain/protein';
 import type { UserStateSnapshot } from './types';
 import type { LoggedSet } from '../db/workouts';
 import type { WeightReading } from '../db/weights';
@@ -31,7 +32,8 @@ export interface SnapshotSources {
   /** Every set in the reconciliation window, ascending by performedAt. */
   sets: LoggedSet[];
   exercises: ExerciseRow[];
-  proteinPerKg7d: number | null;
+  /** Food logged in the window. Empty is fine — the protein figure goes null. */
+  food?: { loggedAt: string; proteinG: number }[];
   now?: Date;
 }
 
@@ -104,6 +106,8 @@ export interface BuiltSnapshot {
   reconciliation: Reconciliation;
   /** Which lift the strength half was read from, so the UI can name it. */
   primaryExerciseId: string | null;
+  /** Most recent reading, for anything reported per kg of bodyweight. */
+  latestWeightKg: number | null;
 }
 
 export function buildSnapshot(sources: SnapshotSources): BuiltSnapshot {
@@ -127,9 +131,18 @@ export function buildSnapshot(sources: SnapshotSources): BuiltSnapshot {
 
   const windowStart = new Date(now.getTime() - 7 * MS_PER_DAY).toISOString();
 
+  // Protein reads over the same 7 days as volume, and against the most recent
+  // bodyweight rather than a smoothed one — this is a dose per kg of the body
+  // that trained, not a trend.
+  const latestWeight = sources.weights.at(-1)?.valueKg ?? null;
+  const recentFood = (sources.food ?? []).filter((f) => f.loggedAt >= windowStart);
+  const recentSets = sources.sets.filter((s) => s.performedAt >= windowStart);
+  const proteinPerKg7d = proteinPerKgOnTrainingDays(recentFood, recentSets, latestWeight);
+
   return {
     primaryExerciseId,
     reconciliation,
+    latestWeightKg: latestWeight,
     snapshot: {
       goal: sources.goal,
       // Straight from the reconciler, never recomputed here — a second opinion
@@ -138,7 +151,7 @@ export function buildSnapshot(sources: SnapshotSources): BuiltSnapshot {
       weightTrend: reconciliation.weightTrend,
       e1rmTrend: reconciliation.e1rmTrend,
       weeklySetsByMuscle: weeklySetsByMuscle(sources.sets, sources.exercises, windowStart),
-      proteinPerKg7d: sources.proteinPerKg7d,
+      proteinPerKg7d,
       numbersHidden: sources.numbersHidden,
     },
   };

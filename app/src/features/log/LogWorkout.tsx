@@ -18,6 +18,7 @@ import {
 import { setE1rm } from '../../domain/e1rm';
 import { getSetsSince } from '../../db/workouts';
 import { getWeightHistory } from '../../db/weights';
+import { getEntriesSince } from '../../db/nutrition';
 import { buildSnapshot } from '../../advice/snapshot';
 import type { Reconciliation } from '../../domain/reconcile';
 import { getUser } from '../../db/user';
@@ -330,8 +331,8 @@ function LoggingSurface(): ReactElement {
       goalStartedAt: user.goalStartedAt,
       weights: await getWeightHistory(),
       sets: await getSetsSince(windowStart),
+      food: (await getEntriesSince(windowStart)).map((e) => ({ loggedAt: e.loggedAt, proteinG: e.proteinG })),
       exercises: SEED_EXERCISES,
-      proteinPerKg7d: null, // M3 owns the nutrition half; wired when it lands
     });
 
     const item = selectSessionAdvice(
