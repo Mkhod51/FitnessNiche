@@ -115,3 +115,33 @@ export function clampCalorieTarget(user: UserProfile, requested: number): Clampe
   const rounded = Math.round(value);
   return { value: rounded, clamped: reason !== 'none', reason };
 }
+
+/**
+ * The target for a chosen daily deficit.
+ *
+ * This exists so no screen ever writes `maintenance - deficit` itself. That
+ * arithmetic IS target-setting, and `guards-enforcement.test.ts` fails the build
+ * when it appears outside this layer — a slider that computed its own value
+ * would be the second path GR-1 forbids, even if it politely called the clamp
+ * afterwards.
+ *
+ * A negative deficit is a surplus and passes through: GR-1 guards under-eating.
+ */
+export function targetForDeficit(user: UserProfile, deficitKcal: number): ClampedTarget {
+  if (!Number.isFinite(deficitKcal) || !usable(user.maintenanceKcal)) {
+    return clampCalorieTarget(user, Number.NaN);
+  }
+  return clampCalorieTarget(user, user.maintenanceKcal - deficitKcal);
+}
+
+/**
+ * The largest deficit this person can actually be given, once the floors are
+ * taken into account. A slider uses this as its maximum so the control STOPS
+ * rather than letting someone drag into a value that is silently clamped back —
+ * a limit you can cross and have quietly undone is a warning, not a guard.
+ */
+export function maxAllowedDeficit(user: UserProfile): number {
+  if (!usable(user.maintenanceKcal)) return 0;
+  const atCap = targetForDeficit(user, MAX_DAILY_DEFICIT_KCAL);
+  return Math.max(0, Math.round(user.maintenanceKcal - atCap.value));
+}

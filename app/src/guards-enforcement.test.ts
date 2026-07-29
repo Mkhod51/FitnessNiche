@@ -33,8 +33,22 @@ const GUARD_MAGIC = [
   /\bSEX_FLOOR\b/,
 ];
 
-/** Doing this to a maintenance figure anywhere but the guard is a second path. */
-const TARGET_ARITHMETIC = /maintenance\w*\s*[-+]\s*\w+|deficit\w*\s*[-+*]\s*\w+/i;
+/**
+ * Doing this to a maintenance figure anywhere but the guard is a second path.
+ *
+ * Whitespace around the operator is REQUIRED, and that is the whole trick: real
+ * arithmetic reads `maintenanceKcal - deficit` once formatted, while kebab-case
+ * identifiers like `maintenance-estimate` and `deficit-slider` never have it.
+ * The first version of this pattern omitted that and flagged five test ids on
+ * its first real caller — a guard that cries wolf teaches people to ignore it,
+ * which is worse than not having one.
+ */
+const TARGET_ARITHMETIC = /\b\w*(maintenance|deficit)\w*\s+[-+*]\s+\w/i;
+
+/** Comments discuss the arithmetic constantly; only code counts. */
+function stripComments(src: string): string {
+  return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+}
 
 function sourceFilesUnder(dir: string): string[] {
   const abs = join(here, dir);
@@ -83,7 +97,7 @@ describe('calorie-target enforcement', () => {
 
   it('finds nobody computing a target from maintenance outside the domain layer', () => {
     const offenders = sourceFilesUnder('features')
-      .filter((file) => TARGET_ARITHMETIC.test(readFileSync(file, 'utf8')))
+      .filter((file) => TARGET_ARITHMETIC.test(stripComments(readFileSync(file, 'utf8'))))
       .map((f) => relative(here, f));
 
     expect(
