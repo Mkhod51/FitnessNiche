@@ -81,7 +81,7 @@ describe('EatDay — GR-1 is structural here, not a tone of voice', () => {
   it('never renders a remaining / left / budget counter, or a streak', async () => {
     mockGetEntriesForDay.mockResolvedValue([entry({ kcal: 1910, proteinG: 142 })]);
     render(<EatDay />);
-    await screen.findByTestId('kcal-total');
+    await waitFor(() => expect(screen.getByTestId('kcal-total')).toHaveTextContent('1,910'));
 
     expect(screen.queryByText(/remaining/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/\bleft\b/i)).not.toBeInTheDocument();
@@ -93,7 +93,10 @@ describe('EatDay — GR-1 is structural here, not a tone of voice', () => {
   it('shows what was eaten, not what is left', async () => {
     mockGetEntriesForDay.mockResolvedValue([entry({ kcal: 1910 })]);
     render(<EatDay />);
-    expect(await screen.findByTestId('kcal-total')).toHaveTextContent('1,910');
+    // Wait for the CONTENT, not merely the element: the total renders
+    // immediately at 0 while the entries are still loading, so findByTestId
+    // alone asserts against the first paint and passes or fails on timing.
+    await waitFor(() => expect(screen.getByTestId('kcal-total')).toHaveTextContent('1,910'));
     expect(screen.getByText(/energy eaten today/i)).toBeInTheDocument();
     // 2500 - 1910 = 590 is the number GR-1 forbids. It must appear nowhere.
     expect(screen.queryByText(/590/)).not.toBeInTheDocument();
@@ -101,8 +104,7 @@ describe('EatDay — GR-1 is structural here, not a tone of voice', () => {
 
   it('says the bar fills toward the target rather than counting down from it', async () => {
     render(<EatDay />);
-    await screen.findByTestId('kcal-total');
-    expect(screen.getByText(/fills toward the target/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/fills toward the target/i)).toBeInTheDocument());
   });
 
   // Protein is the asymmetry: a floor you are reaching, so a countdown here
@@ -110,8 +112,7 @@ describe('EatDay — GR-1 is structural here, not a tone of voice', () => {
   it('does count protein down, because that one encourages eating', async () => {
     mockGetEntriesForDay.mockResolvedValue([entry({ proteinG: 140 })]);
     render(<EatDay />);
-    await screen.findByTestId('protein-total');
-    expect(screen.getByText(/40 g to go/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/40 g to go/i)).toBeInTheDocument());
   });
 });
 
@@ -186,8 +187,7 @@ describe('EatDay — logging', () => {
   it('says plainly that no target is set rather than comparing against nothing', async () => {
     mockGetUser.mockResolvedValue({ ...baseUser, calorieTargetKcal: null, proteinTargetG: null });
     render(<EatDay />);
-    await screen.findByTestId('kcal-total');
-    expect(screen.getByText(/no target set/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/no target set/i)).toBeInTheDocument());
   });
 
   it('reports the weekly average over days actually logged, and says so', async () => {
@@ -196,8 +196,7 @@ describe('EatDay — logging', () => {
       entry({ id: 'b', kcal: 3000, loggedAt: '2026-07-27T08:00:00.000Z' }),
     ]);
     render(<EatDay />);
-    await screen.findByTestId('week-average');
-    expect(screen.getByTestId('week-average')).toHaveTextContent('2,500');
+    await waitFor(() => expect(screen.getByTestId('week-average')).toHaveTextContent('2,500'));
     expect(screen.getByText(/over 2 logged days/i)).toBeInTheDocument();
   });
 });
