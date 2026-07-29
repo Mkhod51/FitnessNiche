@@ -19,7 +19,7 @@
    cd app && ls src/domain src/features && npm run typecheck && npm test -- --run
    ```
 
-**Verified 2026-07-29 (latest):** typecheck clean · **502 unit tests / 47 files** · build OK · e2e 21/21.
+**Verified 2026-07-29 (latest):** typecheck clean · **511 unit tests / 48 files** · build OK · e2e 21/21.
 
 ## What exists now
 
@@ -50,7 +50,7 @@ and erasure plus the GR-1 Beat/NHS signpost, and the Hevy CSV parser.
 makes advice data-earned (FR-ADV-4/AC-3), migration `0004_goal_clock`, and the weekly review
 screen at `/review`.
 
-**Verified 2026-07-29:** typecheck clean · **502 unit tests / 47 files** · build OK · **e2e 21/21**.
+**Verified 2026-07-29:** typecheck clean · **511 unit tests / 48 files** · build OK · **e2e 21/21**.
 
 Two things worth knowing about how it was scoped:
 
@@ -64,9 +64,14 @@ Two things worth knowing about how it was scoped:
   rather than guessing. That is a design claim that still needs the developer's eye on it — the
   gate is not self-certifying.
 
-**Still open in M4:** `proteinPerKg7d` is wired as `null` (M3 owns the nutrition half), and the
-review screen shows sets-per-muscle as a plain list rather than against the population range the
-way Trends does.
+**M4 is now feature-complete.** `proteinPerKg7d` reads from food logged on training days
+(`domain/protein.ts`) — the "on training days" qualifier is load-bearing, since rest-day intake is
+a different question. Sets per muscle render against the studied 10-20 range via the shared
+`components/Meter`, with marks past the range faint rather than red. The review screen carries the
+same motion system as the rest of the app.
+
+**What M4 does NOT close:** the OQ-4 gate itself. The screen is built and the refusal behaviour is
+real, but whether the verdict earns its keep is the developer's call, not a passing test.
 
 ## What does not exist
 
