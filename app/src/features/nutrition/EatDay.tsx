@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import { Link } from 'react-router';
 import { ConsentGate } from '../onboarding/ConsentGate';
+import { Meter } from '../../components/Meter';
 import { getUser, type User } from '../../db/user';
 import {
   logFood,
@@ -31,39 +32,6 @@ const SLOT_LABEL: Record<MealSlot, string> = {
 /** Each mark is 100 kcal / 10 g — Isotype's rule: repeat a mark, never scale one. */
 const KCAL_PER_MARK = 100;
 const PROTEIN_PER_MARK = 10;
-
-/**
- * Quantity is shown by repeating a countable mark, never by scaling one
- * (DESIGN.md §Direction contract), so the meter fills mark by mark in sequence
- * rather than sliding a bar to a new width. The sequence is the point: it shows
- * a value moved and by how much, where substituting a new static bar would only
- * show where it ended up.
- *
- * The stagger is per-mark but the TOTAL is clamped to `--motion-settle`, so a
- * 30-mark kcal meter takes exactly as long as a 6-mark one. An un-clamped
- * per-mark delay is how this kind of meter turns into a progress bar the user
- * waits on, which would be a loading animation for a local read — banned
- * outright by §Motion.
- */
-function Meter({ filled, total, tone }: { filled: number; total: number; tone: 'ink' | 'conf' }): ReactElement {
-  const marks = Math.max(total, filled);
-  return (
-    <div className="mt-2 flex gap-[2.5px]" aria-hidden="true">
-      {Array.from({ length: marks }, (_, i) => {
-        const on = i < filled;
-        return (
-          <span
-            key={i}
-            className={`h-[16px] min-w-0 flex-1 ${
-              on ? `mark-fill ${tone === 'conf' ? 'bg-conf-b' : 'bg-ink'}` : 'bg-rule-strong'
-            }`}
-            style={on ? { animationDelay: `calc(var(--motion-settle) * ${(i / Math.max(filled, 1)) * 0.6})` } : undefined}
-          />
-        );
-      })}
-    </div>
-  );
-}
 
 function DayView(): ReactElement {
   const [user, setUser] = useState<User | null>(null);
