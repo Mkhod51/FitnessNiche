@@ -8,6 +8,7 @@ function claim(over: Partial<Claim> = {}): Claim {
   return {
     id: 'c-test-a',
     statement: 'A statement',
+    peekStatement: 'Short curated form',
     grade: 'A',
     status: 'settled',
     domain: 'volume',
@@ -24,18 +25,21 @@ function claim(over: Partial<Claim> = {}): Claim {
 const deloadClaim = claim({
   id: 'c-deload',
   statement: 'A planned deload week every four to six weeks helps manage fatigue',
+  peekStatement: 'Short curated form',
   domain: 'deloads',
 });
 
 const restClaim = claim({
   id: 'c-rest',
   statement: 'Resting more than a minute between sets is mildly better for growth',
+  peekStatement: 'Short curated form',
   domain: 'rest-intervals',
 });
 
 const proteinClaim = claim({
   id: 'c-protein-dose',
   statement: 'Roughly 1.6 to 2.2 grams of protein per kilogram supports muscle growth',
+  peekStatement: 'Short curated form',
   domain: 'protein-dose',
   citations: [{
     id: 'cit-1', claimId: 'c-protein-dose', doi: '10.0/x', authors: 'Zubrzycki OA',
@@ -50,6 +54,7 @@ const forSide = claim({
   clusterId: 'protein-timing',
   domain: 'protein-timing',
   statement: 'Spreading protein into several doses around training may add something',
+  peekStatement: 'Short curated form',
 });
 
 const againstSide = claim({
@@ -58,6 +63,7 @@ const againstSide = claim({
   clusterId: 'protein-timing',
   domain: 'protein-timing',
   statement: 'Total daily protein dominates once timing is accounted for',
+  peekStatement: 'Short curated form',
 });
 
 const claims: Claim[] = [deloadClaim, restClaim, proteinClaim, forSide, againstSide];

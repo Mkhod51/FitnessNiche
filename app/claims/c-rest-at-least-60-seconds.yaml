@@ -3,6 +3,8 @@ statement: >-
   Resting longer than about a minute between sets may be slightly better for growth,
   though the effect is not clearly separable from none, and past roughly 90 seconds
   the authors found no further difference
+peekStatement: >-
+  Resting past about a minute may help growth slightly, though not clearly separably from none
 grade: C
 status: settled
 domain: rest-intervals

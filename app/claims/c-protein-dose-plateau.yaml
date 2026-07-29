@@ -2,6 +2,8 @@ id: c-protein-dose-plateau
 statement: >-
   Past roughly 1.6 g of protein per kg of bodyweight a day, more protein stops
   adding measurable lean mass
+peekStatement: >-
+  Past roughly 1.6 g per kg a day, more protein stops adding measurable lean mass
 grade: B
 status: settled
 domain: protein-dose

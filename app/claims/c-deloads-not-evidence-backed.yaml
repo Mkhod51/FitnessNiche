@@ -3,6 +3,8 @@ statement: >-
   Planned deload weeks are widely prescribed but barely studied, and the one
   controlled trial in trained lifters found they cost strength without helping
   muscle growth
+peekStatement: >-
+  Planned deloads are barely studied, and one trial found they cost strength
 grade: B
 status: settled
 domain: deloads

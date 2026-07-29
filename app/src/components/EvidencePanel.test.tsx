@@ -6,6 +6,7 @@ import type { Claim } from '../advice/types';
 const claim: Claim = {
   id: 'c-volume',
   statement: 'More weekly sets produce more growth, with diminishing returns',
+  peekStatement: 'Short curated form',
   grade: 'C', status: 'settled', domain: 'volume',
   predicates: null, clusterId: null, phrasingKey: 'test-volume',
   supersededBy: null, lastReviewed: '2026-06-01',

@@ -2,6 +2,8 @@ id: c-failure-not-required
 statement: >-
   Taking sets to failure is not required for strength or muscle growth, though in
   lifters who already train there is a small hypertrophy cost to stopping short
+peekStatement: >-
+  Taking sets to failure is not required for strength or growth
 grade: A
 status: settled
 domain: failure-proximity

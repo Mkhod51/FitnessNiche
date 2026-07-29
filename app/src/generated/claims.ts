@@ -7,6 +7,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-deficit-beyond-500-blocks-lean-mass",
     "statement": "Around a 500 kcal per day deficit is where gaining lean mass stops being realistic, so a larger deficit trades muscle for speed",
+    "peekStatement": "Past about a 500 kcal daily deficit, gaining lean mass stops being realistic",
     "grade": "B",
     "status": "settled",
     "domain": "energy-balance",
@@ -60,6 +61,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-deficit-impairs-lean-mass",
     "statement": "Training in an energy deficit blunts how much lean mass you gain compared with training at maintenance",
+    "peekStatement": "Training in an energy deficit blunts lean-mass gain compared with maintenance",
     "grade": "B",
     "status": "settled",
     "domain": "energy-balance",
@@ -117,6 +119,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-deloads-not-evidence-backed",
     "statement": "Planned deload weeks are widely prescribed but barely studied, and the one controlled trial in trained lifters found they cost strength without helping muscle growth",
+    "peekStatement": "Planned deloads are barely studied, and one trial found they cost strength",
     "grade": "B",
     "status": "settled",
     "domain": "deloads",
@@ -160,6 +163,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-failure-not-required",
     "statement": "Taking sets to failure is not required for strength or muscle growth, though in lifters who already train there is a small hypertrophy cost to stopping short",
+    "peekStatement": "Taking sets to failure is not required for strength or growth",
     "grade": "A",
     "status": "settled",
     "domain": "failure-proximity",
@@ -217,6 +221,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-failure-proximity-dose-response",
     "statement": "Muscle growth tends to increase the closer sets are taken to failure, while strength looks much the same across a wide range of reps-in-reserve",
+    "peekStatement": "Growth tends to rise closer to failure; strength looks similar across a wide RIR range",
     "grade": "B",
     "status": "settled",
     "domain": "failure-proximity",
@@ -245,6 +250,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-failure-small-hypertrophy-edge-when-trained",
     "statement": "In lifters who already train, sets taken to failure show a small hypertrophy advantage that does not appear in untrained beginners",
+    "peekStatement": "In lifters who already train, failure shows a small hypertrophy edge",
     "grade": "B",
     "status": "settled",
     "domain": "failure-proximity",
@@ -294,6 +300,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-frequency-helps-strength",
     "statement": "Strength is the exception: spreading the same volume over more sessions does tend to improve strength, though the returns shrink",
+    "peekStatement": "Spreading the same volume over more sessions does tend to help strength, with shrinking returns",
     "grade": "B",
     "status": "settled",
     "domain": "frequency",
@@ -336,6 +343,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-frequency-irrelevant-when-volume-equated",
     "statement": "Once weekly volume is matched, how many sessions you split it across makes little difference to muscle growth",
+    "peekStatement": "With weekly volume matched, how you split it makes little difference to growth",
     "grade": "A",
     "status": "settled",
     "domain": "frequency",
@@ -392,6 +400,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-protein-dose-plateau",
     "statement": "Past roughly 1.6 g of protein per kg of bodyweight a day, more protein stops adding measurable lean mass",
+    "peekStatement": "Past roughly 1.6 g per kg a day, more protein stops adding measurable lean mass",
     "grade": "B",
     "status": "settled",
     "domain": "protein-dose",
@@ -453,6 +462,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-protein-helps-trained-more",
     "statement": "Training experience increases how much extra protein helps, while getting older reduces it",
+    "peekStatement": "Training experience raises how much extra protein helps; getting older reduces it",
     "grade": "B",
     "status": "settled",
     "domain": "protein-dose",
@@ -492,6 +502,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-protein-supplementation-works",
     "statement": "Supplementing protein while you lift produces a real but modest increase in lean mass and strength",
+    "peekStatement": "Supplementing protein while you lift gives a real but modest gain",
     "grade": "A",
     "status": "settled",
     "domain": "protein-dose",
@@ -544,6 +555,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-protein-timing-distribution-matters",
     "statement": "Spreading protein into 20-40 g doses every three to four hours, including around training, may still add something total intake alone does not",
+    "peekStatement": "Spreading protein through the day may add something total intake alone does not",
     "grade": "C",
     "status": "contested",
     "domain": "protein-timing",
@@ -616,6 +628,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-protein-timing-total-intake-dominates",
     "statement": "Once total daily protein is accounted for, when you eat it around training stops predicting muscle or strength gains",
+    "peekStatement": "Once daily total is accounted for, timing around training stops predicting gains",
     "grade": "B",
     "status": "contested",
     "domain": "protein-timing",
@@ -672,6 +685,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-rest-at-least-60-seconds",
     "statement": "Resting longer than about a minute between sets may be slightly better for growth, though the effect is not clearly separable from none, and past roughly 90 seconds the authors found no further difference",
+    "peekStatement": "Resting past about a minute may help growth slightly, though not clearly separably from none",
     "grade": "C",
     "status": "settled",
     "domain": "rest-intervals",
@@ -750,6 +764,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-strength-holds-through-a-deficit",
     "statement": "Strength appears to hold up better than muscle size does in an energy deficit, though the strength comparison is a non-significant result rather than a demonstrated equivalence",
+    "peekStatement": "Strength appears to hold up better than size in a deficit, on a non-significant result",
     "grade": "B",
     "status": "settled",
     "domain": "energy-balance",
@@ -818,6 +833,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-volume-dose-response",
     "statement": "More weekly sets per muscle produce more hypertrophy, with each additional set adding less than the one before",
+    "peekStatement": "More weekly sets per muscle produce more growth, each set adding less than the last",
     "grade": "A",
     "status": "settled",
     "domain": "volume",
@@ -911,6 +927,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-volume-strength-diminishing-returns",
     "statement": "Strength gains keep rising with weekly volume too, but they flatten off much faster than muscle size does",
+    "peekStatement": "Strength rises with weekly volume too, but flattens off much faster than size does",
     "grade": "B",
     "status": "settled",
     "domain": "volume",

@@ -2,6 +2,8 @@ id: c-deficit-beyond-500-blocks-lean-mass
 statement: >-
   Around a 500 kcal per day deficit is where gaining lean mass stops being
   realistic, so a larger deficit trades muscle for speed
+peekStatement: >-
+  Past about a 500 kcal daily deficit, gaining lean mass stops being realistic
 grade: B
 status: settled
 domain: energy-balance

@@ -2,6 +2,8 @@ id: c-frequency-helps-strength
 statement: >-
   Strength is the exception: spreading the same volume over more sessions does
   tend to improve strength, though the returns shrink
+peekStatement: >-
+  Spreading the same volume over more sessions does tend to help strength, with shrinking returns
 grade: B
 status: settled
 domain: frequency

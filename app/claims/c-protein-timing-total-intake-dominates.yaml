@@ -2,6 +2,8 @@ id: c-protein-timing-total-intake-dominates
 statement: >-
   Once total daily protein is accounted for, when you eat it around training
   stops predicting muscle or strength gains
+peekStatement: >-
+  Once daily total is accounted for, timing around training stops predicting gains
 grade: B
 status: contested
 domain: protein-timing
