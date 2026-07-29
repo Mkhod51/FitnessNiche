@@ -41,7 +41,7 @@ export function ConfidenceTicks({ grade }: { grade: Grade }): ReactElement {
           );
         })}
       </div>
-      <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint">{label}</span>
+      <span className="font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint">{label}</span>
     </div>
   );
 }
