@@ -1,4 +1,4 @@
-import { eq, and, isNull, isNotNull, desc } from 'drizzle-orm';
+import { eq, and, isNull, isNotNull, desc, gte } from 'drizzle-orm';
 import { getDrizzle } from './client';
 import { workouts, sets } from './schema';
 import { LOCAL_USER_ID } from './user';
@@ -245,4 +245,19 @@ export async function getOpenSessionSets(now: Date = new Date()): Promise<Logged
   const workout = await findOpenWorkout(now);
   if (!workout) return [];
   return getSetsForWorkout(workout.id);
+}
+
+/**
+ * Every non-deleted set performed at or after `sinceIso`, across all workouts.
+ *
+ * Weekly volume is a rolling window over every session, not today's — which is
+ * also why the advice peek can be chosen from real data the moment a session
+ * opens, before anything has been logged into it.
+ */
+export async function getSetsSince(sinceIso: string): Promise<LoggedSet[]> {
+  const db = getDrizzle();
+  return db
+    .select()
+    .from(sets)
+    .where(and(isNull(sets.deletedAt), gte(sets.performedAt, sinceIso)));
 }
