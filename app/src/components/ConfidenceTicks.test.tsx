@@ -31,4 +31,14 @@ describe('ConfidenceTicks', () => {
     render(<ConfidenceTicks grade="A" />);
     expect(screen.getByTestId('confidence-ticks')).not.toHaveTextContent(/limited evidence/i);
   });
+
+  it.each([
+    ['A', 'text-conf-a'], ['B', 'text-conf-b'], ['C', 'text-conf-c'], ['D', 'text-conf-d'],
+  ] as [Grade, string][])('tints the %s label with its ramp colour', (g, cls) => {
+    // The developer chose the tinted variant; a label left in neutral ink is the
+    // monochrome variant wearing it. Colour stays redundant to the count and words.
+    render(<ConfidenceTicks grade={g} />);
+    const label = within(screen.getByTestId('confidence-ticks')).getByText(GRADE_LANGUAGE[g].chipLabel);
+    expect(label.className).toContain(cls);
+  });
 });

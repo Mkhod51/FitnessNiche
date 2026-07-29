@@ -2,12 +2,24 @@ import type { ReactElement } from 'react';
 import { ConfidenceTicks } from './ConfidenceTicks';
 import type { Claim, Citation } from '../advice/types';
 
+/**
+ * Citation author lists run to eleven names in this claim base, which wraps to
+ * four lines of italic serif on a 340px card. Mobile is the design target, so the
+ * card shows first-author-et-al and the evidence panel carries the full list.
+ * This shortens a stored string for display; it never invents one.
+ */
+export function shortenAuthors(authors: string): string {
+  const [first, ...rest] = authors.split(',').map((a) => a.trim()).filter(Boolean);
+  if (!first) return authors;
+  return rest.length > 0 ? `${first} et al.` : first;
+}
+
 // DESIGN.md §Type: source lines are italic serif; sample size is a count, so it
 // gets the mono treatment ("a number set in the serif face is a bug").
 function SourceLine({ citation }: { citation: Citation }): ReactElement {
   return (
     <p data-testid="claim-source" className="mt-2 font-serif text-[12px] italic text-ink-soft">
-      {citation.authors}, {citation.journal}, {citation.year}
+      {shortenAuthors(citation.authors)}, {citation.journal}, {citation.year}
       {citation.n !== null && (
         <>
           {' '}

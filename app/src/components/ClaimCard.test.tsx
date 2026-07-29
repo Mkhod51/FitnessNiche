@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { ClaimCard } from './ClaimCard';
+import { ClaimCard, shortenAuthors } from './ClaimCard';
 import type { Claim } from '../advice/types';
 
 const claim: Claim = {
@@ -78,5 +78,28 @@ describe('ClaimCard', () => {
     const sides = screen.getAllByTestId('claim-side');
     expect(sides.map((el) => el.getAttribute('data-claim-id')).sort()).toEqual(['c-a', 'c-b']);
     for (const side of sides) expect(within(side).getByTestId('confidence-ticks')).toBeVisible();
+  });
+
+  it('shortens a long author list instead of wrapping four lines on a phone', () => {
+    const many = { ...claim, citations: [{ ...claim.citations[0],
+      authors: 'Morton RW, Murphy KT, McKellar SR, Schoenfeld BJ, Henselmans M, Phillips SM' }] };
+    render(<ClaimCard claim={many} />);
+    const src = screen.getByTestId('claim-source');
+    expect(src).toHaveTextContent('Morton RW et al.');
+    expect(src).not.toHaveTextContent('Phillips SM');
+  });
+});
+
+describe('shortenAuthors', () => {
+  it('leaves a single author alone', () => {
+    expect(shortenAuthors('Grgic J')).toBe('Grgic J');
+  });
+
+  it('collapses two or more to et al.', () => {
+    expect(shortenAuthors('Murphy C, Koehler K')).toBe('Murphy C et al.');
+  });
+
+  it('returns the original when there is nothing to split', () => {
+    expect(shortenAuthors('')).toBe('');
   });
 });
