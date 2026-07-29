@@ -174,3 +174,34 @@ Full record with the mockups' reasoning: `superpowers/plans/2026-07-27-trackers-
 30. **No fourth tab, and bodyweight logging is not settings.** The developer proposed one new tab for settings, body metrics and the calorie calculator, and asked for an opinion. Settings sits behind a gear on the Hub — a tab bar is for frequent destinations and settings is visited about twice a year, which is why Hevy and MyFitnessPal both do this; GR-1 requires settings to *exist* ("static signpost to Beat/NHS in settings", verbatim) but not to be a tab. Bodyweight logging goes on the Hub because it is a **logging surface** — frequent, offline-first, consent-gated — and bodyweight is one of only two signals this project's research grades trustworthy; burying the daily weigh-in in configuration would make the most defensible measurement in the product the hardest to reach. The calorie calculator lives inside Eat's goal setting, because **a calculator that produces a calorie target is a target-setting path** and a second one is exactly what the `guards.ts` choke-point rule exists to prevent. Schema consequence: `users` gains `birth_year` — a year rather than an age, since an age column is wrong within twelve months and nothing would correct it.
 
 31. **No placeholder claims, ever — and none are needed.** The developer asked whether curation could defer behind placeholders, and invited a correction if that were risky. It is both risky and unnecessary. **A fabricated claim in `claims/*.yaml` would pass every existing guard:** Zod validates DOI *shape* not resolution, the drift test only checks the bundle matches the committed copy, and the provenance test proves advice renders *from* a claim record — which a fake record satisfies perfectly. It would be indistinguishable from a curated claim, and #17 already records a *real* claim with an unsupported number surviving every automated guard, caught only by hostile human reading. It is unnecessary because `evaluateClaims(snapshot, claims)` is pure and takes claims as an argument, so selection tests use fixtures declared in test files that never enter `claims/`; and `c-volume-dose-response` is real, [A], and its stored predicate genuinely fires from logged data, exercising the whole pipeline end to end. **If a future session finds itself wanting a placeholder claim, that is the signal to curate a real one instead.**
+
+## OQ-2 answered (2026-07-29)
+
+32. **Hevy's free CSV export carries `rpe`, not `rir` — and RIR is recoverable from it.** The
+open question since Phase 2 was whether the free-tier export carries RIR or only weight×reps,
+because the answer decides whether imported history can feed the e1RM trend at all. It carries
+neither directly. The header is `title, start_time, end_time, description, exercise_title,
+superset_id, exercise_notes, set_index, set_type, weight_lbs, reps, distance_miles,
+duration_seconds, rpe`, confirmed against two independent descriptions of a real export. RPE is
+on the standard 1–10 scale, so **RIR = 10 − RPE**.
+
+**This is better than BUILD-PLAN assumed.** M2 Task 8 was written expecting `rir: null` on every
+imported set, which would have excluded all imported history from e1RM and left payoff latency
+unmitigated. Imported sets with a recorded RPE now qualify.
+
+**But the pessimistic path still has to work**, and does: `rpe` is optional per set and is
+commonly blank — the one worked example available shows it empty — so a blank imports as
+`rir: null` and `setE1rm` excludes it. Both outcomes are normal and neither is an error.
+
+Two further consequences the answer forced:
+- The export is in **pounds** (`weight_lbs`) for imperial users and `weight_kg` for metric ones.
+  Importing 225 as kilograms would be a 2.2× error on every lift that looks entirely plausible,
+  so the parser converts and handles both headers.
+- `set_type` distinguishes `warmup` from `normal`, which maps directly onto the `set_type` column
+  added in migration 0002 — so imported warm-ups stay out of weekly volume and out of e1RM
+  without any extra work.
+
+**No real export file could be obtained**, so the parser reads the header **by name rather than
+by position** and reports anything it cannot place instead of guessing. If the real format
+differs from the documented one, it says so rather than silently importing wrong numbers.
+**Reversal trigger:** a real export that fails to parse — the problem list will name the column.
