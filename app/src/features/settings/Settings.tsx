@@ -4,6 +4,8 @@ import { getUser, updateProfile, type User } from '../../db/user';
 import { exportEverything, exportFilename, exportSetsCsv, exportCsvFilename, deleteEverything } from '../../db/export';
 import { CLAIMS } from '../../generated/claims';
 import { readStoredTheme, applyTheme, type Theme } from '../../theme';
+import { getSyncConfig, setSyncConfig, clearSyncConfig, type SyncConfig } from '../../sync/config';
+import { syncNow, startAutoSync } from '../../sync/sync';
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 const TAP = 'transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)]';
@@ -45,9 +47,14 @@ export function Settings(): ReactElement {
   const [theme, setTheme] = useState<Theme>('auto');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleted, setDeleted] = useState(false);
+  const [syncUrl, setSyncUrl] = useState('');
+  const [syncToken, setSyncToken] = useState('');
+  const [syncCfg, setSyncCfg] = useState<SyncConfig | null>(null);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
   useEffect(() => {
     setTheme(readStoredTheme());
+    setSyncCfg(getSyncConfig());
     let off = false;
     void (async () => {
       const u = await getUser();
@@ -86,6 +93,36 @@ export function Settings(): ReactElement {
     setDeleted(true);
     setConfirmingDelete(false);
     setUser(await getUser());
+  }
+
+  // setSyncConfig persists but does not re-arm the online listener (no circular
+  // import with sync.ts). Re-arming here keeps the listener aligned with the
+  // new config; re-reading getSyncConfig updates the displayed status and the
+  // conditional privacy notice in one step.
+  function handleSaveSync() {
+    setSyncConfig(syncUrl, syncToken);
+    startAutoSync();
+    setSyncCfg(getSyncConfig());
+    setSyncMsg(null);
+  }
+
+  async function handleSyncNow() {
+    setSyncMsg(null);
+    try {
+      const r = await syncNow();
+      setSyncMsg(r.configured ? `pushed ${r.pushed}, pulled ${r.pulled}` : 'not configured');
+    } catch (e) {
+      // A broken endpoint must be visible — auto-sync logs to console, but a
+      // manual tap should show the user what happened, not swallow it.
+      setSyncMsg(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  function handleDisconnectSync() {
+    clearSyncConfig();
+    startAutoSync();
+    setSyncCfg(getSyncConfig());
+    setSyncMsg(null);
   }
 
   const lastReviewed = CLAIMS.map((c) => c.lastReviewed).sort().at(-1) ?? '—';
@@ -187,27 +224,120 @@ export function Settings(): ReactElement {
         <span className={LABEL}>CSV ›</span>
       </button>
 
-      {/* NFR-4/GR-5. The notice states what is actually true of this build —
-          on-device storage, no account, no third party — rather than the
-          boilerplate a hosted app would need. Saying "we may share with
-          partners" here would be false, and a privacy notice that overstates
-          what it collects is its own kind of dishonesty. Revisit when sync
-          ships and data genuinely leaves the device. */}
+      {/* Sync configuration. Runtime-configurable so a user can point at their
+          own Worker without a rebuild; the URL/token live in localStorage (see
+          sync/config.ts), never in the replicated DB, so the server's own
+          credential doesn't cross the wire. */}
+      <div className={ROW}>
+        <span className="min-w-0">
+          <span className="block font-serif text-[15.5px] text-ink">Sync</span>
+          <span data-testid="sync-status" className="block font-serif text-[12px] italic leading-[1.4] text-ink-faint">
+            {syncCfg ? `Configured → ${syncCfg.url}` : 'Off — data stays on this device only'}
+          </span>
+        </span>
+      </div>
+      <div className="border-b border-rule px-4 py-3">
+        <label className={LABEL} htmlFor="sync-url-input">Server URL</label>
+        <input
+          id="sync-url-input"
+          type="url"
+          inputMode="url"
+          autoComplete="off"
+          spellCheck={false}
+          data-testid="sync-url-input"
+          value={syncUrl}
+          onChange={(e) => setSyncUrl(e.target.value)}
+          placeholder="https://your-worker.workers.dev"
+          className="mt-1 min-h-[44px] w-full border border-rule-strong bg-paper px-3 font-sans text-[13px] text-ink outline-none focus:border-ink"
+        />
+        <label className={`${LABEL} mt-3 block`} htmlFor="sync-token-input">Bearer token</label>
+        <input
+          id="sync-token-input"
+          type="password"
+          autoComplete="off"
+          spellCheck={false}
+          data-testid="sync-token-input"
+          value={syncToken}
+          onChange={(e) => setSyncToken(e.target.value)}
+          className="mt-1 min-h-[44px] w-full border border-rule-strong bg-paper px-3 font-sans text-[13px] text-ink outline-none focus:border-ink"
+        />
+        <div className="mt-3 flex flex-wrap gap-3">
+          <button
+            type="button"
+            data-testid="sync-save-button"
+            disabled={!syncUrl.trim() || !syncToken.trim()}
+            onClick={handleSaveSync}
+            className={`min-h-[44px] flex-none border border-ink px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-ink ${TAP} disabled:opacity-40 disabled:pointer-events-none`}
+          >
+            Save
+          </button>
+          {syncCfg && (
+            <button
+              type="button"
+              data-testid="sync-now-button"
+              onClick={() => void handleSyncNow()}
+              className={`min-h-[44px] flex-none border border-rule-strong px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-ink ${TAP}`}
+            >
+              Sync now
+            </button>
+          )}
+          {syncCfg && (
+            <button
+              type="button"
+              data-testid="sync-disconnect-button"
+              onClick={handleDisconnectSync}
+              className={`min-h-[44px] flex-none px-2 font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-flag ${TAP}`}
+            >
+              Disconnect
+            </button>
+          )}
+        </div>
+        {syncMsg && (
+          <p data-testid="sync-result" className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
+            {syncMsg}
+          </p>
+        )}
+      </div>
+
+      {/* NFR-4/GR-5. The notice states what is actually true of this build, not
+          boilerplate. With sync configured it says plainly what replicates
+          where, that the bearer token stays on this device, and that "Delete
+          all my data" below is device-only — server-side erasure is not yet
+          wired (T6: never overstate). Without sync it states the honest
+          default: on-device, no account, nowhere else. */}
       <section data-testid="privacy-notice" className="border-b border-rule px-4 py-4">
         <p className={LABEL}>Your data</p>
-        <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
-          Everything you log — sets, bodyweight, meals — is stored in a database on this device
-          and nowhere else. There is no account, and nothing is sent to us or to anyone else.
-        </p>
-        <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
-          Workout and bodyweight data is special-category health data under UK GDPR, which is why
-          consent is asked separately before any of it is recorded, and why both buttons above
-          exist: you can take your data out, and you can erase it, without asking anyone.
-        </p>
-        <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-          Clearing this site&rsquo;s storage in your browser erases it too — there is no copy
-          anywhere for us to restore from.
-        </p>
+        {syncCfg ? (
+          <>
+            <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
+              Everything you log — sets, bodyweight, meals — is stored in a database on this
+              device and replicates to the server at <span className="break-all">{syncCfg.url}</span>.
+              The connection uses a bearer token stored only on this device, never sent anywhere
+              except to that server to authenticate sync.
+            </p>
+            <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
+              &ldquo;Delete all my data&rdquo; below erases this device only. It does not erase
+              what the server already holds — server-side erasure is not yet wired. Export above
+              gives you a copy of everything on this device.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
+              Everything you log — sets, bodyweight, meals — is stored in a database on this device
+              and nowhere else. There is no account, and nothing is sent to us or to anyone else.
+            </p>
+            <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
+              Workout and bodyweight data is special-category health data under UK GDPR, which is why
+              consent is asked separately before any of it is recorded, and why both buttons above
+              exist: you can take your data out, and you can erase it, without asking anyone.
+            </p>
+            <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
+              Clearing this site&rsquo;s storage in your browser erases it too — there is no copy
+              anywhere for us to restore from.
+            </p>
+          </>
+        )}
       </section>
 
       {/* GR-5 erasure. Destructive controls are --flag TEXT, never a filled red
