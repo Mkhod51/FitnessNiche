@@ -30,6 +30,7 @@ async function makeTestDb() {
 
 // Imported after the mock above is set up (vi.mock is hoisted by vitest).
 import { syncNow, startAutoSync } from './sync';
+import { setSyncConfig, clearSyncConfig } from './config';
 import { markPending, getWatermark } from './queue';
 import { LOCAL_USER_ID } from '../db/user';
 import { SYNC_PATH, type PushPullResponse } from './protocol';
@@ -63,6 +64,7 @@ afterEach(() => {
   cleanupAutoSync = undefined;
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
+  clearSyncConfig(); // isolate runtime-config tests from each other
 });
 
 describe('unconfigured sync — inert by default (no server configured is the normal state)', () => {
@@ -228,6 +230,51 @@ describe('startAutoSync — drains the queue on reconnect', () => {
     window.dispatchEvent(new Event('online'));
     await Promise.resolve();
 
+    expect(fetch).not.toHaveBeenCalled();
+  });
+});
+
+// Runtime config (localStorage) is the production path — env vars are dev/CI
+// only. The token lives outside SQLite on purpose (see config.ts), so this
+// also proves the credential never needs to be in a sync'd table to work.
+describe('runtime config — takes precedence over env, and re-arms', () => {
+  it('configures sync with no env vars set, hitting the runtime URL', async () => {
+    setSyncConfig('https://rt.example.dev', 'rt-token');
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ serverSeq: 1, changes: [], superseded: [] }) as unknown as Response,
+    );
+
+    const result = await syncNow();
+    expect(result).toEqual({ configured: true, pushed: 0, pulled: 0, superseded: 0 });
+    const [url, init] = vi.mocked(fetch).mock.calls[0];
+    expect(url).toBe('https://rt.example.dev/sync');
+    expect((init?.headers as Record<string, string>).Authorization).toBe('Bearer rt-token');
+  });
+
+  it('runtime config overrides env vars when both are present', async () => {
+    configureSync(); // env says SYNC_URL
+    setSyncConfig('https://rt.example.dev', 'rt-token');
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ serverSeq: 1, changes: [], superseded: [] }) as unknown as Response,
+    );
+
+    await syncNow();
+    const [url] = vi.mocked(fetch).mock.calls[0];
+    expect(url).toBe('https://rt.example.dev/sync'); // runtime won, not env
+  });
+
+  it('re-calling startAutoSync after clearing config disarms the listener', async () => {
+    setSyncConfig('https://rt.example.dev', 'rt-token');
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ serverSeq: 1, changes: [], superseded: [] }) as unknown as Response,
+    );
+
+    cleanupAutoSync = startAutoSync(); // armed
+    clearSyncConfig();
+    cleanupAutoSync = startAutoSync(); // re-arm must tear the old listener down, not stack
+
+    window.dispatchEvent(new Event('online'));
+    await Promise.resolve();
     expect(fetch).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { BrowserRouter, NavLink, Route, Routes, useLocation } from 'react-router';
 import { initDb } from './db/client';
+import { startAutoSync } from './sync/sync';
 import type { StorageMode } from './db/protocol';
 import { Hub } from './features/hub/Hub';
 import { LogWorkout } from './features/log/LogWorkout';
@@ -74,9 +75,16 @@ function Shell() {
   const [mode, setMode] = useState<BootState>('booting');
 
   useEffect(() => {
+    // Auto-sync arms only after the DB is up — a reconnect before boot would
+    // fire syncNow against an uninitialised queue. Cleanup disarms on unmount.
+    let stopSync: (() => void) | undefined;
     initDb()
-      .then(setMode)
+      .then((m) => {
+        setMode(m);
+        stopSync = startAutoSync();
+      })
       .catch((e) => setMode(`error: ${e.message}`));
+    return () => stopSync?.();
   }, []);
 
   // D7: memory-fallback is a data-loss mode, not a curiosity — anything other

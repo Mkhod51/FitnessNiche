@@ -8,18 +8,22 @@ import {
 } from './protocol';
 import { pendingRows, clearPending, markPending, getWatermark, setWatermark } from './queue';
 import { applyIncoming } from './merge';
+import { getSyncConfig } from './config';
 
 export type SyncResult =
   | { configured: false }
   | { configured: true; pushed: number; pulled: number; superseded: number };
 
 /**
- * Reads config fresh on every call rather than caching it at module load —
- * env vars unset means no server today (the default state), which must never
- * become a hard requirement. Also makes tests able to flip it per-case with
- * `vi.stubEnv` without a module reset.
+ * Runtime config first (Settings-entered), then env vars as a dev/CI fallback.
+ * Reads fresh on every call rather than caching at module load — no config
+ * means no server today (the default state), which must never become a hard
+ * requirement. Tests flip the env half per-case with `vi.stubEnv` without a
+ * module reset; the runtime half is just localStorage.
  */
 function config(): { url: string; token: string } | null {
+  const runtime = getSyncConfig();
+  if (runtime) return runtime;
   const url = import.meta.env.VITE_SYNC_URL as string | undefined;
   const token = import.meta.env.VITE_SYNC_TOKEN as string | undefined;
   if (!url || !token) return null;
@@ -97,8 +101,21 @@ async function runSync(now: Date): Promise<SyncResult> {
  * Returns a cleanup function so a component can remove the listener on
  * unmount. When sync isn't configured this is a no-op both ways: nothing is
  * attached, and the returned cleanup has nothing to remove.
+ *
+ * Idempotent and re-armable: calling it again (after Settings changes the
+ * config) tears down the previous listener first, so the online handler
+ * always reflects the current config and never stacks. The single armed
+ * listener is tracked module-side so a re-arm and the previous cleanup
+ * can't both be holding the same handler.
  */
+let armedCleanup: (() => void) | null = null;
+
 export function startAutoSync(): () => void {
+  // Disarm whatever is currently armed, regardless of config — a re-call after
+  // a config change must re-evaluate from a clean slate.
+  armedCleanup?.();
+  armedCleanup = null;
+
   if (!config()) return () => {};
 
   const onOnline = () => {
@@ -111,5 +128,10 @@ export function startAutoSync(): () => void {
   };
 
   window.addEventListener('online', onOnline);
-  return () => window.removeEventListener('online', onOnline);
+  const cleanup = () => {
+    window.removeEventListener('online', onOnline);
+    if (armedCleanup === cleanup) armedCleanup = null;
+  };
+  armedCleanup = cleanup;
+  return cleanup;
 }
