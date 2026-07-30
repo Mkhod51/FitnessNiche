@@ -21,6 +21,11 @@
 
 **Verified 2026-07-29 (latest):** typecheck clean · **511 unit tests / 48 files** · build OK · e2e 21/21.
 
+**Gates closed 2026-07-30 (developer verdict: yes on both):** the M1 A+C interaction is
+decisive-and-honest enough to ship, and the M4 reconciliation verdict earns its keep beyond
+two overlaid charts. OQ-4 is resolved. Work now on branch `OpenSourceMod`: closing M5
+(sync wiring into the running app) and starting the food database (FR-LOG-6).
+
 ## What exists now
 
 **Training.** Explicit session start/finish (`workouts.name`, `finished_at`), the Hevy-idiom
