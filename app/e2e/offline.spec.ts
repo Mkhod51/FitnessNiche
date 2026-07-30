@@ -14,7 +14,15 @@ test('the app boots and reads data with the network off', async ({ page, context
 
   await expect(page.getByRole('heading', { name: /evidence/i })).toBeVisible();
   await expect(page.getByTestId('storage-mode')).toHaveText('opfs-sahpool');
-  await expect(page.getByTestId('exercise-count')).toHaveText(String(SEED_EXERCISES.length));
+  // exercise-count isn't rendered on the advice feed — it carried no product meaning
+  // there — so this reads the same count through the window.__db e2e hatch, same as
+  // the write probe below.
+  const exerciseCount = await page.evaluate(async () => {
+    const { execSql } = (window as unknown as { __db: { execSql: (sql: string, params?: unknown[], method?: string) => Promise<unknown[][]> } }).__db;
+    const rows = await execSql('select count(*) from exercises', [], 'all');
+    return Number(rows[0]?.[0] ?? 0);
+  });
+  expect(exerciseCount).toBe(SEED_EXERCISES.length);
 
   // M0's check is "reads/writes SQLite" with the network down, so prove the write half
   // too. No user-facing write path exists until M2, so this goes through the same

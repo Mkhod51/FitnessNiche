@@ -1,15 +1,26 @@
 import { test, expect } from '@playwright/test';
 import { SEED_EXERCISES } from '../src/db/seed-exercises';
 
+// exercise-count isn't rendered anywhere on the advice feed — it carried no product
+// meaning there — so this reads the same count through the window.__db e2e hatch
+// client.ts installs when built with `--mode e2e` (see playwright.config.ts).
+async function countExercises(page: import('@playwright/test').Page): Promise<number> {
+  return page.evaluate(async () => {
+    const { execSql } = (window as unknown as { __db: { execSql: (sql: string, params?: unknown[], method?: string) => Promise<unknown[][]> } }).__db;
+    const rows = await execSql('select count(*) from exercises', [], 'all');
+    return Number(rows[0]?.[0] ?? 0);
+  });
+}
+
 test('database survives a hard reload', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('storage-mode')).toHaveText('opfs-sahpool');
-  await expect(page.getByTestId('exercise-count')).toHaveText(String(SEED_EXERCISES.length));
+  expect(await countExercises(page)).toBe(SEED_EXERCISES.length);
 
   await page.reload();
   await expect(page.getByTestId('storage-mode')).toHaveText('opfs-sahpool');
   // Same count (not doubled) proves the data persisted AND seeding is idempotent.
-  await expect(page.getByTestId('exercise-count')).toHaveText(String(SEED_EXERCISES.length));
+  expect(await countExercises(page)).toBe(SEED_EXERCISES.length);
 });
 
 test('migrations create the expected tables', async ({ page }) => {
