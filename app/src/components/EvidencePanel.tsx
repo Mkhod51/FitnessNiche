@@ -24,6 +24,18 @@ function CitationBlock({ citation }: { citation: Citation }): ReactElement {
       >
         {doiUrl}
       </a>
+      {citation.quote !== null && (
+        // A short attributed quote, GR-3's other permitted use of a source. These are
+        // curated precisely where a paper qualifies its own finding — one says
+        // "caution is warranted ... due to its exploratory nature" — so dropping them
+        // would discard the most honest sentence in the record.
+        <blockquote
+          data-testid="citation-quote"
+          className="mt-2 border-l-2 border-rule-strong pl-3 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft"
+        >
+          &ldquo;{citation.quote}&rdquo;
+        </blockquote>
+      )}
       <div className="mt-2">
         <FigureChart citation={citation} />
       </div>

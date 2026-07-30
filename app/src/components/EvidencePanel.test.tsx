@@ -85,4 +85,19 @@ describe('EvidencePanel', () => {
     render(<EvidencePanel claim={claim} />);
     expect(screen.queryByTestId('evidence-superseded')).toBeNull();
   });
+
+  it('shows a curated attributed quote when the record carries one', () => {
+    // Quotes are curated at the point a paper qualifies its own finding, so this is
+    // load-bearing nuance rather than decoration.
+    const quoted: Claim = { ...claim, citations: [
+      { ...claim.citations[0], quote: 'caution is warranted when interpreting the present analysis' },
+    ] };
+    render(<EvidencePanel claim={quoted} />);
+    expect(screen.getByTestId('citation-quote')).toHaveTextContent(/caution is warranted/i);
+  });
+
+  it('renders no quote element at all when the record has none', () => {
+    render(<EvidencePanel claim={claim} />);
+    expect(screen.queryByTestId('citation-quote')).toBeNull();
+  });
 });
