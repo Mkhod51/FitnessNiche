@@ -3,6 +3,7 @@ import { getDrizzle } from './client';
 import { weights } from './schema';
 import { LOCAL_USER_ID } from './user';
 import { newId } from './id';
+import { markPending } from '../sync/queue';
 
 export type WeightReading = typeof weights.$inferSelect;
 
@@ -19,6 +20,7 @@ export async function logWeight(valueKg: number, now: Date = new Date()): Promis
 
   const created = await db.select().from(weights).where(eq(weights.id, id)).get();
   if (!created) throw new Error('failed to create weight row');
+  await markPending('weights', id, now);
   return created;
 }
 

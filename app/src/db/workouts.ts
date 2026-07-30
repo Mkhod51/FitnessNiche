@@ -3,6 +3,7 @@ import { getDrizzle } from './client';
 import { workouts, sets } from './schema';
 import { LOCAL_USER_ID } from './user';
 import { newId } from './id';
+import { markPending } from '../sync/queue';
 
 export type Workout = typeof workouts.$inferSelect;
 // Named LoggedSet, not Set — `Set` would shadow the built-in collection type
@@ -69,6 +70,7 @@ export async function startWorkout(name: string | null = null, now: Date = new D
 
   const created = await db.select().from(workouts).where(eq(workouts.id, id)).get();
   if (!created) throw new Error('failed to create workout row');
+  await markPending('workouts', id, now);
   return created;
 }
 
@@ -77,6 +79,7 @@ export async function finishWorkout(id: string, now: Date = new Date()): Promise
   const db = getDrizzle();
   const nowIso = now.toISOString();
   await db.update(workouts).set({ finishedAt: nowIso, updatedAt: nowIso }).where(eq(workouts.id, id)).run();
+  await markPending('workouts', id, now);
 }
 
 /** Names a session. Separate from finishing, so a session can be named while it runs. */
@@ -87,6 +90,7 @@ export async function renameWorkout(id: string, name: string, now: Date = new Da
     .set({ name: name.trim() || null, updatedAt: now.toISOString() })
     .where(eq(workouts.id, id))
     .run();
+  await markPending('workouts', id, now);
 }
 
 /**
@@ -205,6 +209,7 @@ export async function logSet(input: SetInput, now: Date = new Date()): Promise<L
 
   const created = await db.select().from(sets).where(eq(sets.id, id)).get();
   if (!created) throw new Error('failed to create set row');
+  await markPending('sets', id, now);
   return created;
 }
 

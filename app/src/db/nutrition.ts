@@ -3,6 +3,7 @@ import { getDrizzle } from './client';
 import { foodLogEntries } from './schema';
 import { LOCAL_USER_ID } from './user';
 import { newId } from './id';
+import { markPending } from '../sync/queue';
 
 export type FoodEntry = typeof foodLogEntries.$inferSelect;
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -66,6 +67,7 @@ export async function logFood(input: FoodEntryInput, now: Date = new Date()): Pr
 
   const created = await db.select().from(foodLogEntries).where(eq(foodLogEntries.id, id)).get();
   if (!created) throw new Error('failed to create food log entry');
+  await markPending('food_log_entries', id, now);
   return created;
 }
 
@@ -99,6 +101,7 @@ export async function deleteFoodEntry(id: string, now: Date = new Date()): Promi
     .set({ deletedAt: nowIso, updatedAt: nowIso })
     .where(eq(foodLogEntries.id, id))
     .run();
+  await markPending('food_log_entries', id, now);
 }
 
 /** Entries across a window, newest first — the 7-day average the day view leans on. */

@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { getDrizzle, initDb } from './client';
 import { users } from './schema';
+import { markPending } from '../sync/queue';
 
 // This is a local-first, single-user app — exactly one person per install
 // (PRODUCT.md §Operating Context). There is no multi-user or auth flow, so a
@@ -54,6 +55,7 @@ export async function recordConsent(): Promise<User> {
   const db = getDrizzle();
   const now = new Date().toISOString();
   await db.update(users).set({ consentedAt: now, updatedAt: now }).where(eq(users.id, LOCAL_USER_ID)).run();
+  await markPending('users', LOCAL_USER_ID);
   return getUser();
 }
 
@@ -86,6 +88,7 @@ export async function updateProfile(
     .set({ ...patch, ...goalClock, updatedAt: now.toISOString() })
     .where(eq(users.id, LOCAL_USER_ID))
     .run();
+  await markPending('users', LOCAL_USER_ID, now);
   return getUser();
 }
 
@@ -108,5 +111,6 @@ export async function setCalorieTarget(
     .set({ ...target, updatedAt: now.toISOString() })
     .where(eq(users.id, LOCAL_USER_ID))
     .run();
+  await markPending('users', LOCAL_USER_ID, now);
   return getUser();
 }

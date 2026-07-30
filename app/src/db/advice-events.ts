@@ -3,6 +3,7 @@ import { getDrizzle } from './client';
 import { adviceEvents } from './schema';
 import { LOCAL_USER_ID } from './user';
 import { newId } from './id';
+import { markPending } from '../sync/queue';
 
 export type AdviceEvent = typeof adviceEvents.$inferSelect;
 
@@ -40,6 +41,7 @@ export async function recordAdviceShown(
     .run();
   const created = await db.select().from(adviceEvents).where(eq(adviceEvents.id, id)).get();
   if (!created) throw new Error('failed to record advice event');
+  await markPending('advice_events', id, now);
   return created;
 }
 
@@ -52,6 +54,15 @@ export async function suppressClaim(claimId: string, now: Date = new Date()): Pr
     .set({ suppressedAt: nowIso, updatedAt: nowIso })
     .where(and(eq(adviceEvents.claimId, claimId), isNull(adviceEvents.deletedAt)))
     .run();
+
+  // The suppression lives as a column on every advice_events row for this
+  // claim, so each affected row must be queued — otherwise a "don't show this
+  // again" tapped on one device reappears on the other.
+  const affected = await db
+    .select({ id: adviceEvents.id })
+    .from(adviceEvents)
+    .where(and(eq(adviceEvents.claimId, claimId), isNotNull(adviceEvents.suppressedAt)));
+  await Promise.all(affected.map((r) => markPending('advice_events', r.id, now)));
 }
 
 /** Claims the user has permanently silenced. */
