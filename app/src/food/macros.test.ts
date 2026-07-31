@@ -11,7 +11,4 @@ describe('macrosForQuantity', () => {
   it('handles zero grams without NaN', () => {
     expect(macrosForQuantity(chicken, 0)).toEqual({ kcal: 0, proteinG: 0, carbsG: 0, fatG: 0 });
   });
-  it('treats missing carbs/fat as zero, not NaN', () => {
-    expect(macrosForQuantity({ kcalPer100g: 100, proteinGPer100g: 10 }, 50)).toEqual({ kcal: 50, proteinG: 5, carbsG: 0, fatG: 0 });
-  });
 });

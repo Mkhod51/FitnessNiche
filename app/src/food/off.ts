@@ -2,12 +2,14 @@ import type { FoodItemDraft } from './types';
 
 /** 1 kcal = 4.184 kJ. Exact unit conversion, used only when OFF gives kJ only. */
 const KJ_PER_KCAL = 4.184;
-type Nutriments = Record<string, number | undefined>;
+type Nutriments = Record<string, unknown>;
 
 /** Coerce a crowdsource value to a finite non-negative number, else undefined. */
 function num(v: unknown): number | undefined {
-  const n = typeof v === 'string' ? Number(v) : (v as number);
-  return Number.isFinite(n) && (n as number) >= 0 ? (n as number) : undefined;
+  if (typeof v === 'string' && v.trim() === '') return undefined;
+  if (typeof v !== 'string' && typeof v !== 'number') return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
 }
 
 function energyKcal(n: Nutriments): number | undefined {
@@ -20,10 +22,9 @@ function energyKcal(n: Nutriments): number | undefined {
 /**
  * Map one OFF product to a draft, or null when it is incomplete.
  *
- * Honesty rule (T3): an item missing energy or protein is DROPPED, never
- * zero-filled — a silent 0 g protein would under-count the day's protein and
- * look like a real number. Energy may come from `energy-kcal_100g` directly or
- * be converted exactly from `energy_100g` (kJ); protein must be present directly.
+ * Honesty rule (T3): an item missing energy, protein, carbs, or fat is DROPPED,
+ * never zero-filled. Energy may come from `energy-kcal_100g` directly or be
+ * converted exactly from `energy_100g` (kJ); the macros must be present directly.
  */
 export function parseOffProduct(p: unknown): FoodItemDraft | null {
   if (!p || typeof p !== 'object') return null;
@@ -32,7 +33,9 @@ export function parseOffProduct(p: unknown): FoodItemDraft | null {
 
   const kcal = energyKcal(n);
   const protein = num(n['proteins_100g']);
-  if (kcal === undefined || protein === undefined) return null;
+  const carbs = num(n['carbohydrates_100g']);
+  const fat = num(n['fat_100g']);
+  if (kcal === undefined || protein === undefined || carbs === undefined || fat === undefined) return null;
 
   const name = String(product.product_name ?? product['product_name_en'] ?? '').trim();
   if (!name) return null;
@@ -45,8 +48,8 @@ export function parseOffProduct(p: unknown): FoodItemDraft | null {
     barcode: product.code ? String(product.code) : undefined,
     kcalPer100g: kcal,
     proteinGPer100g: protein,
-    carbsGPer100g: num(n['carbohydrates_100g']),
-    fatGPer100g: num(n['fat_100g']),
+    carbsGPer100g: carbs,
+    fatGPer100g: fat,
     fibreGPer100g: num(n['fiber_100g']) ?? num(n['fibre_100g']),
   };
 }
@@ -89,8 +92,12 @@ export async function searchFoodOnline(q: string): Promise<{ drafts: FoodItemDra
 export async function lookupBarcode(barcode: string): Promise<FoodItemDraft | null> {
   const url = `${OFF_ORIGIN}/api/v3.6/product/${encodeURIComponent(barcode)}.json?fields=${OFF_FIELDS}`;
   const res = await fetch(url);
+  if (res.status === 404) {
+    const json = await res.json() as { result?: { id?: string } };
+    if (json.result?.id === 'product_not_found') return null;
+  }
   if (!res.ok) throw new Error(`OFF lookup failed (${res.status})`);
 
-  const json = await res.json() as { status: number; product?: unknown };
-  return json.status === 1 && json.product ? parseOffProduct(json.product) : null;
+  const json = await res.json() as { status?: string; product?: unknown };
+  return json.status === 'success' && json.product ? parseOffProduct(json.product) : null;
 }

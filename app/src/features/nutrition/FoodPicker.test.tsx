@@ -74,6 +74,18 @@ function food(overrides: Partial<FoodItem> = {}): FoodItem {
   };
 }
 
+function offDraft(overrides: Partial<FoodItemDraft> = {}): FoodItemDraft {
+  return {
+    source: 'off',
+    name: 'Skyr Plain',
+    kcalPer100g: 62,
+    proteinGPer100g: 11,
+    carbsGPer100g: 4,
+    fatGPer100g: 0.2,
+    ...overrides,
+  };
+}
+
 function renderPicker(day = new Date(2026, 6, 31)) {
   return render(<FoodPicker mealSlot="dinner" day={day} onLogged={vi.fn()} onClose={vi.fn()} />);
 }
@@ -107,7 +119,7 @@ describe('FoodPicker', () => {
 
   it('shows an honesty note after a submitted OFF search hides incomplete foods', async () => {
     mockSearchFoodOnline.mockResolvedValue({
-      drafts: [{ source: 'off', name: 'Skyr Plain', kcalPer100g: 62, proteinGPer100g: 11 }],
+      drafts: [offDraft()],
       hidden: 2,
     });
     renderPicker();
@@ -133,7 +145,7 @@ describe('FoodPicker', () => {
 
   it('looks up a submitted plausible barcode and renders the matching OFF food', async () => {
     const barcode = '5000159484695';
-    const draft: FoodItemDraft = { source: 'off', name: 'Heinz Baked Beans', barcode, kcalPer100g: 78, proteinGPer100g: 4.7 };
+    const draft = offDraft({ name: 'Heinz Baked Beans', barcode, kcalPer100g: 78, proteinGPer100g: 4.7, carbsGPer100g: 12.5, fatGPer100g: 0.2 });
     mockLookupBarcode.mockResolvedValue(draft);
     renderPicker();
 
@@ -161,7 +173,7 @@ describe('FoodPicker', () => {
 
   it('searches OFF by keyword for a submitted non-barcode query', async () => {
     mockSearchFoodOnline.mockResolvedValue({
-      drafts: [{ source: 'off', name: 'Skyr Plain', kcalPer100g: 62, proteinGPer100g: 11 }],
+      drafts: [offDraft()],
       hidden: 0,
     });
     renderPicker();
@@ -242,8 +254,8 @@ describe('FoodPicker', () => {
   });
 
   it('ignores a submitted OFF response once the query has changed', async () => {
-    let resolveSearch: (value: { drafts: Array<{ source: 'off'; name: string; kcalPer100g: number; proteinGPer100g: number }>; hidden: number }) => void;
-    const pendingSearch = new Promise<{ drafts: Array<{ source: 'off'; name: string; kcalPer100g: number; proteinGPer100g: number }>; hidden: number }>((resolve) => {
+    let resolveSearch: (value: { drafts: FoodItemDraft[]; hidden: number }) => void;
+    const pendingSearch = new Promise<{ drafts: FoodItemDraft[]; hidden: number }>((resolve) => {
       resolveSearch = resolve;
     });
     mockSearchFoodOnline.mockReturnValueOnce(pendingSearch);
@@ -254,7 +266,7 @@ describe('FoodPicker', () => {
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
     fireEvent.change(input, { target: { value: 'yogurt' } });
     await act(async () => {
-      resolveSearch!({ drafts: [{ source: 'off', name: 'Skyr Plain', kcalPer100g: 62, proteinGPer100g: 11 }], hidden: 0 });
+      resolveSearch!({ drafts: [offDraft()], hidden: 0 });
     });
 
     expect(screen.queryByText('Skyr Plain')).not.toBeInTheDocument();
@@ -285,7 +297,7 @@ describe('FoodPicker', () => {
 
   it('caches an OFF selection before logging it', async () => {
     mockSearchFoodOnline.mockResolvedValue({
-      drafts: [{ source: 'off', name: 'Skyr Plain', kcalPer100g: 62, proteinGPer100g: 11 }],
+      drafts: [offDraft()],
       hidden: 0,
     });
     mockSaveFoodItem.mockResolvedValue(food({ id: 'saved-skyr', source: 'off', name: 'Skyr Plain' }));

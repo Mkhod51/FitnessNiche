@@ -6,6 +6,9 @@ import { LOCAL_USER_ID } from '../db/user';
 import type { FoodItem, FoodItemDraft } from './types';
 
 export async function saveFoodItem(draft: FoodItemDraft, now: Date = new Date()): Promise<FoodItem> {
+  if (!Number.isFinite(draft.carbsGPer100g) || !Number.isFinite(draft.fatGPer100g)) {
+    throw new Error('OFF foods need complete carbs and fat values before they can be saved');
+  }
   const db = getDrizzle();
   const at = now.toISOString();
   const cols = {
@@ -13,8 +16,8 @@ export async function saveFoodItem(draft: FoodItemDraft, now: Date = new Date())
     brand: draft.brand ?? null,
     kcalPer100g: draft.kcalPer100g,
     proteinGPer100g: draft.proteinGPer100g,
-    carbsGPer100g: draft.carbsGPer100g ?? 0,
-    fatGPer100g: draft.fatGPer100g ?? 0,
+    carbsGPer100g: draft.carbsGPer100g,
+    fatGPer100g: draft.fatGPer100g,
     fibreGPer100g: draft.fibreGPer100g ?? null,
     servingGrams: draft.servingGrams ?? null,
     servingLabel: draft.servingLabel ?? null,

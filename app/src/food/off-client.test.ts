@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { lookupBarcode, searchFoodOnline } from './off';
 
-function mockFetch(payload: unknown, ok = true) {
+function mockFetch(payload: unknown, ok = true, status = ok ? 200 : 500) {
   globalThis.fetch = vi.fn(async () => ({
     ok,
-    status: ok ? 200 : 500,
+    status,
     json: async () => payload,
   }) as Response) as typeof fetch;
 }
@@ -18,7 +18,11 @@ describe('searchFoodOnline', () => {
     mockFetch({
       count: 3,
       products: [
-        { code: '1', product_name: 'Skyr', nutriments: { 'energy-kcal_100g': 62, proteins_100g: 11 } },
+        {
+          code: '1',
+          product_name: 'Skyr',
+          nutriments: { 'energy-kcal_100g': 62, proteins_100g: 11, carbohydrates_100g: 4, fat_100g: 0.2 },
+        },
         { code: '2', product_name: 'X', nutriments: { proteins_100g: 5 } },
       ],
     });
@@ -48,14 +52,23 @@ describe('searchFoodOnline', () => {
 });
 
 describe('lookupBarcode', () => {
-  it('returns a draft for a found product, null for status 0', async () => {
+  it('returns a draft for a current v3 string-status success response', async () => {
     mockFetch({
-      status: 1,
-      product: { code: '1', product_name: 'Skyr', nutriments: { 'energy-kcal_100g': 62, proteins_100g: 11 } },
+      status: 'success',
+      result: { id: 'product_found' },
+      product: {
+        code: '1',
+        product_name: 'Skyr',
+        nutriments: { 'energy-kcal_100g': 62, proteins_100g: 11, carbohydrates_100g: 4, fat_100g: 0.2 },
+      },
     });
-    expect((await lookupBarcode('1'))?.name).toBe('Skyr');
 
-    mockFetch({ status: 0, product: null });
+    expect((await lookupBarcode('1'))?.name).toBe('Skyr');
+  });
+
+  it('returns null for a current v3 404 product-not-found response', async () => {
+    mockFetch({ status: 'failure', result: { id: 'product_not_found' } }, false, 404);
+
     expect(await lookupBarcode('nope')).toBeNull();
   });
 
@@ -66,7 +79,7 @@ describe('lookupBarcode', () => {
   });
 
   it('uses OFF v3.6 barcode lookup and encodes the barcode', async () => {
-    mockFetch({ status: 0, product: null });
+    mockFetch({ status: 'failure', result: { id: 'product_not_found' } }, false, 404);
 
     await lookupBarcode('abc/123');
 

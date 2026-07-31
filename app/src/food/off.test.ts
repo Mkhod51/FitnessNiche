@@ -20,8 +20,26 @@ describe('parseOffProduct', () => {
   });
 
   it('converts energy from kJ when kcal is absent (exact, not fabrication)', () => {
-    const d = parseOffProduct({ ...good, nutriments: { energy_100g: 259.4, proteins_100g: 11 } });
+    const d = parseOffProduct({
+      ...good,
+      nutriments: { energy_100g: 259.4, proteins_100g: 11, carbohydrates_100g: 4, fat_100g: 0.2 },
+    });
     expect(d?.kcalPer100g).toBeCloseTo(62, 0); // 259.4 / 4.184
+  });
+
+  it('uses valid kJ when the kcal field is blank instead of treating blank as zero', () => {
+    const d = parseOffProduct({
+      ...good,
+      nutriments: {
+        'energy-kcal_100g': '   ',
+        energy_100g: '259.4',
+        proteins_100g: '11',
+        carbohydrates_100g: '4',
+        fat_100g: '0.2',
+      },
+    });
+
+    expect(d?.kcalPer100g).toBeCloseTo(62, 0);
   });
 
   it('drops a product missing both kcal sources (hidden, not zero-filled)', () => {
@@ -30,6 +48,25 @@ describe('parseOffProduct', () => {
 
   it('drops a product missing protein — a silent 0 would under-count the day', () => {
     expect(parseOffProduct({ ...good, nutriments: { 'energy-kcal_100g': 62 } })).toBeNull();
+  });
+
+  it('drops blank and malformed required nutrient strings instead of coercing them to zero', () => {
+    expect(parseOffProduct({
+      ...good,
+      nutriments: { ...good.nutriments, proteins_100g: '' },
+    })).toBeNull();
+    expect(parseOffProduct({
+      ...good,
+      nutriments: { ...good.nutriments, carbohydrates_100g: 'not-a-number' },
+    })).toBeNull();
+  });
+
+  it('drops products missing carbs or fat rather than inventing zeroes', () => {
+    const { carbohydrates_100g: _carbs, ...withoutCarbs } = good.nutriments;
+    const { fat_100g: _fat, ...withoutFat } = good.nutriments;
+
+    expect(parseOffProduct({ ...good, nutriments: withoutCarbs })).toBeNull();
+    expect(parseOffProduct({ ...good, nutriments: withoutFat })).toBeNull();
   });
 
   it('drops junk and empty payloads without throwing', () => {

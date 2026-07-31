@@ -15,8 +15,8 @@ export type FoodItemDraft = {
   barcode?: string;
   kcalPer100g: number;
   proteinGPer100g: number;
-  carbsGPer100g?: number;
-  fatGPer100g?: number;
+  carbsGPer100g: number;
+  fatGPer100g: number;
   fibreGPer100g?: number;
   servingGrams?: number;
   servingLabel?: string;
