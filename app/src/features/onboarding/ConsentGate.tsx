@@ -63,10 +63,10 @@ export function ConsentGate({ children }: { children: ReactNode }): ReactElement
         Before you log anything
       </h2>
       <p className="mt-2 font-serif text-[15px] leading-[1.45] text-ink">
-        Logging a workout or a bodyweight entry stores that data on this device. Under
-        UK GDPR, workout and bodyweight data is treated as special-category health data,
-        so we ask separately, plainly, before any of it is recorded. It stays on your
-        device — nothing is sent anywhere else.
+        Logging a workout, bodyweight entry, or meal stores health data on this device.
+        Under UK GDPR, that is special-category health data, so we ask separately and
+        plainly before recording it. Logs stay on this device unless you configure sync.
+        Food searches and barcodes are sent to Open Food Facts only when you submit them.
       </p>
       <div className="mt-4 flex gap-3">
         <button

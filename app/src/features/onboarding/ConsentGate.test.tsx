@@ -161,7 +161,7 @@ describe('ConsentGate', () => {
     expect(screen.queryByTestId('consent-accept')).not.toBeInTheDocument();
   });
 
-  it('states plainly what is stored, that it stays on-device, and that it is special-category health data under UK GDPR', async () => {
+  it('distinguishes local logs from food searches and barcodes submitted to Open Food Facts', async () => {
     mockGetUser.mockResolvedValue({ ...baseUser, consentedAt: null });
     render(
       <ConsentGate>
@@ -172,7 +172,9 @@ describe('ConsentGate', () => {
     const gate = screen.getByTestId('consent-gate');
     expect(gate).toHaveTextContent(/workout/i);
     expect(gate).toHaveTextContent(/bodyweight/i);
-    expect(gate).toHaveTextContent(/device/i);
+    expect(gate).toHaveTextContent(/meal/i);
+    expect(gate).toHaveTextContent(/logs stay on this device unless you configure sync/i);
+    expect(gate).toHaveTextContent(/food searches and barcodes are sent to Open Food Facts only when you submit them/i);
     expect(gate).toHaveTextContent(/special.category/i);
     expect(gate).toHaveTextContent(/UK GDPR|GDPR/i);
   });

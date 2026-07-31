@@ -27,9 +27,25 @@ describe('seedFoods', () => {
     expect(Number(rows[0][0])).toBe(SEED_FOODS.length);
   });
 
-  it('does nothing when the CoFID seed is already complete', async () => {
+  it('upserts idempotently without creating duplicate CoFID rows', async () => {
     await seedFoods(exec);
-    expect(await seedFoods(exec)).toBe(0);
+    expect(await seedFoods(exec)).toBe(SEED_FOODS.length);
+    const rows = await exec("select count(*) from food_items where source = 'cofid'", [], 'all');
+    expect(Number(rows[0][0])).toBe(SEED_FOODS.length);
+  });
+
+  it('repairs stale CoFID values even when the row count already matches', async () => {
+    await seedFoods(exec);
+    const expected = SEED_FOODS[0];
+    await exec(
+      'update food_items set name = ?, kcal_per_100g = ? where id = ?',
+      ['Stale food name', -1, expected.id],
+      'run',
+    );
+
+    expect(await seedFoods(exec)).toBe(SEED_FOODS.length);
+    const rows = await exec('select name, kcal_per_100g from food_items where id = ?', [expected.id], 'all');
+    expect(rows[0]).toEqual([expected.name, expected.kcalPer100g]);
   });
 
   it('repairs a half-seeded table left by an interrupted first boot', async () => {

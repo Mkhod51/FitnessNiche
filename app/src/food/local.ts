@@ -48,8 +48,7 @@ export async function getRecentFoods(limit = 6): Promise<FoodItem[]> {
     .from(foodLogEntries)
     .innerJoin(foodItems, eq(foodLogEntries.foodItemId, foodItems.id))
     .where(and(eq(foodLogEntries.userId, LOCAL_USER_ID), isNull(foodLogEntries.deletedAt), isNotNull(foodLogEntries.foodItemId)))
-    .orderBy(desc(foodLogEntries.loggedAt))
-    .limit(limit * 3);
+    .orderBy(desc(foodLogEntries.loggedAt));
   const seen = new Set<string>();
   const out: FoodItem[] = [];
   for (const r of rows) {

@@ -186,6 +186,8 @@ describe('EatDay — logging', () => {
       expect.objectContaining({ name: 'Chicken and rice', mealSlot: 'lunch', kcal: 760, proteinG: 62 }),
       expect.any(Date),
     );
+    await waitFor(() => expect(screen.queryByTestId('food-save-button')).not.toBeInTheDocument());
+    expect(screen.getByTestId('add-food-lunch')).toBeInTheDocument();
   });
 
   it('refuses an entry with no energy — unlike a set, that records nothing', async () => {

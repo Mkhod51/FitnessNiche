@@ -232,7 +232,7 @@ export function Settings(): ReactElement {
         <span className="min-w-0">
           <span className="block font-serif text-[15.5px] text-ink">Sync</span>
           <span data-testid="sync-status" className="block font-serif text-[12px] italic leading-[1.4] text-ink-faint">
-            {syncCfg ? `Configured → ${syncCfg.url}` : 'Off — data stays on this device only'}
+            {syncCfg ? `Configured → ${syncCfg.url}` : 'Off — logs stay on this device'}
           </span>
         </span>
       </div>
@@ -303,8 +303,8 @@ export function Settings(): ReactElement {
           boilerplate. With sync configured it says plainly what replicates
           where, that the bearer token stays on this device, and that "Delete
           all my data" below is device-only — server-side erasure is not yet
-          wired (T6: never overstate). Without sync it states the honest
-          default: on-device, no account, nowhere else. */}
+          wired (T6: never overstate). Food-query disclosure applies in both
+          branches because it is independent of log sync. */}
       <section data-testid="privacy-notice" className="border-b border-rule px-4 py-4">
         <p className={LABEL}>Your data</p>
         {syncCfg ? (
@@ -324,8 +324,8 @@ export function Settings(): ReactElement {
         ) : (
           <>
             <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
-              Everything you log — sets, bodyweight, meals — is stored in a database on this device
-              and nowhere else. There is no account, and nothing is sent to us or to anyone else.
+              Everything you log — sets, bodyweight, meals — is stored in a database on this device.
+              Logs stay on this device unless you configure sync. There is no account.
             </p>
             <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
               Workout and bodyweight data is special-category health data under UK GDPR, which is why
@@ -334,10 +334,13 @@ export function Settings(): ReactElement {
             </p>
             <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
               Clearing this site&rsquo;s storage in your browser erases it too — there is no copy
-              anywhere for us to restore from.
+              of your logs for us to restore from.
             </p>
           </>
         )}
+        <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
+          Food searches and barcodes are sent to Open Food Facts only when you submit them.
+        </p>
       </section>
 
       {/* GR-5 erasure. Destructive controls are --flag TEXT, never a filled red
@@ -415,7 +418,7 @@ export function Settings(): ReactElement {
           >
             CoFID
           </a>{' '}
-          dataset (© Crown / OGL). Each entry shows its source.
+          dataset (© Crown / OGL). Food search results show their source.
         </p>
       </div>
     </div>

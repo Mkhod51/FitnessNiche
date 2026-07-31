@@ -36,18 +36,28 @@ export async function seedExercises(exec: Exec): Promise<number> {
   return SEED_EXERCISES.length;
 }
 
-// Idempotent CoFID seed. Gate on the CoFID row count rather than the whole
-// table: cached OFF rows are device-local reference data and must survive.
+// Idempotent CoFID seed. Every boot upserts the stable CoFID IDs so corrected
+// source values reach existing installs; cached OFF rows remain untouched.
 export async function seedFoods(exec: Exec): Promise<number> {
-  const present = await exec("select count(*) from food_items where source = 'cofid'", [], 'all');
-  if (Number(present[0]?.[0] ?? 0) === SEED_FOODS.length) return 0;
-
   await exec('begin', [], 'run');
   try {
     for (const food of SEED_FOODS) {
       await exec(
-        `insert or replace into food_items (id, source, name, brand, barcode, kcal_per_100g, protein_g_per_100g, carbs_g_per_100g, fat_g_per_100g, fibre_g_per_100g, serving_grams, serving_label, updated_at)
-         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `insert into food_items (id, source, name, brand, barcode, kcal_per_100g, protein_g_per_100g, carbs_g_per_100g, fat_g_per_100g, fibre_g_per_100g, serving_grams, serving_label, updated_at)
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         on conflict(id) do update set
+           source = excluded.source,
+           name = excluded.name,
+           brand = excluded.brand,
+           barcode = excluded.barcode,
+           kcal_per_100g = excluded.kcal_per_100g,
+           protein_g_per_100g = excluded.protein_g_per_100g,
+           carbs_g_per_100g = excluded.carbs_g_per_100g,
+           fat_g_per_100g = excluded.fat_g_per_100g,
+           fibre_g_per_100g = excluded.fibre_g_per_100g,
+           serving_grams = excluded.serving_grams,
+           serving_label = excluded.serving_label,
+           updated_at = excluded.updated_at`,
         [
           food.id,
           'cofid',

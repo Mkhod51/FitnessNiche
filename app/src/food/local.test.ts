@@ -71,6 +71,17 @@ describe('food_items cache', () => {
     expect(recents.map((f) => f.name)).toEqual(['Chicken', 'Oats']);
   });
 
+  it('dedupes recents before limiting so repeated logs do not hide an older distinct food', async () => {
+    const oats = await saveFoodItem(offDraft({ name: 'Oats', barcode: 'A', kcalPer100g: 380, proteinGPer100g: 13, carbsGPer100g: 68, fatGPer100g: 7 }));
+    const chicken = await saveFoodItem(offDraft({ name: 'Chicken', barcode: 'B', kcalPer100g: 165, proteinGPer100g: 31, carbsGPer100g: 0, fatGPer100g: 3.6 }));
+    await logFood({ name: 'Oats', mealSlot: 'breakfast', kcal: 300, proteinG: 10, foodItemId: oats.id }, new Date(2026, 6, 28, 8));
+    for (let hour = 9; hour < 15; hour += 1) {
+      await logFood({ name: 'Chicken', mealSlot: 'lunch', kcal: 165, proteinG: 31, foodItemId: chicken.id }, new Date(2026, 6, 28, hour));
+    }
+
+    expect((await getRecentFoods(2)).map((f) => f.name)).toEqual(['Chicken', 'Oats']);
+  });
+
   it('common foods are the CoFID rows', async () => {
     await testDz.insert(schema.foodItems).values({
       id: 'eggs-boiled', source: 'cofid', name: 'Eggs, boiled',

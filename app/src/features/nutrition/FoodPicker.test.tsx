@@ -86,8 +86,13 @@ function offDraft(overrides: Partial<FoodItemDraft> = {}): FoodItemDraft {
   };
 }
 
-function renderPicker(day = new Date(2026, 6, 31)) {
-  return render(<FoodPicker mealSlot="dinner" day={day} onLogged={vi.fn()} onClose={vi.fn()} />);
+function renderPicker(
+  day = new Date(2026, 6, 31),
+  onLogged: () => void | Promise<void> = vi.fn(),
+  onClose = vi.fn(),
+) {
+  const rendered = render(<FoodPicker mealSlot="dinner" day={day} onLogged={onLogged} onClose={onClose} />);
+  return { ...rendered, onLogged, onClose };
 }
 
 describe('FoodPicker', () => {
@@ -128,7 +133,20 @@ describe('FoodPicker', () => {
     fireEvent.change(input, { target: { value: 'skyr' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
-    expect(await screen.findByText(/2 results hidden \u2014 missing protein or energy/i)).toBeInTheDocument();
+    expect(await screen.findByText(/2 results hidden \u2014 missing enough nutrition data/i)).toBeInTheDocument();
+  });
+
+  it('keeps the incomplete-result warning qualitative when figures are hidden', async () => {
+    mockGetUser.mockResolvedValue({ ...user, numbersHidden: true });
+    mockSearchFoodOnline.mockResolvedValue({ drafts: [offDraft()], hidden: 2 });
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'skyr' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(await screen.findByText(/some results hidden because they did not include enough nutrition data/i)).toBeInTheDocument();
+    expect(screen.queryByText(/2 results hidden/i)).not.toBeInTheDocument();
   });
 
   it('filters local foods while typing without calling OFF until the query is submitted', async () => {
@@ -223,6 +241,43 @@ describe('FoodPicker', () => {
     });
   });
 
+  it('awaits the selected-food refresh before closing the picker', async () => {
+    let finishRefresh: () => void;
+    const onLogged = vi.fn(() => new Promise<void>((resolve) => {
+      finishRefresh = resolve;
+    }));
+    const onClose = vi.fn();
+    mockGetCommonFoods.mockResolvedValue([food({ id: 'cofid-chicken' })]);
+    renderPicker(new Date(2026, 6, 31), onLogged, onClose);
+
+    fireEvent.click(await screen.findByRole('button', { name: /chicken breast, grilled/i }));
+    fireEvent.click(screen.getByRole('button', { name: /add to dinner/i }));
+
+    await waitFor(() => expect(onLogged).toHaveBeenCalledTimes(1));
+    expect(onClose).not.toHaveBeenCalled();
+    finishRefresh!();
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
+  it('awaits the quick-add refresh before closing the picker', async () => {
+    let finishRefresh: () => void;
+    const onLogged = vi.fn(() => new Promise<void>((resolve) => {
+      finishRefresh = resolve;
+    }));
+    const onClose = vi.fn();
+    renderPicker(new Date(2026, 6, 31), onLogged, onClose);
+
+    fireEvent.click(await screen.findByRole('button', { name: /can't find it.*quick add/i }));
+    fireEvent.change(screen.getByTestId('food-name-input'), { target: { value: 'Chicken and rice' } });
+    fireEvent.change(screen.getByTestId('food-kcal-input'), { target: { value: '760' } });
+    fireEvent.click(screen.getByTestId('food-save-button'));
+
+    await waitFor(() => expect(onLogged).toHaveBeenCalledTimes(1));
+    expect(onClose).not.toHaveBeenCalled();
+    finishRefresh!();
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
   it('keeps names and provenance visible without exposing figures in numbers-hidden mode', async () => {
     mockGetUser.mockResolvedValue({ ...user, numbersHidden: true });
     mockGetCommonFoods.mockResolvedValue([food()]);
@@ -232,6 +287,22 @@ describe('FoodPicker', () => {
     expect(screen.getByText('CoFID')).toBeInTheDocument();
     expect(screen.queryByText(/165 kcal/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/31 P/i)).not.toBeInTheDocument();
+  });
+
+  it('replaces quick-add with a hidden-safe route back to sourced foods', async () => {
+    mockGetUser.mockResolvedValue({ ...user, numbersHidden: true });
+    renderPicker();
+
+    fireEvent.click(await screen.findByRole('button', { name: /can't find it.*quick add/i }));
+
+    expect(screen.getByText(/quick add with nutrition figures is unavailable while figures are hidden/i)).toBeInTheDocument();
+    expect(screen.queryByTestId('food-kcal-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('food-protein-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('food-save-button')).not.toBeInTheDocument();
+    expect(mockLogFood).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /back to sourced foods/i }));
+    expect(await screen.findByRole('searchbox')).toBeInTheDocument();
   });
 
   it('does not expose figures before the numbers-hidden preference has loaded', async () => {

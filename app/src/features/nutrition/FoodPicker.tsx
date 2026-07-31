@@ -10,7 +10,7 @@ import type { FoodItem, FoodItemDraft } from '../../food/types';
 type FoodPickerProps = {
   mealSlot: MealSlot;
   day: Date;
-  onLogged: () => void;
+  onLogged: () => void | Promise<void>;
   onClose: () => void;
 };
 
@@ -94,12 +94,12 @@ function FoodRow({ food, hidden, onSelect }: { food: PickedFood; hidden: boolean
   );
 }
 
-function WifiNotice(): ReactElement {
+function WifiNotice({ quickAddAvailable }: { quickAddAvailable: boolean }): ReactElement {
   return (
     <div data-testid="food-offline-notice" className="mx-4 mb-3 mt-1 bg-paper-sunk px-3.5 py-3">
       <p className="font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-        You&apos;ll need wifi to search for new foods. Your recent and common foods are still here &mdash; and quick-add
-        works without a connection.
+        You&apos;ll need wifi to search for new foods. Your recent and common foods are still here
+        {quickAddAvailable ? <> &mdash; and quick-add works without a connection.</> : '.'}
       </p>
     </div>
   );
@@ -231,7 +231,8 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
         },
         loggedAtFor(day),
       );
-      onLogged();
+      await onLogged();
+      onClose();
     } finally {
       setBusy(false);
     }
@@ -255,10 +256,39 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
         },
         loggedAtFor(day),
       );
-      onLogged();
+      await onLogged();
+      onClose();
     } finally {
       setBusy(false);
     }
+  }
+
+  if (quickAdd && figuresHidden) {
+    return (
+      <section aria-label="Quick add unavailable while figures are hidden" className="border-y border-rule">
+        <header className="flex items-center gap-2 border-b border-rule px-4 py-3">
+          <button type="button" onClick={() => setQuickAdd(false)} className={`${LABEL} min-h-[44px] text-ink`}>
+            Back
+          </button>
+          <div>
+            <p className="font-serif text-[18px] leading-[1.1] text-ink">Quick add unavailable</p>
+            <p className={`${LABEL} mt-1`}>Figures are hidden</p>
+          </div>
+        </header>
+        <div className="p-4">
+          <p className="font-serif text-[14px] leading-[1.5] text-ink-soft">
+            Quick add with nutrition figures is unavailable while figures are hidden. Sourced foods can still be logged without showing their figures.
+          </p>
+          <button
+            type="button"
+            onClick={() => setQuickAdd(false)}
+            className="mt-3 min-h-[48px] w-full bg-ink font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-paper"
+          >
+            Back to sourced foods
+          </button>
+        </div>
+      </section>
+    );
   }
 
   if (quickAdd) {
@@ -330,8 +360,8 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
         </header>
         {!figuresHidden && (
           <p className={`${FIGURE} px-4 py-3 text-[12.5px] text-ink-faint`}>
-            {Math.round(selected.kcalPer100g)} kcal · {selected.proteinGPer100g} g protein · {selected.carbsGPer100g ?? 0} g carbs ·{' '}
-            {selected.fatGPer100g ?? 0} g fat - per 100 g
+            {Math.round(selected.kcalPer100g)} kcal · {selected.proteinGPer100g} g protein · {selected.carbsGPer100g} g carbs ·{' '}
+            {selected.fatGPer100g} g fat - per 100 g
           </p>
         )}
         <div className="px-4 pt-2">
@@ -426,7 +456,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
           Search
         </button>
       </form>
-      {showWifiNotice && <WifiNotice />}
+      {showWifiNotice && <WifiNotice quickAddAvailable={!figuresHidden} />}
       {isSearching ? (
         <>
           {localResults.length > 0 && (
@@ -441,9 +471,13 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
               <ul>{onlineResults.map((food, index) => <FoodRow key={`${food.barcode ?? food.name}-${index}`} food={food} hidden={figuresHidden} onSelect={() => pick(food)} />)}</ul>
             </section>
           )}
-          {!figuresHidden && showOnlineResults && onlineHidden > 0 && (
+          {showOnlineResults && onlineHidden > 0 && (
             <p className="px-4 py-2 font-serif text-[10px] italic text-ink-faint">
-              {onlineHidden} {onlineHidden === 1 ? 'result' : 'results'} hidden &mdash; missing protein or energy. Not shown rather than guessed.
+              {figuresHidden ? (
+                'Some results hidden because they did not include enough nutrition data. Not shown rather than guessed.'
+              ) : (
+                <>{onlineHidden} {onlineHidden === 1 ? 'result' : 'results'} hidden &mdash; missing enough nutrition data. Not shown rather than guessed.</>
+              )}
             </p>
           )}
         </>
