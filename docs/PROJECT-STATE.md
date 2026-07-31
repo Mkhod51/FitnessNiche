@@ -20,7 +20,7 @@ not merged.**
    cd app && ls src/domain src/features && npm run typecheck && npm test -- --run
    ```
 
-**Verified 2026-07-31 (latest):** typecheck clean · **623 unit tests / 61 files** ·
+**Verified 2026-07-31 (latest):** typecheck clean · **633 unit tests / 61 files** ·
 **e2e 23/23**.
 
 **Gates closed 2026-07-30 (developer verdict: yes on both):** the M1 A+C interaction is
@@ -136,9 +136,9 @@ lookup, caches selected OFF items into `food_items`, and logs grams-first quanti
 missing energy or protein rather than zero-filling them, and keeps quick-add as the offline
 fallback.
 
-**Verified 2026-07-31:** focused FoodPicker tests **16/16** passed, nutrition unit tests **32/32**
-passed, Settings attribution tests **6/6** passed, focused food Playwright spec **2/2** passed,
-full Vitest **623/623** passed, and full Playwright e2e **23/23** passed. Typecheck is clean.
+**Verified 2026-07-31:** focused food/provider/privacy tests **72/72** passed, focused food
+Playwright spec **2/2** passed, full Vitest **633/633** passed, and full Playwright e2e
+**23/23** passed. Typecheck is clean.
 
 Honest gaps:
 
