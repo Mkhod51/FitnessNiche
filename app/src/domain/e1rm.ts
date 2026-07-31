@@ -25,14 +25,26 @@ export function setE1rm(weightKg: number, reps: number, rir: number): number | n
   if (weightKg <= 0 || reps <= 0 || rir < 0) return null;
   if (reps > MAX_QUALIFYING_REPS || rir > MAX_QUALIFYING_RIR) return null;
 
-  // Effective reps = reps performed + reps left in reserve: the total reps
-  // the set would have reached at true failure, which is the quantity Epley
-  // actually estimates from. Subtracting 1 anchors a true single (reps=1,
-  // rir=0) to exactly its own weight -- plain Epley (weight*(1+reps/30))
-  // returns weight*31/30 for a single, which is fabricated precision at the
-  // one case where the true 1RM is already known exactly.
+  // Effective reps = reps performed + reps left in reserve: the total reps the
+  // set would have reached at true failure, which is the quantity Epley
+  // estimates from.
   const effectiveReps = reps + rir;
-  return weightKg * (1 + (effectiveReps - 1) / EPLEY_DENOMINATOR);
+
+  // A set of one at RIR 0 is a 1RM that was actually performed. It is a
+  // measurement, not an estimate, so it is returned exactly. Epley would put it
+  // at weight*31/30 — 3.3% of fabricated precision at the single case where the
+  // true value is already known.
+  if (effectiveReps === 1) return weightKg;
+
+  // Published Epley, unmodified. An earlier revision shifted the numerator to
+  // (effectiveReps - 1) so the curve met the single smoothly, which made the
+  // anchor continuous but moved every other estimate 3.3% below Epley — the
+  // same magnitude as the disagreement between Epley, Brzycki and Lombardi that
+  // the evidence doc measures. Reporting "Epley" while shipping a shifted
+  // variant is the quiet inaccuracy this product exists to refuse, so the
+  // discontinuity at one rep stays: it is the honest seam between a measured
+  // value and an estimated one.
+  return weightKg * (1 + effectiveReps / EPLEY_DENOMINATOR);
 }
 
 // A regression only earns its keep once there are enough points for the
