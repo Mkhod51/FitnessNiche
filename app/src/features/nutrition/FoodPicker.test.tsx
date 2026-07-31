@@ -213,7 +213,7 @@ describe('FoodPicker', () => {
     expect(screen.queryByText('Skyr Plain')).not.toBeInTheDocument();
   });
 
-  it('keeps the hidden-mode selected-food workflow usable without rendering figures', async () => {
+  it('keeps hidden-mode quantity editable and logs it without rendering nutrition figures', async () => {
     mockGetUser.mockResolvedValue({ ...user, numbersHidden: true });
     mockGetCommonFoods.mockResolvedValue([food({ id: 'cofid-chicken' })]);
     mockMacrosForQuantity.mockReturnValue({ kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 });
@@ -221,10 +221,19 @@ describe('FoodPicker', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: /chicken breast, grilled/i }));
 
+    expect(screen.getByTestId('food-grams-input')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /add to dinner/i })).toBeInTheDocument();
     expect(screen.queryByText(/165 kcal/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/31 g protein/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/per 100 g/i)).not.toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('food-grams-input'), { target: { value: '200' } });
     fireEvent.click(screen.getByRole('button', { name: /add to dinner/i }));
-    await waitFor(() => expect(mockLogFood).toHaveBeenCalledWith(expect.objectContaining({ foodItemId: 'cofid-chicken' }), expect.any(Date)));
+    await waitFor(() =>
+      expect(mockLogFood).toHaveBeenCalledWith(
+        expect.objectContaining({ foodItemId: 'cofid-chicken', quantityGrams: 200, quantityLabel: '200 g' }),
+        expect.any(Date),
+      ),
+    );
   });
 
   it('caches an OFF selection before logging it', async () => {

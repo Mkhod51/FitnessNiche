@@ -322,79 +322,63 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
             <p className={`${LABEL} mt-1`}>{sourceLabel(selected.source)}</p>
           </div>
         </header>
-        {figuresHidden ? (
-          <div className="p-4">
-            <button
-              type="button"
-              onClick={() => void addSelected()}
-              disabled={!macros || busy}
-              className="min-h-[48px] w-full bg-ink font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-paper disabled:opacity-50"
-            >
-              Add to {SLOT_LABEL[mealSlot]}
-            </button>
-            <button type="button" onClick={() => setQuickAdd(true)} className={`${LABEL} min-h-[44px] text-ink-faint`}>
-              Quick add instead &rsaquo;
-            </button>
-          </div>
-        ) : (
-          <>
-            <p className={`${FIGURE} px-4 py-3 text-[12.5px] text-ink-faint`}>
-              {Math.round(selected.kcalPer100g)} kcal · {selected.proteinGPer100g} g protein · {selected.carbsGPer100g ?? 0} g carbs ·{' '}
-              {selected.fatGPer100g ?? 0} g fat - per 100 g
-            </p>
-            <div className="px-4 pt-2">
-              <label className="block">
-                <span className={LABEL}>Grams</span>
-                <span className="mt-2 flex h-[52px] items-center border border-rule-strong bg-paper px-3">
-                  <input
-                    data-testid="food-grams-input"
-                    value={grams}
-                    onChange={(event) => setGrams(event.target.value.replace(/[^0-9.]/g, ''))}
-                    className={`${FIGURE} min-w-0 flex-1 bg-transparent text-right text-[22px] text-ink outline-none`}
-                    inputMode="decimal"
-                    autoComplete="off"
-                    aria-label="Grams"
-                  />
-                  <span className={`${LABEL} ml-2`}>g</span>
-                </span>
-              </label>
-              {serving && (
-                <div className={`${FIGURE} flex flex-wrap gap-x-3 gap-y-1 py-3 text-[11.5px] text-ink-faint`}>
-                  <span>or</span>
-                  <button type="button" onClick={() => setGrams(String(serving))} className="text-left text-ink underline decoration-rule-strong underline-offset-4">
-                    {selected.servingLabel ?? '1 serving'} approx. {serving} g
-                  </button>
-                  <button type="button" onClick={() => setGrams(String(serving * 2))} className="text-left text-ink underline decoration-rule-strong underline-offset-4">
-                    2 servings approx. {serving * 2} g
-                  </button>
-                </div>
-              )}
-            </div>
-            {macros && (
-              <div className="mx-4 mt-3 bg-paper-sunk px-4 py-3.5">
-                <p className={`${FIGURE} text-[26px] leading-none text-ink`}>
-                  {macros.kcal} <span className={`${LABEL} align-middle`}>kcal</span>
-                </p>
-                <p className={`${FIGURE} mt-2 text-[13px] text-ink-soft`}>
-                  {macros.proteinG} g protein · {macros.carbsG} g carbs · {macros.fatG} g fat
-                </p>
-              </div>
-            )}
-            <div className="p-4">
-              <button
-                type="button"
-                onClick={() => void addSelected()}
-                disabled={!macros || busy}
-                className="min-h-[48px] w-full bg-ink font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-paper disabled:opacity-50"
-              >
-                Add to {SLOT_LABEL[mealSlot]}
-              </button>
-              <button type="button" onClick={() => setQuickAdd(true)} className={`${LABEL} mt-2 min-h-[44px] w-full text-ink-faint`}>
-                Quick add instead &rsaquo;
-              </button>
-            </div>
-          </>
+        {!figuresHidden && (
+          <p className={`${FIGURE} px-4 py-3 text-[12.5px] text-ink-faint`}>
+            {Math.round(selected.kcalPer100g)} kcal · {selected.proteinGPer100g} g protein · {selected.carbsGPer100g ?? 0} g carbs ·{' '}
+            {selected.fatGPer100g ?? 0} g fat - per 100 g
+          </p>
         )}
+        <div className="px-4 pt-2">
+          <label className="block">
+            <span className={LABEL}>Grams</span>
+            <span className="mt-2 flex h-[52px] items-center border border-rule-strong bg-paper px-3">
+              <input
+                data-testid="food-grams-input"
+                value={grams}
+                onChange={(event) => setGrams(event.target.value.replace(/[^0-9.]/g, ''))}
+                className={`${FIGURE} min-w-0 flex-1 bg-transparent text-right text-[22px] text-ink outline-none`}
+                inputMode="decimal"
+                autoComplete="off"
+                aria-label="Grams"
+              />
+              <span className={`${LABEL} ml-2`}>g</span>
+            </span>
+          </label>
+          {serving && (
+            <div className={`${FIGURE} flex flex-wrap gap-x-3 gap-y-1 py-3 text-[11.5px] text-ink-faint`}>
+              <span>or</span>
+              <button type="button" onClick={() => setGrams(String(serving))} className="text-left text-ink underline decoration-rule-strong underline-offset-4">
+                {selected.servingLabel ?? '1 serving'} approx. {serving} g
+              </button>
+              <button type="button" onClick={() => setGrams(String(serving * 2))} className="text-left text-ink underline decoration-rule-strong underline-offset-4">
+                2 servings approx. {serving * 2} g
+              </button>
+            </div>
+          )}
+        </div>
+        {!figuresHidden && macros && (
+          <div className="mx-4 mt-3 bg-paper-sunk px-4 py-3.5">
+            <p className={`${FIGURE} text-[26px] leading-none text-ink`}>
+              {macros.kcal} <span className={`${LABEL} align-middle`}>kcal</span>
+            </p>
+            <p className={`${FIGURE} mt-2 text-[13px] text-ink-soft`}>
+              {macros.proteinG} g protein · {macros.carbsG} g carbs · {macros.fatG} g fat
+            </p>
+          </div>
+        )}
+        <div className="p-4">
+          <button
+            type="button"
+            onClick={() => void addSelected()}
+            disabled={!macros || busy}
+            className="min-h-[48px] w-full bg-ink font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-paper disabled:opacity-50"
+          >
+            Add to {SLOT_LABEL[mealSlot]}
+          </button>
+          <button type="button" onClick={() => setQuickAdd(true)} className={`${LABEL} mt-2 min-h-[44px] w-full text-ink-faint`}>
+            Quick add instead &rsaquo;
+          </button>
+        </div>
       </section>
     );
   }
