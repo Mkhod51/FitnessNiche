@@ -62,10 +62,16 @@ export function AdviceFeed(): ReactElement {
             behind it.
           </p>
         ) : (
-          ruleTriggered.map((item) => {
-            const claim = CLAIMS.find((c) => c.id === item.claimId);
-            return claim ? <ClaimCard key={item.claimId} claim={claim} /> : null;
-          })
+          // The engine pulls both sides of a contested cluster in (FR-ADV-6), so this
+          // path has to collapse them exactly as the browse path does — otherwise the
+          // two sides render as separate unlabelled cards that happen to disagree.
+          collapseClusters(
+            ruleTriggered
+              .map((item) => CLAIMS.find((c) => c.id === item.claimId))
+              .filter((c): c is Claim => c !== undefined),
+          ).map((group) => (
+            <ClaimCard key={group[0].id} claim={group[0]} cluster={group.length > 1 ? group : undefined} />
+          ))
         )}
       </section>
 

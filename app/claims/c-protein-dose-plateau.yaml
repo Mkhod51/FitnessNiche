@@ -29,7 +29,9 @@ citations:
     effectSize: >-
       Two-phase break-point analysis placed the plateau at a total intake of
       1.62 g/kg/day, beyond which supplementation produced no further gain in
-      fat-free mass.
+      fat-free mass. The paper reports the breakpoint as a point estimate; we could not
+      read an interval around it, so treat 1.6 as the centre of a fuzzy region rather
+      than a line.
     ci: null
     figures:
       - label: intake where added protein stops helping

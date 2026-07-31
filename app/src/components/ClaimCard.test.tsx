@@ -95,8 +95,14 @@ describe('shortenAuthors', () => {
     expect(shortenAuthors('Grgic J')).toBe('Grgic J');
   });
 
-  it('collapses two or more to et al.', () => {
-    expect(shortenAuthors('Murphy C, Koehler K')).toBe('Murphy C et al.');
+  it('names both authors of a two-author paper rather than saying et al.', () => {
+    // "Murphy C et al." for a two-author paper is bibliographically wrong, and this
+    // audience cites papers.
+    expect(shortenAuthors('Murphy C, Koehler K')).toBe('Murphy C & Koehler K');
+  });
+
+  it('collapses three or more to et al.', () => {
+    expect(shortenAuthors('Grgic J, Schoenfeld BJ, Orazem J, Sabol F')).toBe('Grgic J et al.');
   });
 
   it('returns the original when there is nothing to split', () => {

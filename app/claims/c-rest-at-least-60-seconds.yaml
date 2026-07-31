@@ -1,8 +1,9 @@
 id: c-rest-at-least-60-seconds
 statement: >-
-  Resting more than about a minute between sets is mildly better for growth than
-  resting less, and past roughly 90 seconds it stops mattering
-grade: B
+  Resting longer than about a minute between sets may be slightly better for growth,
+  though the effect is not clearly separable from none, and past roughly 90 seconds
+  the authors found no further difference
+grade: C
 status: settled
 domain: rest-intervals
 predicates: null
@@ -23,7 +24,10 @@ citations:
       Central estimates favoured longer rest for the arm (0.13) and thigh (0.17)
       and marginally favoured shorter rest for the whole body (-0.08). Every one
       of those controlled credible intervals crosses zero, so the direction is
-      consistent but the effect is not clearly distinguishable from none.
+      consistent but the effect is not clearly distinguishable from none. The
+      authors conclude a small benefit to resting beyond 60 s, and separately
+      report detecting no appreciable difference beyond 90 s — that upper bound
+      is the source of the 90-second figure in the statement.
     ci: >-
       Arm 95% CrI -0.27 to 0.51; thigh 95% CrI -0.13 to 0.43; whole body 95% CrI
       -0.45 to 0.29
@@ -38,7 +42,15 @@ citations:
         value: 19
       - label: studies pooled
         value: 9
-    quote: null
+      - label: rest duration above which a benefit was suggested
+        value: 60
+        unit: s
+      - label: rest duration beyond which no further difference was detected
+        value: 90
+        unit: s
+    quote: >-
+      our analysis did not detect appreciable differences in hypertrophy when
+      resting >90 s between sets
   - id: cit-rest-grgic
     claimId: c-rest-at-least-60-seconds
     doi: 10.1080/17461391.2017.1340524

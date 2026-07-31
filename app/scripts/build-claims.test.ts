@@ -79,6 +79,41 @@ describe('buildClaims', () => {
   });
 });
 
+describe('buildClaims — gates added after the whole-branch review', () => {
+  it('rejects two citations sharing an id inside one claim', () => {
+    // Citation ids key the evidence panel's React list; a collision drops a source.
+    const second = [
+      '  - id: cit-test-1',
+      '    claimId: c-test-volume',
+      '    doi: 10.1000/second',
+      '    authors: Another B',
+      '    year: 2020',
+      '    journal: Another Journal',
+      '    n: null',
+      '    population: unstated',
+      '    effectSize: null',
+      '    ci: null',
+      '    figures: []',
+      '    quote: null',
+      '',
+    ].join('\n');
+    expect(() => buildClaims([{ file: 'c-test-volume.yaml', yaml: goodYaml + second }]))
+      .toThrow(/duplicate citation id/i);
+  });
+
+  it('rejects a settled claim carrying a clusterId', () => {
+    // Would render under a "contested — both sides shown" banner and misrepresent a
+    // settled pair as a live controversy.
+    const bad = goodYaml.replace('clusterId: null', 'clusterId: some-cluster');
+    expect(() => buildClaims([{ file: 'c-test-volume.yaml', yaml: bad }])).toThrow(/only a contested claim/i);
+  });
+
+  it('rejects a claim superseded by itself', () => {
+    const bad = goodYaml.replace('supersededBy: null', 'supersededBy: c-test-volume');
+    expect(() => buildClaims([{ file: 'c-test-volume.yaml', yaml: bad }])).toThrow(/itself/i);
+  });
+});
+
 describe('renderModule', () => {
   it('emits a typed module importing the pinned Claim type', () => {
     const out = renderModule(buildClaims([{ file: 'c-test-volume.yaml', yaml: goodYaml }]));

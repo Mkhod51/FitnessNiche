@@ -60,7 +60,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-deficit-impairs-lean-mass",
     "statement": "Training in an energy deficit blunts how much lean mass you gain compared with training at maintenance",
-    "grade": "A",
+    "grade": "B",
     "status": "settled",
     "domain": "energy-balance",
     "predicates": {
@@ -159,7 +159,7 @@ export const CLAIMS: Claim[] = [
   },
   {
     "id": "c-failure-not-required",
-    "statement": "Taking sets to failure is not required for strength or muscle growth, and stopping short does not appear to cost you either",
+    "statement": "Taking sets to failure is not required for strength or muscle growth, though in lifters who already train there is a small hypertrophy cost to stopping short",
     "grade": "A",
     "status": "settled",
     "domain": "failure-proximity",
@@ -429,7 +429,7 @@ export const CLAIMS: Claim[] = [
         "journal": "British Journal of Sports Medicine",
         "n": 1863,
         "population": "mixed",
-        "effectSize": "Two-phase break-point analysis placed the plateau at a total intake of 1.62 g/kg/day, beyond which supplementation produced no further gain in fat-free mass.",
+        "effectSize": "Two-phase break-point analysis placed the plateau at a total intake of 1.62 g/kg/day, beyond which supplementation produced no further gain in fat-free mass. The paper reports the breakpoint as a point estimate; we could not read an interval around it, so treat 1.6 as the centre of a fuzzy region rather than a line.",
         "ci": null,
         "figures": [
           {
@@ -616,7 +616,7 @@ export const CLAIMS: Claim[] = [
   {
     "id": "c-protein-timing-total-intake-dominates",
     "statement": "Once total daily protein is accounted for, when you eat it around training stops predicting muscle or strength gains",
-    "grade": "A",
+    "grade": "B",
     "status": "contested",
     "domain": "protein-timing",
     "predicates": {
@@ -641,7 +641,7 @@ export const CLAIMS: Claim[] = [
         "journal": "Journal of the International Society of Sports Nutrition",
         "n": 525,
         "population": "unstated",
-        "effectSize": "A simple pooled analysis showed a small-to-moderate effect of timing on hypertrophy, but in the full meta-regression controlling for covariates no significant difference remained for either strength or hypertrophy. Total protein intake was the strongest predictor of effect-size magnitude.",
+        "effectSize": "A simple pooled analysis showed a small-to-moderate effect of timing on hypertrophy, but in the full meta-regression controlling for covariates no significant difference remained for either strength or hypertrophy. Total protein intake was the strongest predictor of effect-size magnitude. Graded B rather than A: one meta-analysis from 2013, not replicated in this base, and the training status of its pooled subjects was not stated in the source we read.",
         "ci": null,
         "figures": [
           {
@@ -671,8 +671,8 @@ export const CLAIMS: Claim[] = [
   },
   {
     "id": "c-rest-at-least-60-seconds",
-    "statement": "Resting more than about a minute between sets is mildly better for growth than resting less, and past roughly 90 seconds it stops mattering",
-    "grade": "B",
+    "statement": "Resting longer than about a minute between sets may be slightly better for growth, though the effect is not clearly separable from none, and past roughly 90 seconds the authors found no further difference",
+    "grade": "C",
     "status": "settled",
     "domain": "rest-intervals",
     "predicates": null,
@@ -690,7 +690,7 @@ export const CLAIMS: Claim[] = [
         "journal": "Frontiers in Sports and Active Living",
         "n": null,
         "population": "unstated",
-        "effectSize": "Central estimates favoured longer rest for the arm (0.13) and thigh (0.17) and marginally favoured shorter rest for the whole body (-0.08). Every one of those controlled credible intervals crosses zero, so the direction is consistent but the effect is not clearly distinguishable from none.",
+        "effectSize": "Central estimates favoured longer rest for the arm (0.13) and thigh (0.17) and marginally favoured shorter rest for the whole body (-0.08). Every one of those controlled credible intervals crosses zero, so the direction is consistent but the effect is not clearly distinguishable from none. The authors conclude a small benefit to resting beyond 60 s, and separately report detecting no appreciable difference beyond 90 s — that upper bound is the source of the 90-second figure in the statement.",
         "ci": "Arm 95% CrI -0.27 to 0.51; thigh 95% CrI -0.13 to 0.43; whole body 95% CrI -0.45 to 0.29",
         "figures": [
           {
@@ -712,9 +712,19 @@ export const CLAIMS: Claim[] = [
           {
             "label": "studies pooled",
             "value": 9
+          },
+          {
+            "label": "rest duration above which a benefit was suggested",
+            "value": 60,
+            "unit": "s"
+          },
+          {
+            "label": "rest duration beyond which no further difference was detected",
+            "value": 90,
+            "unit": "s"
           }
         ],
-        "quote": null
+        "quote": "our analysis did not detect appreciable differences in hypertrophy when resting >90 s between sets"
       },
       {
         "id": "cit-rest-grgic",
