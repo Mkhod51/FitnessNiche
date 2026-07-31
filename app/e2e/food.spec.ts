@@ -1,8 +1,10 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 
 type E2eDb = {
   execSql: (sql: string, params?: unknown[], method?: string) => Promise<unknown[][]>;
 };
+
+const COMMON_FOOD_NAME = 'Almonds';
 
 async function openBreakfastPickerOffline(page: Page, context: import('@playwright/test').BrowserContext): Promise<void> {
   await page.goto('/');
@@ -15,7 +17,18 @@ async function openBreakfastPickerOffline(page: Page, context: import('@playwrig
   await page.getByTestId('add-food-breakfast').click();
 }
 
-async function logOats(page: Page): Promise<void> {
+function commonFoodsSection(page: Page): Locator {
+  return page.getByText('Common foods', { exact: true }).locator('xpath=../..');
+}
+
+async function logCommonFood(page: Page): Promise<void> {
+  const commonFoods = commonFoodsSection(page);
+  await expect(commonFoods.getByRole('button', { name: COMMON_FOOD_NAME })).toBeVisible();
+  await commonFoods.getByRole('button', { name: COMMON_FOOD_NAME }).click();
+  await page.getByRole('button', { name: 'Add to Breakfast' }).click();
+}
+
+async function logOatsFromLocalSearch(page: Page): Promise<void> {
   await page.getByRole('searchbox').fill('oats');
   await page.getByRole('button', { name: 'Oats, rolled' }).click();
   await page.getByRole('button', { name: 'Add to Breakfast' }).click();
@@ -34,21 +47,22 @@ async function oatsEntries(page: Page): Promise<unknown[][]> {
 
 test('offline search shows the notice and logs a common CoFID food', async ({ page, context }) => {
   await openBreakfastPickerOffline(page, context);
+  await expect(commonFoodsSection(page).getByRole('button', { name: COMMON_FOOD_NAME })).toBeVisible();
 
   await page.getByRole('searchbox').fill('oats');
   await expect(page.getByTestId('food-offline-notice')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Oats, rolled' }).click();
-  await page.getByRole('button', { name: 'Add to Breakfast' }).click();
+  await page.getByRole('searchbox').fill('');
+  await logCommonFood(page);
 
-  await expect(page.getByTestId('meal-breakfast')).toContainText('Oats, rolled');
+  await expect(page.getByTestId('meal-breakfast')).toContainText(COMMON_FOOD_NAME);
 
   await context.setOffline(false);
 });
 
 test('a curated food logged offline survives a reload', async ({ page, context }) => {
   await openBreakfastPickerOffline(page, context);
-  await logOats(page);
+  await logOatsFromLocalSearch(page);
 
   await expect(page.getByTestId('meal-breakfast')).toContainText('Oats, rolled');
   expect(await oatsEntries(page)).toEqual([['Oats, rolled', 'oats-rolled', 100]]);
