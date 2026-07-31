@@ -59,6 +59,12 @@ describe('lookupBarcode', () => {
     expect(await lookupBarcode('nope')).toBeNull();
   });
 
+  it('throws on a non-ok response so the caller can show the wifi notice', async () => {
+    mockFetch({}, false);
+
+    await expect(lookupBarcode('1')).rejects.toBeDefined();
+  });
+
   it('uses OFF v3.6 barcode lookup and encodes the barcode', async () => {
     mockFetch({ status: 0, product: null });
 
