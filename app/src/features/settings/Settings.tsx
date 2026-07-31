@@ -404,8 +404,18 @@ export function Settings(): ReactElement {
       </div>
       <div className="px-4 py-3">
         <p className="font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-          Exercise data is hand-authored for this app. Food data will carry its source and licence
-          per entry once a food database ships.
+          <strong className="font-semibold text-ink-soft">Data sources.</strong> Food data from{' '}
+          <a className="underline decoration-rule-strong underline-offset-4" href="https://world.openfoodfacts.org">
+            Open Food Facts
+          </a>{' '}
+          (ODbL) and the{' '}
+          <a
+            className="underline decoration-rule-strong underline-offset-4"
+            href="https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid"
+          >
+            CoFID
+          </a>{' '}
+          dataset (Crown / OGL). Each entry shows its source.
         </p>
       </div>
     </div>

@@ -69,6 +69,16 @@ describe('Settings sync section', () => {
     expect(screen.queryByTestId('sync-disconnect-button')).not.toBeInTheDocument();
   });
 
+  it('attributes food data to Open Food Facts and CoFID', async () => {
+    mockGetSyncConfig.mockReturnValue(null);
+    render(<Settings />);
+    await screen.findByText(/data sources/i);
+
+    expect(screen.getByText(/open food facts/i)).toBeInTheDocument();
+    expect(screen.getByText(/cofid/i)).toBeInTheDocument();
+    expect(screen.getByText(/each entry shows its source/i)).toBeInTheDocument();
+  });
+
   it('saving url + token calls setSyncConfig, re-arms auto-sync, and reflects configured status with the URL in the notice', async () => {
     let cfg: SyncConfig | null = null;
     mockGetSyncConfig.mockImplementation(() => cfg);
