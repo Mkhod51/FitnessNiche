@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import { Link } from 'react-router';
 import { ConsentGate } from '../onboarding/ConsentGate';
+import { FoodPicker } from './FoodPicker';
 import { Meter } from '../../components/Meter';
 import { getUser, type User } from '../../db/user';
 import {
-  logFood,
   getEntriesForDay,
   getEntriesSince,
   deleteFoodEntry,
@@ -19,8 +19,6 @@ import {
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 const FIGURE = 'font-figure tabular-nums';
 const TAP = 'transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)]';
-const FIELD =
-  'h-[44px] w-full border border-rule bg-paper px-2 text-right text-[16px] text-ink outline-none focus:border-ink';
 
 const SLOT_LABEL: Record<MealSlot, string> = {
   breakfast: 'Breakfast',
@@ -39,8 +37,6 @@ function DayView(): ReactElement {
   const [entries, setEntries] = useState<FoodEntry[]>([]);
   const [weekAvg, setWeekAvg] = useState<{ kcal: number; days: number } | null>(null);
   const [adding, setAdding] = useState<MealSlot | null>(null);
-  const [draft, setDraft] = useState({ name: '', kcal: '', protein: '', grams: '' });
-  const [busy, setBusy] = useState(false);
 
   const reload = useCallback(async (d: Date) => {
     setEntries(await getEntriesForDay(d));
@@ -77,35 +73,6 @@ function DayView(): ReactElement {
 
   function shiftDay(by: number) {
     setDay((d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + by));
-  }
-
-  async function submitQuickAdd(slot: MealSlot) {
-    if (busy) return;
-    const kcal = Number(draft.kcal);
-    const protein = Number(draft.protein);
-    // Unlike a set, an entry with no energy is not a record of anything — there
-    // is no equivalent of a bodyweight set here, so this gate costs nothing.
-    if (!draft.name.trim() || !Number.isFinite(kcal) || kcal <= 0) return;
-
-    setBusy(true);
-    try {
-      await logFood(
-        {
-          name: draft.name.trim(),
-          mealSlot: slot,
-          kcal,
-          proteinG: Number.isFinite(protein) ? protein : 0,
-          quantityGrams: draft.grams ? Number(draft.grams) : null,
-          quantityLabel: draft.grams ? `${draft.grams} g` : null,
-        },
-        isToday ? new Date() : new Date(day.getFullYear(), day.getMonth(), day.getDate(), 12),
-      );
-      setDraft({ name: '', kcal: '', protein: '', grams: '' });
-      setAdding(null);
-      await reload(day);
-    } finally {
-      setBusy(false);
-    }
   }
 
   async function removeEntry(id: string) {
@@ -259,72 +226,12 @@ function DayView(): ReactElement {
             </ul>
 
             {adding === slot ? (
-              <div className="mt-2 border-t border-rule pt-3">
-                <input
-                  data-testid="food-name-input"
-                  className="h-[44px] w-full border border-rule bg-paper px-2 font-serif text-[16px] text-ink outline-none focus:border-ink"
-                  placeholder="What did you eat?"
-                  autoComplete="off"
-                  value={draft.name}
-                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                />
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  <label>
-                    <span className={LABEL}>kcal</span>
-                    <input
-                      data-testid="food-kcal-input"
-                      className={`${FIGURE} ${FIELD}`}
-                      inputMode="numeric"
-                      autoComplete="off"
-                      value={draft.kcal}
-                      onChange={(e) => setDraft({ ...draft, kcal: e.target.value.replace(/[^0-9]/g, '') })}
-                    />
-                  </label>
-                  <label>
-                    <span className={LABEL}>Protein g</span>
-                    <input
-                      data-testid="food-protein-input"
-                      className={`${FIGURE} ${FIELD}`}
-                      inputMode="numeric"
-                      autoComplete="off"
-                      value={draft.protein}
-                      onChange={(e) => setDraft({ ...draft, protein: e.target.value.replace(/[^0-9]/g, '') })}
-                    />
-                  </label>
-                  <label>
-                    <span className={LABEL}>Grams</span>
-                    <input
-                      data-testid="food-grams-input"
-                      className={`${FIGURE} ${FIELD}`}
-                      inputMode="numeric"
-                      autoComplete="off"
-                      value={draft.grams}
-                      onChange={(e) => setDraft({ ...draft, grams: e.target.value.replace(/[^0-9]/g, '') })}
-                    />
-                  </label>
-                </div>
-                <div className="mt-2 flex gap-2">
-                  <button
-                    type="button"
-                    data-testid="food-save-button"
-                    onClick={() => void submitQuickAdd(slot)}
-                    className={`min-h-[44px] flex-1 bg-ink font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-paper ${TAP} active:opacity-80`}
-                  >
-                    Add
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAdding(null)}
-                    className={`${LABEL} min-h-[44px] px-3 text-ink ${TAP}`}
-                  >
-                    Cancel
-                  </button>
-                </div>
-                <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-                  No food database yet, so this is a quick-add. Approximate is the point — logging
-                  something sustainably beats logging nothing precisely.
-                </p>
-              </div>
+              <FoodPicker
+                mealSlot={slot}
+                day={day}
+                onLogged={() => reload(day)}
+                onClose={() => setAdding(null)}
+              />
             ) : (
               <button
                 type="button"

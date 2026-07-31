@@ -11,6 +11,9 @@ import {
   deleteFoodEntry,
   type FoodEntry,
 } from '../../db/nutrition';
+import { useOnline } from '../../food/connectivity';
+import { getCommonFoods, getRecentFoods, searchFoodLocal } from '../../food/local';
+import { searchFoodOnline } from '../../food/off';
 
 vi.mock('../../db/user', async () => {
   const actual = await vi.importActual<typeof import('../../db/user')>('../../db/user');
@@ -28,6 +31,15 @@ vi.mock('../../db/nutrition', async () => {
   };
 });
 
+vi.mock('../../food/connectivity', () => ({ useOnline: vi.fn() }));
+vi.mock('../../food/local', () => ({
+  getCommonFoods: vi.fn(),
+  getRecentFoods: vi.fn(),
+  saveFoodItem: vi.fn(),
+  searchFoodLocal: vi.fn(),
+}));
+vi.mock('../../food/off', () => ({ searchFoodOnline: vi.fn() }));
+
 // EatDay links to the goal screen, so it needs router context to render at all.
 const render = (ui: ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
 
@@ -36,6 +48,11 @@ const mockGetEntriesForDay = vi.mocked(getEntriesForDay);
 const mockGetEntriesSince = vi.mocked(getEntriesSince);
 const mockLogFood = vi.mocked(logFood);
 const mockDelete = vi.mocked(deleteFoodEntry);
+const mockUseOnline = vi.mocked(useOnline);
+const mockGetRecentFoods = vi.mocked(getRecentFoods);
+const mockGetCommonFoods = vi.mocked(getCommonFoods);
+const mockSearchFoodLocal = vi.mocked(searchFoodLocal);
+const mockSearchFoodOnline = vi.mocked(searchFoodOnline);
 
 const baseUser: User = {
   id: 'local-user',
@@ -79,6 +96,11 @@ beforeEach(() => {
   mockGetEntriesSince.mockResolvedValue([]);
   mockLogFood.mockResolvedValue(entry());
   mockDelete.mockResolvedValue(undefined);
+  mockUseOnline.mockReturnValue(true);
+  mockGetRecentFoods.mockResolvedValue([]);
+  mockGetCommonFoods.mockResolvedValue([]);
+  mockSearchFoodLocal.mockResolvedValue([]);
+  mockSearchFoodOnline.mockResolvedValue({ drafts: [], hidden: 0 });
 });
 
 describe('EatDay — GR-1 is structural here, not a tone of voice', () => {
@@ -152,6 +174,7 @@ describe('EatDay — logging', () => {
   it('quick-adds without any food database behind it', async () => {
     render(<EatDay />);
     fireEvent.click(await screen.findByTestId('add-food-lunch'));
+    fireEvent.click(await screen.findByRole('button', { name: /can't find it.*quick add/i }));
 
     fireEvent.change(screen.getByTestId('food-name-input'), { target: { value: 'Chicken and rice' } });
     fireEvent.change(screen.getByTestId('food-kcal-input'), { target: { value: '760' } });
@@ -168,6 +191,7 @@ describe('EatDay — logging', () => {
   it('refuses an entry with no energy — unlike a set, that records nothing', async () => {
     render(<EatDay />);
     fireEvent.click(await screen.findByTestId('add-food-lunch'));
+    fireEvent.click(await screen.findByRole('button', { name: /can't find it.*quick add/i }));
     fireEvent.change(screen.getByTestId('food-name-input'), { target: { value: 'Air' } });
     fireEvent.click(screen.getByTestId('food-save-button'));
 
@@ -178,6 +202,7 @@ describe('EatDay — logging', () => {
   it('keeps the grams as entered rather than inventing a portion', async () => {
     render(<EatDay />);
     fireEvent.click(await screen.findByTestId('add-food-breakfast'));
+    fireEvent.click(await screen.findByRole('button', { name: /can't find it.*quick add/i }));
     fireEvent.change(screen.getByTestId('food-name-input'), { target: { value: 'Oats' } });
     fireEvent.change(screen.getByTestId('food-kcal-input'), { target: { value: '340' } });
     fireEvent.change(screen.getByTestId('food-grams-input'), { target: { value: '80' } });
