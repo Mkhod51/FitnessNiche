@@ -20,9 +20,8 @@ not merged.**
    cd app && ls src/domain src/features && npm run typecheck && npm test -- --run
    ```
 
-**Verified 2026-07-31 (latest):** typecheck clean · **620 unit assertions / 61 files**
-pass, but Vitest exits non-zero with the known 43 pre-existing unhandled DB/mock errors
-from `LogWorkout`/`App` tests · **e2e 23/23**.
+**Verified 2026-07-31 (latest):** typecheck clean · **623 unit tests / 61 files** ·
+**e2e 23/23**.
 
 **Gates closed 2026-07-30 (developer verdict: yes on both):** the M1 A+C interaction is
 decisive-and-honest enough to ship, and the M4 reconciliation verdict earns its keep beyond
@@ -124,9 +123,8 @@ Two things M5 does **not** close, both disclosed in the UI rather than hidden:
 - If e2e ever reports `window.__db` undefined, a stale `vite preview` is lingering on :4173 and
   Playwright's `reuseExistingServer: !CI` is reusing it instead of rebuilding — kill it and re-run.
   The hatch itself is correct.
-- The unit run emits 43 unhandled errors from the D7 memory-fallback test (`Hub.tsx`
-  `getDrizzle()` under `App.test.tsx`); they don't fail the run, and the files involved are
-  unchanged from `main`, so they predate this branch.
+- The old unit-test isolation issue that emitted 43 unhandled DB/mock errors from
+  `LogWorkout.test.tsx` and `App.test.tsx` is fixed on this branch.
 
 ## Food database (FR-LOG-6) — built on `OpenSourceMod` (2026-07-31, not merged)
 
@@ -140,9 +138,7 @@ fallback.
 
 **Verified 2026-07-31:** focused FoodPicker tests **16/16** passed, nutrition unit tests **32/32**
 passed, Settings attribution tests **6/6** passed, focused food Playwright spec **2/2** passed,
-and full Playwright e2e **23/23** passed in the task run. Typecheck is clean. Full Vitest still
-exits non-zero because of the known 43 pre-existing unhandled DB/mock errors from
-`LogWorkout`/`App` tests, even though all 620 assertions pass.
+full Vitest **623/623** passed, and full Playwright e2e **23/23** passed. Typecheck is clean.
 
 Honest gaps:
 
