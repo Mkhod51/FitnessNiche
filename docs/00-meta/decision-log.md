@@ -205,3 +205,28 @@ Two further consequences the answer forced:
 by position** and reports anything it cannot place instead of guessing. If the real format
 differs from the documented one, it says so rather than silently importing wrong numbers.
 **Reversal trigger:** a real export that fails to parse — the problem list will name the column.
+
+## Food database (2026-07-30)
+
+33. **FR-LOG-6 ships live-fetched plus cached, not self-hosted.** The requirement's
+"self-hosted/cached" wording is deliberately relaxed for v1: Open Food Facts is fetched from
+the client when online, and an accepted item is cached locally in `food_items`. This preserves
+the offline repeat-use path without building a Worker-side catalogue or an OFF contribution-back
+loop. Self-hosting remains the documented future route; revisit when a server-side catalogue is
+needed rather than treating it as an invisible implementation detail.
+
+34. **`food_items` is not synced.** `food_log_entries` is in `SYNC_TABLES`, but reference data
+(`exercises` and `food_items`) is intentionally excluded so a catalogue is not replicated on
+every sync. CoFID seeds are therefore shipped locally and cached OFF foods are device-local;
+cross-device recent foods are not a v1 feature. A future change must explicitly add
+`food_items` to `SYNC_TABLES` and design its replication behaviour.
+
+35. **The first CoFID seed has 38 auditable rows, not a target-count filler.** Every included
+macro is a numeric value copied from the 2021 CoFID Proximates table; AOAC fibre is used where
+present and NSP only when AOAC is unavailable. The planned items omitted from v1 are chicken
+breast raw (only a broader light-meat row), salmon grilled/raw (no explicitly Atlantic row),
+whole boiled egg and raw egg white (required macros are `Tr`), skyr (no row), firm tofu (no
+matching preparation), black beans (no row), boiled quinoa (raw only), boiled green beans (dried
+only), and olive oil (protein is `Tr`). Do not replace those values with estimates or different
+foods; OFF search is the honest fallback. Each included seed records its CoFID code and source
+name in `seed-foods.ts` for review.

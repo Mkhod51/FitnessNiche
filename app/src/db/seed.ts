@@ -1,5 +1,8 @@
 import { SEED_EXERCISES } from './seed-exercises';
+import { SEED_FOODS } from './seed-foods';
 import type { Exec } from './migrate';
+
+const FOOD_SEED_AT = '2026-07-30T00:00:00.000Z';
 
 export async function seedExercises(exec: Exec): Promise<number> {
   const rows = await exec('select count(*) from exercises', [], 'all');
@@ -31,4 +34,46 @@ export async function seedExercises(exec: Exec): Promise<number> {
     throw err;
   }
   return SEED_EXERCISES.length;
+}
+
+// Idempotent CoFID seed. Gate on the CoFID row count rather than the whole
+// table: cached OFF rows are device-local reference data and must survive.
+export async function seedFoods(exec: Exec): Promise<number> {
+  const present = await exec("select count(*) from food_items where source = 'cofid'", [], 'all');
+  if (Number(present[0]?.[0] ?? 0) === SEED_FOODS.length) return 0;
+
+  await exec('begin', [], 'run');
+  try {
+    for (const food of SEED_FOODS) {
+      await exec(
+        `insert or replace into food_items (id, source, name, brand, barcode, kcal_per_100g, protein_g_per_100g, carbs_g_per_100g, fat_g_per_100g, fibre_g_per_100g, serving_grams, serving_label, updated_at)
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          food.id,
+          'cofid',
+          food.name,
+          null,
+          null,
+          food.kcalPer100g,
+          food.proteinGPer100g,
+          food.carbsGPer100g,
+          food.fatGPer100g,
+          food.fibreGPer100g ?? null,
+          food.servingGrams ?? null,
+          food.servingLabel ?? null,
+          FOOD_SEED_AT,
+        ],
+        'run',
+      );
+    }
+    await exec('commit', [], 'run');
+  } catch (err) {
+    try {
+      await exec('rollback', [], 'run');
+    } catch {
+      /* sqlite already rolled back */
+    }
+    throw err;
+  }
+  return SEED_FOODS.length;
 }
