@@ -3,3 +3,8 @@
 
 # Everything build- or tooling-generated under app/ is ignored by app/.gitignore.
 # This file covers the repo root, which has no build of its own.
+
+# Local agent/tooling scratch output.
+.firecrawl/
+.playwright-mcp/
+graphify-out/

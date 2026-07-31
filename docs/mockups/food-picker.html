@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MyoStat — food addition mockups</title>
+<style>
+  :root{
+    --paper:#FBFAF7; --sunk:#F6F3EB;
+    --ink:#141414; --soft:#57534A; --faint:#767162;
+    --rule:#E6E1D4; --strong:#DAD5C7;
+    --flag:#B0453A;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#E9E4D8;color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;padding:40px 24px 56px;}
+  .canvas{display:flex;flex-wrap:wrap;gap:40px 34px;justify-content:center;max-width:1260px;margin:0 auto;}
+  .frame{width:362px;}
+  .caption{font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft);margin:0 2px 12px;}
+  .caption .sub{display:block;font-weight:400;letter-spacing:0.02em;text-transform:none;font-size:11.5px;color:var(--faint);margin-top:4px;line-height:1.4;}
+  .screen{background:var(--paper);border:1px solid var(--strong);overflow:hidden;}
+
+  .serif{font-family:ui-serif,Georgia,"Times New Roman",serif;}
+  .fig{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;}
+  .label{font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--faint);}
+  .pad{padding:16px;}
+  .hair{border-top:1px solid var(--rule);}
+  .hair-b{border-bottom:1px solid var(--rule);}
+
+  /* headers */
+  .topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;}
+  .topbar .back{font-size:20px;color:var(--ink);line-height:1;width:24px;}
+  .topbar .t{font-family:ui-serif,Georgia,serif;font-size:18px;line-height:1.1;}
+  .topbar .ctx{font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--faint);margin-top:3px;}
+
+  /* day summary */
+  .stat{padding:14px 16px;}
+  .stat .lbl{font-family:ui-serif,Georgia,serif;font-size:15px;}
+  .stat .nums{font-family:system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink);float:right;}
+  .stat .nums em{font-style:normal;color:var(--faint);}
+  .meter{display:flex;gap:3px;align-items:flex-end;margin-top:8px;}
+  .mark{width:10px;height:19px;background:var(--strong);}
+  .mark.on{background:var(--ink);}
+  .cap{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--faint);margin-top:7px;}
+
+  /* meal rows */
+  .meal{padding:10px 16px 4px;}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;padding:10px 16px;}
+  .row.b{border-bottom:1px solid var(--rule);}
+  .fname{font-family:ui-serif,Georgia,serif;font-size:15.5px;line-height:1.18;}
+  .fmeta{font-size:11px;color:var(--faint);margin-top:3px;font-variant-numeric:tabular-nums;}
+  .src{font-size:8.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--faint);}
+  .src.v{color:var(--soft);}
+  .kcal{font-family:system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:15.5px;color:var(--ink);text-align:right;white-space:nowrap;}
+  .kcal u{font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);text-decoration:none;margin-left:3px;}
+  .chev{color:var(--faint);font-size:14px;margin-left:8px;}
+  .aff{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:12px 16px;}
+  .aff .t{font-size:9.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--faint);}
+
+  /* search field */
+  .field{display:flex;align-items:center;gap:8px;border:1px solid var(--strong);background:var(--paper);min-height:48px;margin:12px 16px;padding:0 12px;}
+  .field input{border:0;outline:0;background:transparent;font:inherit;font-size:14px;color:var(--ink);width:100%;}
+  .field .ph{color:#A39C8E;font-size:14px;}
+  .field.off{opacity:.45;}
+  .field .glass{color:var(--faint);font-size:15px;}
+
+  /* notice */
+  .notice{margin:4px 16px 12px;background:var(--sunk);padding:13px 14px;}
+  .notice p{margin:0;font-family:ui-serif,Georgia,serif;font-style:italic;font-size:12.5px;line-height:1.45;color:var(--soft);}
+
+  /* section label */
+  .sec{padding:14px 16px 6px;}
+
+  /* results honesty note */
+  .note{padding:8px 16px;font-size:10px;letter-spacing:0.04em;color:var(--faint);font-style:italic;}
+
+  /* quantity */
+  .base{padding:12px 16px;font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--faint);}
+  .qtywrap{padding:6px 16px 4px;}
+  .qlbl{font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--faint);margin-bottom:7px;}
+  .grambox{display:flex;align-items:center;justify-content:flex-end;gap:6px;border:1px solid var(--strong);background:var(--paper);min-height:52px;padding:0 14px;}
+  .grambox .v{font-family:system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:22px;color:var(--ink);}
+  .grambox .u{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--faint);}
+  .portions{padding:10px 16px 4px;font-size:11.5px;color:var(--faint);font-variant-numeric:tabular-nums;}
+  .portions .a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--strong);text-underline-offset:3px;margin-right:10px;}
+  .preview{margin:14px 16px;background:var(--sunk);padding:14px 16px;}
+  .preview .big{font-family:system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:26px;color:var(--ink);line-height:1;}
+  .preview .big em{font-style:normal;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);margin-left:6px;}
+  .preview .sub{font-family:system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13px;color:var(--soft);margin-top:6px;}
+  .btnrow{padding:16px;}
+  .btn{display:block;width:100%;min-height:48px;background:var(--ink);color:var(--paper);border:0;font:inherit;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;}
+  .btn2{display:block;width:100%;text-align:center;background:transparent;border:0;font:inherit;font-size:9.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--faint);padding:14px 0 4px;}
+
+  /* tab bar */
+  .tabs{display:flex;border-top:1px solid var(--rule);background:var(--paper);}
+  .tab{flex:1;padding:12px 0 15px;text-align:center;font-size:9px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);}
+  .tab.on{color:var(--ink);}
+
+  .foot{max-width:1260px;margin:36px auto 0;color:var(--soft);font-size:12px;line-height:1.6;}
+  .foot b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- 1. EAT — DAY VIEW (context) -->
+  <div class="frame">
+    <p class="caption">1 · Eat — the day view<span class="sub">Where “add food” lives. Totals are countable marks that fill toward a target — never a draining bar (GR-1).</span></p>
+    <div class="screen">
+      <div class="topbar">
+        <div class="t">Eat</div>
+        <div class="label" style="margin-left:auto">Wed 30 Jul</div>
+      </div>
+
+      <div class="stat hair-b">
+        <div><span class="lbl serif">Energy</span><span class="nums">1,840 <em>/ 2,400</em></span></div>
+        <div class="meter">
+          <span class="mark on"></span><span class="mark on"></span><span class="mark on"></span>
+          <span class="mark on"></span><span class="mark on"></span><span class="mark on"></span>
+          <span class="mark on"></span><span class="mark on"></span><span class="mark on"></span>
+          <span class="mark"></span><span class="mark"></span><span class="mark"></span>
+        </div>
+        <div class="cap">Each mark = 200 kcal</div>
+      </div>
+      <div class="stat hair-b">
+        <div><span class="lbl serif">Protein</span><span class="nums">142 <em>/ 180 g</em></span></div>
+        <div class="meter">
+          <span class="mark on"></span><span class="mark on"></span><span class="mark on"></span>
+          <span class="mark on"></span><span class="mark on"></span><span class="mark on"></span>
+          <span class="mark on"></span><span class="mark"></span><span class="mark"></span>
+        </div>
+        <div class="cap">Each mark = 20 g</div>
+      </div>
+
+      <div class="meal"><span class="label">Breakfast</span></div>
+      <div class="row b">
+        <div><div class="fname">Oats, rolled</div><div class="fmeta">80 g · <span class="src">CoFID</span></div></div>
+        <div class="kcal">300<u>kcal</u></div>
+      </div>
+      <div class="row b">
+        <div><div class="fname">Greek yogurt, plain</div><div class="fmeta">150 g · <span class="src">CoFID</span></div></div>
+        <div class="kcal">95<u>kcal</u></div>
+      </div>
+
+      <div class="meal"><span class="label">Lunch</span></div>
+      <div class="row b">
+        <div><div class="fname">Chicken breast, grilled</div><div class="fmeta">200 g · <span class="src">CoFID</span></div></div>
+        <div class="kcal">330<u>kcal</u></div>
+      </div>
+
+      <div class="meal"><span class="label">Dinner</span></div>
+      <div class="aff hair-b">
+        <span class="t">Add food</span><span class="chev">›</span>
+      </div>
+
+      <div class="tabs">
+        <div class="tab">Hub</div><div class="tab">Train</div><div class="tab on">Eat</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ADD FOOD — online, default -->
+  <div class="frame">
+    <p class="caption">2 · Add food — online<span class="sub">Default state. Search empty → recents, then the curated CoFID common foods. Every item shows its source.</span></p>
+    <div class="screen">
+      <div class="topbar hair-b">
+        <span class="back">‹</span>
+        <div><div class="t">Add to Dinner</div><div class="ctx">Assuming wifi</div></div>
+      </div>
+      <div class="field">
+        <span class="glass">⌕</span>
+        <span class="ph">Search foods, brands or barcode</span>
+      </div>
+
+      <div class="sec"><span class="label">Recent</span></div>
+      <div class="row b">
+        <div><div class="fname">Chicken breast, grilled</div><div class="fmeta">165 kcal · 31 P /100g · <span class="src">CoFID</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="row b">
+        <div><div class="fname">Skyr, plain</div><div class="fmeta">62 kcal · 11 P /100g · <span class="src">OFF</span></div></div>
+        <span class="chev">›</span>
+      </div>
+
+      <div class="sec"><span class="label">Common foods</span></div>
+      <div class="row b">
+        <div><div class="fname">Eggs, whole boiled</div><div class="fmeta">131 kcal · 13 P /100g · <span class="src v">CoFID</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="row b">
+        <div><div class="fname">Beef mince, lean</div><div class="fmeta">175 kcal · 26 P /100g · <span class="src v">CoFID</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="row b">
+        <div><div class="fname">Salmon, Atlantic</div><div class="fmeta">208 kcal · 20 P /100g · <span class="src v">CoFID</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="row">
+        <div><div class="fname">Whey protein isolate</div><div class="fmeta">400 kcal · 90 P /100g · <span class="src">OFF</span></div></div>
+        <span class="chev">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ADD FOOD — online, searching OFF -->
+  <div class="frame">
+    <p class="caption">3 · Add food — live search<span class="sub">Typed query hits Open Food Facts. Results are branded items, labelled community data. Items missing kcal/protein are filtered, not zero-filled — and it says so.</span></p>
+    <div class="screen">
+      <div class="topbar hair-b">
+        <span class="back">‹</span>
+        <div><div class="t">Add to Dinner</div><div class="ctx">Open Food Facts · online</div></div>
+      </div>
+      <div class="field">
+        <span class="glass">⌕</span>
+        <input value="skyr" />
+      </div>
+
+      <div class="sec"><span class="label">Results · Open Food Facts</span></div>
+      <div class="row b">
+        <div><div class="fname">Skyr Plain</div><div class="fmeta">Arla · 62 kcal · 11 P /100g · <span class="src">OFF</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="row b">
+        <div><div class="fname">Skyr Vanilla</div><div class="fmeta">Siggi’s · 78 kcal · 9 P /100g · <span class="src">OFF</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="row b">
+        <div><div class="fname">Skyr Strawberry</div><div class="fmeta">Icelandic Provisions · 88 kcal · 8 P /100g · <span class="src">OFF</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="note">2 results hidden — missing protein or energy. Not shown rather than guessed.</div>
+      <div class="aff">
+        <span class="t">Can’t find it? Quick add</span><span class="chev">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ADD FOOD — offline -->
+  <div class="frame">
+    <p class="caption">4 · Add food — no wifi<span class="sub">The connectivity gate. Search is dimmed and says plainly to find wifi — but recents and common foods still work, and quick-add is always offline.</span></p>
+    <div class="screen">
+      <div class="topbar hair-b">
+        <span class="back">‹</span>
+        <div><div class="t">Add to Dinner</div><div class="ctx" style="color:var(--flag)">No connection</div></div>
+      </div>
+      <div class="field off">
+        <span class="glass">⌕</span>
+        <span class="ph">Search foods, brands or barcode</span>
+      </div>
+      <div class="notice">
+        <p>You’ll need wifi to search for new foods. Your recent and common foods are still here — and quick-add works without a connection.</p>
+      </div>
+
+      <div class="sec"><span class="label">Recent</span></div>
+      <div class="row b">
+        <div><div class="fname">Chicken breast, grilled</div><div class="fmeta">165 kcal · 31 P /100g · <span class="src">CoFID</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="sec"><span class="label">Common foods</span></div>
+      <div class="row b">
+        <div><div class="fname">Eggs, whole boiled</div><div class="fmeta">131 kcal · 13 P /100g · <span class="src v">CoFID</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="row">
+        <div><div class="fname">Salmon, Atlantic</div><div class="fmeta">208 kcal · 20 P /100g · <span class="src v">CoFID</span></div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="aff hair-b">
+        <span class="t" style="color:var(--ink)">Quick add by name and calories</span><span class="chev">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. QUANTITY -->
+  <div class="frame">
+    <p class="caption">5 · Quantity<span class="sub">Grams is the primary control (FR-LOG-3), with a serving hint beside it. Macros compute live from per-100g. “Add” is the one filled control.</span></p>
+    <div class="screen">
+      <div class="topbar hair-b">
+        <span class="back">‹</span>
+        <div><div class="t">Chicken breast, grilled</div><div class="ctx"><span class="src v">CoFID</span></div></div>
+      </div>
+      <div class="base">165 kcal · 31 g protein · 0 g carbs · 3.6 g fat — per 100 g</div>
+
+      <div class="qtywrap">
+        <div class="qlbl">Grams</div>
+        <div class="grambox"><span class="v">200</span><span class="u">g</span></div>
+        <div class="portions">or <span class="a">1 small fillet ≈ 120 g</span><span class="a">2 fillets ≈ 240 g</span></div>
+      </div>
+
+      <div class="preview">
+        <div class="big">330<em>kcal</em></div>
+        <div class="sub">62 g protein · 0 g carbs · 7 g fat</div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn">Add to dinner</button>
+        <button class="btn2">Quick add instead ›</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">
+  <b>Mockups</b> — static HTML using MyoStat’s real design tokens (paper <code>#FBFAF7</code>, ink, serif names / sans-caps labels / tabular figures, countable-mark meters, flat controls, no shadows or rounded content). For layout &amp; interaction review only — not a running build. Open this file in a browser at full size to inspect detail.
+</div>
+</body>
+</html>

@@ -1,8 +1,8 @@
 # Project State
 
-**Updated:** 2026-07-29 · **Phase:** Build · **Branch:** `main` — M0, M1 and M2 are all merged
-(fast-forward; m0/m1 were already ancestors of m2). `main` is **87+ commits ahead of
-`origin/main` and has not been pushed.**
+**Updated:** 2026-07-30 · **Phase:** Build · **Branch:** `main` — M0–M4 merged; **M5
+(sync + data rights) is feature-complete on `OpenSourceMod`, 4 commits ahead and not merged.**
+`main` is **87+ commits ahead of `origin/main` and has not been pushed.**
 
 ---
 
@@ -19,12 +19,14 @@
    cd app && ls src/domain src/features && npm run typecheck && npm test -- --run
    ```
 
-**Verified 2026-07-29 (latest):** typecheck clean · **511 unit tests / 48 files** · build OK · e2e 21/21.
+**Verified 2026-07-30 (latest):** typecheck clean · **579 unit tests / 54 files** (M5's own 63 sync/data-rights tests, zero unhandled errors) · build OK · **e2e 21/21**.
 
 **Gates closed 2026-07-30 (developer verdict: yes on both):** the M1 A+C interaction is
 decisive-and-honest enough to ship, and the M4 reconciliation verdict earns its keep beyond
-two overlaid charts. OQ-4 is resolved. Work now on branch `OpenSourceMod`: closing M5
-(sync wiring into the running app) and starting the food database (FR-LOG-6).
+two overlaid charts. OQ-4 is resolved. **M5 (sync + data rights) is feature-complete on branch
+`OpenSourceMod`** — not merged (and the developer merges `main` themselves; never merge for
+them). Next on the agenda: the food database (FR-LOG-6), then the M6 curation-to-~50 and
+hardening tranche.
 
 ## What exists now
 
@@ -44,6 +46,10 @@ selection with a 7-day cooldown, and the peek wired to real logged data.
 returns a verdict *plus* the list of signals it could not resolve; `advice/snapshot.ts` feeds
 that into the claim engine, so `deficitWeeks`/`weightTrend`/`e1rmTrend` are real instead of the
 placeholders the session peek used to hand-fill. Weekly review screen at `/review`.
+
+**Sync (M5).** Append-log push/pull to a Cloudflare Worker + D1, last-write-wins on
+`updated_at`, queue fed from every write, token + Worker URL runtime-configurable in Settings.
+See the M5 section for the two gaps it ships with.
 
 **Also.** Three-tab shell with animated pane transitions, dark ground, Trends (bodyweight,
 e1RM with FR-SIG-2 noise honesty, volume vs the population range), Settings with GR-5 export
@@ -78,12 +84,72 @@ same motion system as the rest of the app.
 **What M4 does NOT close:** the OQ-4 gate itself. The screen is built and the refusal behaviour is
 real, but whether the verdict earns its keep is the developer's call, not a passing test.
 
+## M5 — sync + data rights (2026-07-30)
+
+**Feature-complete on branch `OpenSourceMod`, not merged.** A Cloudflare Worker (Hono) + D1
+endpoint takes a single `POST` push/pull: bearer-token auth (`timingSafeEqual` against
+`SYNC_TOKEN`), a validated `PushPullRequest`, and `applySync` settling every row by `updated_at`
+last-write-wins (no CRDT — NFR-2). The client (`src/sync/`) keeps an append-log queue fed from
+every write (`markPending`), merges incoming with `incomingWins`, and drains on reconnect. The
+token and Worker URL are runtime-configurable in Settings and live in `localStorage`, never in
+the replicated DB — the server's own credential doesn't cross the wire.
+
+**Data rights (GR-5).** Settings exports everything (JSON, the portability obligation) and the
+training log (CSV, sets only), erases the device (`deleteEverything` — `--flag` text, never a
+filled red button), shows an honest privacy notice, and signposts Beat/NHS (GR-1). No health
+data is in a URL or query string — sync is a POST body (NFR-4).
+
+**Verified 2026-07-30:** typecheck clean · **579 unit tests / 54 files**, of which M5's own 63
+(sync, protocol, server `applySync`, queue marking, `Settings.sync`) pass with **zero** unhandled
+errors · build OK · **e2e 21/21**. AC-1's offline halves are e2e-proven (`log-offline.spec.ts`
+logs a set with the network cut and reads it back from sqlite three ways after a reload); "data
+syncs on reconnect" is proven at the **contract** level (`server/src/index.test.ts` settles a real
+push/pull against a fake D1), not by a browser → Worker Playwright run.
+
+Two things M5 does **not** close, both disclosed in the UI rather than hidden:
+
+- **Server-side erasure is not wired.** "Delete all my data" erases this device only; the privacy
+  notice says so plainly (T6). A full delete-account needs a Worker erasure endpoint.
+- **No Playwright round-trip against a real Worker/D1.** The e2e harness builds + previews the
+  client only (`playwright.config.ts`); standing the Worker up in e2e (Miniflare + D1 + token) is
+  the remaining verification, recorded rather than faked. Same discipline M4's OQ-4 used: the
+  in-process contract is tested; the real-world round-trip is a named, open check, not a
+  self-certified one.
+
+**Operational notes (not M5 defects):**
+
+- If e2e ever reports `window.__db` undefined, a stale `vite preview` is lingering on :4173 and
+  Playwright's `reuseExistingServer: !CI` is reusing it instead of rebuilding — kill it and re-run.
+  The hatch itself is correct.
+- The unit run emits 43 unhandled errors from the D7 memory-fallback test (`Hub.tsx`
+  `getDrizzle()` under `App.test.tsx`); they don't fail the run, and the files involved are
+  unchanged from `main`, so they predate this branch.
+
+## Food database (FR-LOG-6) — design approved (2026-07-30, not yet built)
+
+The next milestone. **Design approved** and specced at
+`docs/superpowers/specs/2026-07-30-food-database-design.md`; approved UI mockups at
+`docs/mockups/food-picker.{html,png}`; start/hand-off prompt at
+`docs/superpowers/specs/2026-07-30-food-database-kickoff.md`.
+
+Two developer decisions shape it: (1) **lean and online-assumed** — offline keeps only recents
++ a curated CoFID common-foods set; everything else is fetched live, with an explicit "you'll
+need wifi" message when offline (quick-add stays the always-offline fallback). (2) **direct to
+the Open Food Facts API**, client-side, caching chosen items into `food_items` as recents.
+**FR-LOG-6 deviation to log** when built: "self-hosted" relaxed to "live-fetched + cached"
+(caching preserved). No new schema needed (`food_items`/`food_log_entries` from migration 0003
+already fit); barcode camera scan and Worker self-hosting are deferred to later slices.
+
 ## What does not exist
 
-Sync (M5) · **the food database** — the
-Open Food Facts + CoFID + FDC ETL is the largest single piece of unbuilt work, and quick-add
-was built first precisely so nothing waits on it · the predicate-focused curation tranche that
-would make the advice peek fire more than rarely.
+**The food database** — the Open Food Facts + CoFID + FDC ETL is the largest single piece of
+unbuilt work, and quick-add was built first precisely so nothing waits on it · the
+predicate-focused curation tranche that would make the advice peek fire more than rarely.
+
+**Sync (M5) shipped on `OpenSourceMod` with two honest gaps** (detailed in the M5 section):
+server-side erasure is not wired — "Delete all my data" is device-only and says so — and the
+browser → Worker round-trip is proven at the contract level, not by a Playwright run against a
+real D1 (the e2e harness serves the client only).
 
 **No food data has been hand-authored.** Inventing macro values is the fabrication this
 product exists to refuse.
