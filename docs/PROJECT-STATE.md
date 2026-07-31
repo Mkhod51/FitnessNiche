@@ -1,7 +1,8 @@
 # Project State
 
-**Updated:** 2026-07-30 · **Phase:** Build · **Branch:** `main` — M0–M4 merged; **M5
-(sync + data rights) is feature-complete on `OpenSourceMod`, 4 commits ahead and not merged.**
+**Updated:** 2026-07-31 · **Phase:** Build · **Branch:** `main` — M0–M4 merged; **M5
+(sync + data rights) and FR-LOG-6 food database are feature-complete on `OpenSourceMod`,
+not merged.**
 `main` is **87+ commits ahead of `origin/main` and has not been pushed.**
 
 ---
@@ -19,14 +20,16 @@
    cd app && ls src/domain src/features && npm run typecheck && npm test -- --run
    ```
 
-**Verified 2026-07-30 (latest):** typecheck clean · **579 unit tests / 54 files** (M5's own 63 sync/data-rights tests, zero unhandled errors) · build OK · **e2e 21/21**.
+**Verified 2026-07-31 (latest):** typecheck clean · **620 unit assertions / 61 files**
+pass, but Vitest exits non-zero with the known 43 pre-existing unhandled DB/mock errors
+from `LogWorkout`/`App` tests · **e2e 23/23**.
 
 **Gates closed 2026-07-30 (developer verdict: yes on both):** the M1 A+C interaction is
 decisive-and-honest enough to ship, and the M4 reconciliation verdict earns its keep beyond
 two overlaid charts. OQ-4 is resolved. **M5 (sync + data rights) is feature-complete on branch
 `OpenSourceMod`** — not merged (and the developer merges `main` themselves; never merge for
-them). Next on the agenda: the food database (FR-LOG-6), then the M6 curation-to-~50 and
-hardening tranche.
+them). **FR-LOG-6 food database is also feature-complete on `OpenSourceMod`**. Next on the
+agenda: M6 curation expansion and hardening.
 
 ## What exists now
 
@@ -35,9 +38,9 @@ set table with queued rows, optional-but-visible RIR, warm-ups excluded from vol
 the exercise picker sheet, session summary, and repeat-a-previous-session carrying its sets.
 
 **Nutrition.** `domain/guards.ts` (GR-1 floors and the deficit cap, with a dormant enforcement
-test), migration `0003`, the Eat day view with quick-add — **working with no food database at
-all** — goal setup with the Mifflin–St Jeor estimate and its error band, and numbers-hidden as
-a real state.
+test), migration `0003`, the Eat day view with FoodPicker, quick-add fallback, recents/common
+foods, submitted Open Food Facts keyword search, barcode lookup, CoFID common-food seed, goal
+setup with the Mifflin–St Jeor estimate and its error band, and numbers-hidden as a real state.
 
 **Advice.** `peekStatement` on every claim with guards against overstating it, one-per-session
 selection with a 7-day cooldown, and the peek wired to real logged data.
@@ -125,34 +128,49 @@ Two things M5 does **not** close, both disclosed in the UI rather than hidden:
   `getDrizzle()` under `App.test.tsx`); they don't fail the run, and the files involved are
   unchanged from `main`, so they predate this branch.
 
-## Food database (FR-LOG-6) — design approved (2026-07-30, not yet built)
+## Food database (FR-LOG-6) — built on `OpenSourceMod` (2026-07-31, not merged)
 
-The next milestone. **Design approved** and specced at
-`docs/superpowers/specs/2026-07-30-food-database-design.md`; approved UI mockups at
-`docs/mockups/food-picker.{html,png}`; start/hand-off prompt at
-`docs/superpowers/specs/2026-07-30-food-database-kickoff.md`.
+FR-LOG-6 is feature-complete on the branch: FoodPicker opens from each meal on the Eat day,
+loads recents and a curated CoFID common-food seed, filters local foods while typing, searches
+Open Food Facts only on Enter/Search, routes 8-14 digit barcode submissions through OFF product
+lookup, caches selected OFF items into `food_items`, and logs grams-first quantities into
+`food_log_entries`. The picker keeps source labels visible (`CoFID` / `OFF`), drops OFF rows
+missing energy or protein rather than zero-filling them, and keeps quick-add as the offline
+fallback.
 
-Two developer decisions shape it: (1) **lean and online-assumed** — offline keeps only recents
-+ a curated CoFID common-foods set; everything else is fetched live, with an explicit "you'll
-need wifi" message when offline (quick-add stays the always-offline fallback). (2) **direct to
-the Open Food Facts API**, client-side, caching chosen items into `food_items` as recents.
-**FR-LOG-6 deviation to log** when built: "self-hosted" relaxed to "live-fetched + cached"
-(caching preserved). No new schema needed (`food_items`/`food_log_entries` from migration 0003
-already fit); barcode camera scan and Worker self-hosting are deferred to later slices.
+**Verified 2026-07-31:** focused FoodPicker tests **16/16** passed, nutrition unit tests **32/32**
+passed, Settings attribution tests **6/6** passed, focused food Playwright spec **2/2** passed,
+and full Playwright e2e **23/23** passed in the task run. Typecheck is clean. Full Vitest still
+exits non-zero because of the known 43 pre-existing unhandled DB/mock errors from
+`LogWorkout`/`App` tests, even though all 620 assertions pass.
+
+Honest gaps:
+
+- **Seed size is 38 rows, not 150-200.** The first CoFID seed is deliberately small because every
+  macro was audited against CoFID 2021. Expanding the seed is an M6 curation task, not a reason
+  to invent values.
+- **Cross-device recents are not synced.** `food_log_entries` sync, but `food_items` remain local
+  reference/cache data, so selected OFF cache rows and recents are device-local in v1.
+- **OFF is called directly from the browser.** This works for v1 and degrades to the existing wifi
+  notice on failure, but a deployed app should move OFF calls behind a small proxy that identifies
+  the app and enforces OFF rate limits.
+- **Barcode camera scan is not built.** Manual barcode entry in the search box is wired; camera
+  scanning with `@zxing/browser` remains a separate UI slice.
 
 ## What does not exist
 
-**The food database** — the Open Food Facts + CoFID + FDC ETL is the largest single piece of
-unbuilt work, and quick-add was built first precisely so nothing waits on it · the
-predicate-focused curation tranche that would make the advice peek fire more than rarely.
+**Food data beyond v1** — CoFID expansion toward the original larger seed target, USDA FDC
+fallback integration, Worker-side OFF proxy/self-hosting, and barcode camera scanning are not
+built yet · the predicate-focused curation tranche that would make the advice peek fire more
+than rarely.
 
 **Sync (M5) shipped on `OpenSourceMod` with two honest gaps** (detailed in the M5 section):
 server-side erasure is not wired — "Delete all my data" is device-only and says so — and the
 browser → Worker round-trip is proven at the contract level, not by a Playwright run against a
 real D1 (the e2e harness serves the client only).
 
-**No food data has been hand-authored.** Inventing macro values is the fabrication this
-product exists to refuse.
+**No food data has been invented.** CoFID values in the seed are copied from the dataset; OFF
+values are parsed as returned and incomplete rows are hidden rather than guessed.
 
 ## Recently answered
 
