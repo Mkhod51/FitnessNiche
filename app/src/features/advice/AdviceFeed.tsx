@@ -26,7 +26,7 @@ function groupByDomain(claims: Claim[]): [string, Claim[]][] {
  * (FR-ADV-6). Claims without a cluster, or the only member of one, pass
  * through untouched.
  */
-function collapseClusters(claims: Claim[]): Claim[][] {
+export function collapseClusters(claims: Claim[]): Claim[][] {
   const seen = new Set<string>();
   const out: Claim[][] = [];
   for (const claim of claims) {

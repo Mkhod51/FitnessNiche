@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { initDb } from './db/client';
 import type { StorageMode } from './db/protocol';
 import { AdviceFeed } from './features/advice/AdviceFeed';
+import { AskEvidence } from './features/advice/AskEvidence';
 
 type BootState = StorageMode | 'booting' | `error: ${string}`;
 
@@ -41,6 +42,7 @@ export default function App() {
               : `data loss risk — storage fell back to ${mode}, nothing you do here is guaranteed to be saved`}
         </p>
       </header>
+      <AskEvidence />
       <AdviceFeed />
     </main>
   );
