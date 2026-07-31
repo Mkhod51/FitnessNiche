@@ -14,8 +14,9 @@ vi.mock('./rpc', () => ({
     // race each other instead of one finishing before the other starts.
     init: () => new Promise((resolve) => setTimeout(() => resolve('opfs-sahpool'), 5)),
     // initDb now runs migrations right after init, which selects rows and
-    // .maps() them — an empty result set keeps that a no-op here.
-    exec: vi.fn(async () => []),
+    // .maps() them — an empty result set keeps that a no-op here. D8 widened
+    // rpc.exec() to resolve { rows, changes }, so the mock must match.
+    exec: vi.fn(async () => ({ rows: [], changes: 0 })),
   })),
 }));
 

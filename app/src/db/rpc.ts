@@ -18,7 +18,13 @@ export function createRpc(worker: Worker) {
     if (!entry) return;
     pending.delete(res.id);
     if (!res.ok) { entry.reject(new Error(res.error)); return; }
-    entry.resolve((res.kind === 'exec' ? res.rows : res.storage) as never);
+    if (res.kind === 'exec') {
+      entry.resolve({ rows: res.rows, changes: res.changes } as never);
+    } else if (res.kind === 'flush') {
+      entry.resolve(undefined as never);
+    } else {
+      entry.resolve(res.storage as never);
+    }
   };
 
   // A dead/crashed worker never posts a response, so without this every
@@ -46,7 +52,10 @@ export function createRpc(worker: Worker) {
   return {
     init: () => send<StorageMode>({ kind: 'init' }),
     exec: (sql: string, params: unknown[] = [], method: SqlMethod = 'all') =>
-      send<unknown[][]>({ kind: 'exec', sql, params, method }),
+      send<{ rows: unknown[][]; changes: number }>({ kind: 'exec', sql, params, method }),
+    // memory-fallback only: force the debounced snapshot export to run now
+    // (see sqlite.worker.ts). No-ops in opfs-sahpool.
+    flush: () => send<void>({ kind: 'flush' }),
     // Debug-only: lets tests confirm the map is actually emptied on crash,
     // not just that the promises settled.
     _pendingCount: () => pending.size,
