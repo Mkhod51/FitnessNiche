@@ -14,6 +14,7 @@ const mockState = {
   decodeImpl: null as any,
   storedCallback: null as ((result: any, error?: any, controls?: any) => void) | null,
   mockStop: null as any,
+  decodeCalls: 0,
 };
 
 vi.mock('@zxing/browser', () => ({
@@ -23,6 +24,7 @@ vi.mock('@zxing/browser', () => ({
       video: any,
       callback: (result?: any, error?: any, controls?: any) => void
     ) => {
+      mockState.decodeCalls += 1;
       if (mockState.decodeImpl) {
         return mockState.decodeImpl(constraints, video, callback);
       }
@@ -46,6 +48,7 @@ describe('BarcodeScanner', () => {
     mockState.storedCallback = null;
     mockState.mockStop = vi.fn();
     mockState.decodeImpl = null;
+    mockState.decodeCalls = 0;
 
     // Reset navigator.mediaDevices
     Object.defineProperty(navigator, 'mediaDevices', {
@@ -219,5 +222,15 @@ describe('BarcodeScanner', () => {
     expect(onDetected).not.toHaveBeenCalled();
 
     vi.useRealTimers();
+  });
+
+  it('does not re-acquire the camera when the parent re-renders with a fresh onDetected', async () => {
+    const { rerender } = render(<BarcodeScanner onDetected={onDetected} onClose={onClose} />);
+    await vi.waitFor(() => expect(mockState.decodeCalls).toBe(1));
+
+    // A parent that passes a new callback identity each render must not cause the
+    // scanner to re-subscribe and re-request the camera mid-scan.
+    rerender(<BarcodeScanner onDetected={vi.fn()} onClose={vi.fn()} />);
+    expect(mockState.decodeCalls).toBe(1);
   });
 });

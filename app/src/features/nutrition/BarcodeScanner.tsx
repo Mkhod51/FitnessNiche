@@ -15,20 +15,30 @@ type BarcodeScannerProps = {
 export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): ReactElement {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [closing, setClosing] = useState(false);
-  const [resolved, setResolved] = useState(false);
   const [error, setError] = useState<{ type: 'permission' | 'unavailable' } | null>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
+  const resolvedRef = useRef(false);
   const closeTimerRef = useRef<number | null>(null);
   const mountedRef = useRef(true);
+  // Latest-callback refs: the scanner subscribes once on mount (effect deps []),
+  // so a parent passing a fresh onDetected/onClose each render cannot re-trigger
+  // the camera. Re-subscribing here would re-acquire the camera mid-scan.
+  const onDetectedRef = useRef(onDetected);
+  const onCloseRef = useRef(onClose);
+  onDetectedRef.current = onDetected;
+  onCloseRef.current = onClose;
 
   function closeWithMotion() {
-    if (closing) return;
+    if (closing || closeTimerRef.current !== null) return;
     setClosing(true);
     if (prefersReducedMotion()) {
-      onClose();
+      onCloseRef.current();
       return;
     }
-    closeTimerRef.current = window.setTimeout(onClose, SCANNER_MOTION_MS);
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+      onCloseRef.current();
+    }, SCANNER_MOTION_MS);
   }
 
   useEffect(() => {
@@ -45,13 +55,12 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
     const video = videoRef.current;
     if (!video) return;
 
-    // Check for camera support
     if (!navigator.mediaDevices?.getUserMedia) {
       if (mountedRef.current) setError({ type: 'unavailable' });
       return;
     }
 
-    let controls: { stop: () => void } | null = null;
+    let cancelled = false;
 
     async function startScanner() {
       try {
@@ -65,45 +74,44 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
         // ponytail: seam — a Capacitor native barcode plugin replaces this decode block; onDetected/onClose stay unchanged
         const reader = new BrowserMultiFormatReader(hints);
 
-        controls = await reader.decodeFromConstraints(
+        const controls = await reader.decodeFromConstraints(
           { video: { facingMode: 'environment' } },
           video!,
           (result, _error, ctrl) => {
-            if (result && !resolved) {
-              const code = result.getText();
-              if (isPlausibleBarcode(code)) {
-                setResolved(true);
-                controlsRef.current = ctrl;
-                if (ctrl) ctrl.stop();
-                onDetected(code);
-                closeWithMotion();
-              }
-            }
-          }
+            if (!result || resolvedRef.current) return;
+            const code = result.getText();
+            if (!isPlausibleBarcode(code)) return;
+            resolvedRef.current = true;
+            controlsRef.current = ctrl ?? controlsRef.current;
+            ctrl?.stop();
+            if (mountedRef.current) onDetectedRef.current(code);
+            closeWithMotion();
+          },
         );
 
-        if (mountedRef.current) {
-          controlsRef.current = controls;
+        if (cancelled || !mountedRef.current) {
+          controls.stop();
+          return;
         }
+        controlsRef.current = controls;
       } catch (err) {
-        if (!mountedRef.current) return;
-        const error = err as { name?: string };
-        if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') {
-          setError({ type: 'permission' });
-        } else {
-          setError({ type: 'unavailable' });
-        }
+        if (cancelled || !mountedRef.current) return;
+        const caught = err as { name?: string };
+        setError(
+          caught?.name === 'NotAllowedError' || caught?.name === 'SecurityError'
+            ? { type: 'permission' }
+            : { type: 'unavailable' },
+        );
       }
     }
 
     void startScanner();
 
     return () => {
-      if (controls) {
-        controls.stop();
-      }
+      cancelled = true;
+      if (controlsRef.current) controlsRef.current.stop();
     };
-  }, [onDetected, resolved]);
+  }, []);
 
   if (error) {
     return (
