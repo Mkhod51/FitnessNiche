@@ -7,7 +7,7 @@ import { getCommonFoods, getRecentFoods, saveFoodItem, searchFoodLocal } from '.
 import { macrosForQuantity } from '../../food/macros';
 import { lookupBarcode, searchFoodOnline } from '../../food/off';
 import type { FoodItem, FoodItemDraft } from '../../food/types';
-import { FoodPicker, prefersReducedMotion } from './FoodPicker';
+import { FoodPicker } from './FoodPicker';
 
 vi.mock('../../db/user', async () => {
   const actual = await vi.importActual<typeof import('../../db/user')>('../../db/user');
@@ -137,30 +137,6 @@ describe('FoodPicker', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     } finally {
       vi.useRealTimers();
-    }
-  });
-
-  it('detects reduced motion so closing can skip the panel transition', () => {
-    const originalMatchMedia = window.matchMedia;
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === '(prefers-reduced-motion: reduce)',
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
-    });
-
-    try {
-      expect(prefersReducedMotion()).toBe(true);
-      expect(window.matchMedia).toHaveBeenCalledWith('(prefers-reduced-motion: reduce)');
-    } finally {
-      Object.defineProperty(window, 'matchMedia', { writable: true, value: originalMatchMedia });
     }
   });
 

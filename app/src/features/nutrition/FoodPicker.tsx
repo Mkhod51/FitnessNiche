@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactElement } from 'react';
 import { getUser } from '../../db/user';
 import { logFood, type MealSlot } from '../../db/nutrition';
+import { isPlausibleBarcode } from '../../food/barcode';
 import { useOnline } from '../../food/connectivity';
 import { getCommonFoods, getRecentFoods, saveFoodItem, searchFoodLocal } from '../../food/local';
 import { macrosForQuantity } from '../../food/macros';
 import { lookupBarcode, searchFoodOnline } from '../../food/off';
+import { prefersReducedMotion } from '../../motion';
 import type { FoodItem, FoodItemDraft } from '../../food/types';
 
 type FoodPickerProps = {
@@ -58,14 +60,6 @@ function loggedAtFor(day: Date): Date {
     day.getMonth() === today.getMonth() &&
     day.getDate() === today.getDate();
   return isToday ? new Date() : new Date(day.getFullYear(), day.getMonth(), day.getDate(), 12);
-}
-
-function isPlausibleBarcode(term: string): boolean {
-  return /^\d{8,14}$/.test(term);
-}
-
-export function prefersReducedMotion(): boolean {
-  return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 function FoodRow({ food, hidden, onSelect }: { food: PickedFood; hidden: boolean; onSelect: () => void }): ReactElement {
