@@ -13,6 +13,8 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    /* src/provenance.test.ts reads source files with node:fs (Task 10, AC-4/T1) */
+    "types": ["node"],
 
     /* Linting */
     "strict": true,

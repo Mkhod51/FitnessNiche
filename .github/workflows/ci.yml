@@ -23,5 +23,23 @@ jobs:
             echo "found window.__db in a production build — this is UK-GDPR special-category health data, it must never ship"
             exit 1
           fi
+      - name: fail if grade-calibrated advice wording ships without a claim id alongside it (AC-4/T1)
+        run: |
+          # A real DOI legitimately ships inside the bundled claim data, so "no DOI in
+          # dist" would always fail — that check would be meaningless. What actually
+          # matters is that calibrated grade wording (the language a reader takes as a
+          # confidence claim) never appears in a bundle that carries no claimId/claim-id
+          # anywhere — i.e. advice text shipping with no provenance sitting next to it.
+          PHRASES=("well-supported" "supported, with real uncertainty" "suggested, on limited evidence" "anecdotal")
+          fail=0
+          for phrase in "${PHRASES[@]}"; do
+            for file in $(grep -rl -- "$phrase" dist/ 2>/dev/null || true); do
+              if ! grep -q "claimId\|claim-id" "$file"; then
+                echo "found calibrated phrase '$phrase' in $file with no claimId/claim-id anywhere in the same file — advice wording shipped without provenance"
+                fail=1
+              fi
+            done
+          done
+          exit $fail
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
