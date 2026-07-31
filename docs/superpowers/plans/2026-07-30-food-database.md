@@ -921,7 +921,7 @@ Strong model for structure/state; use the **frontend-design** + **impeccable** s
 
 **Behaviour (screens 2–5):**
 - **Empty query:** `Recent` (getRecentFoods) then `Common foods` (getCommonFoods). Each row shows name, `kcal · P g /100g`, and source label (`CoFID` faint-bold / `OFF` faint).
-- **Typing, online (debounced ~250ms):** local matches first, then a `Results · Open Food Facts` section from `searchFoodOnline`. Show the italic honesty note `"N results hidden — missing protein or energy. Not shown rather than guessed."` when `hidden > 0`.
+- **Typing, online:** local matches update immediately. OFF network search runs only when the user submits the query with Enter or the search action, then a `Results · Open Food Facts` section renders from `searchFoodOnline`. This preserves the approved search-results state without using OFF as search-as-you-type. Show the italic honesty note `"N results hidden — missing protein or energy. Not shown rather than guessed."` when `hidden > 0`.
 - **Typing, offline:** local matches only; if none, render the wifi notice.
 - **Offline entirely:** search field dimmed (`opacity .45`) + the notice from screen 4: *"You'll need wifi to search for new foods. Your recent and common foods are still here — and quick-add works without a connection."* Recents + common still render.
 - **Any `searchFoodOnline` throw** → render the same wifi notice (do not crash).
@@ -930,7 +930,7 @@ Strong model for structure/state; use the **frontend-design** + **impeccable** s
 - **Quick-add path:** the existing name/kcal/protein/grams form, log with no `foodItemId` (unchanged behaviour).
 - **numbers-hidden** is respected on this surface (no figures where the day view hides them) — show names + source only, as the day view does.
 
-- [ ] **Step 1: Write failing component tests** (jsdom): offline → the wifi notice is present and recents still render; a `hidden > 0` search renders the honesty note; selecting a common food then "Add" calls `logFood` with the right `foodItemId` + macros; source labels render (`CoFID`/`OFF`). Mock the `src/food/*` and `src/db/nutrition` modules.
+- [ ] **Step 1: Write failing component tests** (jsdom): offline → the wifi notice is present and recents still render; submitting a query where OFF reports `hidden > 0` renders the honesty note; typing alone filters local foods without calling `searchFoodOnline`; selecting a common food then "Add" calls `logFood` with the right `foodItemId` + macros; source labels render (`CoFID`/`OFF`). Mock the `src/food/*` and `src/db/nutrition` modules.
 - [ ] **Step 2: Run tests to verify they fail.**
 - [ ] **Step 3: Build `FoodPicker.tsx`** to the mockups using frontend-design + impeccable. Compose the three lists + quantity step as described. Keep it one focused file; extract the quantity step inline if it stays small.
 - [ ] **Step 4: Run tests to verify they pass.**
