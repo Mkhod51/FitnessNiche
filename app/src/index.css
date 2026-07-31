@@ -210,6 +210,24 @@ input[type="number"]::-webkit-inner-spin-button {
   overflow: hidden;
 }
 
+/* The camera scanner arrives as a full-screen sheet rising from the bottom
+   edge, and leaves the same way — same grammar as the food picker, so the two
+   never disagree about how a surface enters. */
+@keyframes scanner-enter {
+  from { transform: translate3d(0, 100%, 0); opacity: 0.4; }
+  to { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+.scanner-enter {
+  animation: scanner-enter var(--motion-move) var(--motion-ease) backwards;
+}
+.scanner-exit {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  transition:
+    transform var(--motion-move) var(--motion-ease),
+    opacity var(--motion-move) var(--motion-ease);
+}
+
 /* Start → session → finish is a sequence, so the pane carries the order: a step
    deeper arrives from the right, a step back from the left. Same grammar as the
    tab panes, one level down, so the two never contradict each other. */

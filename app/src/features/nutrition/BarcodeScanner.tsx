@@ -1,0 +1,175 @@
+import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { BrowserMultiFormatReader } from '@zxing/browser';
+import { BarcodeFormat, DecodeHintType } from '@zxing/library';
+import { isPlausibleBarcode } from '../../food/barcode';
+import { prefersReducedMotion } from '../../motion';
+
+const SCANNER_MOTION_MS = 200;
+const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
+
+type BarcodeScannerProps = {
+  onDetected: (barcode: string) => void;
+  onClose: () => void;
+};
+
+export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): ReactElement {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [closing, setClosing] = useState(false);
+  const [resolved, setResolved] = useState(false);
+  const [error, setError] = useState<{ type: 'permission' | 'unavailable' } | null>(null);
+  const controlsRef = useRef<{ stop: () => void } | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
+  const mountedRef = useRef(true);
+
+  function closeWithMotion() {
+    if (closing) return;
+    setClosing(true);
+    if (prefersReducedMotion()) {
+      onClose();
+      return;
+    }
+    closeTimerRef.current = window.setTimeout(onClose, SCANNER_MOTION_MS);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
+      mountedRef.current = false;
+      if (controlsRef.current) {
+        controlsRef.current.stop();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Check for camera support
+    if (!navigator.mediaDevices?.getUserMedia) {
+      if (mountedRef.current) setError({ type: 'unavailable' });
+      return;
+    }
+
+    let controls: { stop: () => void } | null = null;
+
+    async function startScanner() {
+      try {
+        const hints = new Map<DecodeHintType, any>();
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+          BarcodeFormat.EAN_13,
+          BarcodeFormat.EAN_8,
+          BarcodeFormat.UPC_A,
+        ]);
+
+        // ponytail: seam — a Capacitor native barcode plugin replaces this decode block; onDetected/onClose stay unchanged
+        const reader = new BrowserMultiFormatReader(hints);
+
+        controls = await reader.decodeFromConstraints(
+          { video: { facingMode: 'environment' } },
+          video!,
+          (result, _error, ctrl) => {
+            if (result && !resolved) {
+              const code = result.getText();
+              if (isPlausibleBarcode(code)) {
+                setResolved(true);
+                controlsRef.current = ctrl;
+                if (ctrl) ctrl.stop();
+                onDetected(code);
+                closeWithMotion();
+              }
+            }
+          }
+        );
+
+        if (mountedRef.current) {
+          controlsRef.current = controls;
+        }
+      } catch (err) {
+        if (!mountedRef.current) return;
+        const error = err as { name?: string };
+        if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') {
+          setError({ type: 'permission' });
+        } else {
+          setError({ type: 'unavailable' });
+        }
+      }
+    }
+
+    void startScanner();
+
+    return () => {
+      if (controls) {
+        controls.stop();
+      }
+    };
+  }, [onDetected, resolved]);
+
+  if (error) {
+    return (
+      <div
+        className={`fixed inset-0 z-50 bg-ink ${closing ? 'scanner-exit' : 'scanner-enter'}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Barcode scanner"
+      >
+        <div className="flex h-full flex-col items-center justify-center px-4">
+          <p className="font-serif text-[16px] leading-[1.5] text-paper">
+            {error.type === 'permission'
+              ? 'Camera permission was blocked. Enable it in your browser or site settings, or type the barcode below.'
+              : 'Camera unavailable — type the barcode below.'}
+          </p>
+          <button
+            type="button"
+            onClick={closeWithMotion}
+            className="mt-4 min-h-[48px] w-full bg-paper font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-ink"
+          >
+            Type barcode
+          </button>
+          <button
+            type="button"
+            onClick={closeWithMotion}
+            className="mt-3 min-h-[44px] w-full font-sans text-[11px] text-paper"
+            aria-label="Close scanner"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 bg-ink ${closing ? 'scanner-exit' : 'scanner-enter'}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Barcode scanner"
+    >
+      <video
+        ref={videoRef}
+        muted
+        autoPlay
+        playsInline
+        className="h-full w-full object-cover"
+        aria-hidden
+      />
+      <button
+        type="button"
+        onClick={closeWithMotion}
+        className="absolute right-4 top-4 min-h-[44px] font-sans text-[11px] text-paper"
+        aria-label="Close scanner"
+      >
+        ✕
+      </button>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative h-48 w-64">
+          <div className="absolute inset-0 border-2 border-paper opacity-50" />
+          <div className="absolute bottom-4 left-0 right-0 text-center">
+            <p className={LABEL}>Align the barcode</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
