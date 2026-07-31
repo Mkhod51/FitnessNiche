@@ -4,6 +4,7 @@ import App from './App';
 import { initDb } from './db/client';
 
 vi.mock('./db/client', () => ({ initDb: vi.fn() }));
+vi.mock('./db/weights', () => ({ getWeightHistory: vi.fn(async () => []) }));
 
 const mockInitDb = vi.mocked(initDb);
 

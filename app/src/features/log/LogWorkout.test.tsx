@@ -10,11 +10,22 @@ import {
   getLastSetForExercise,
   getOpenSessionSets,
   getWorkoutTemplate,
+  getRecentExerciseIds,
+  getSetsSince,
   renameWorkout,
   logSet,
   type Workout,
   type LoggedSet,
 } from '../../db/workouts';
+import { getWeightHistory } from '../../db/weights';
+import { getEntriesSince } from '../../db/nutrition';
+import {
+  recordAdviceShown,
+  suppressClaim,
+  suppressedClaimIds,
+  recentlyShownClaimIds,
+  shownInWorkout,
+} from '../../db/advice-events';
 
 vi.mock('../../db/user', async () => {
   const actual = await vi.importActual<typeof import('../../db/user')>('../../db/user');
@@ -32,8 +43,32 @@ vi.mock('../../db/workouts', async () => {
     getLastSetForExercise: vi.fn(),
     getOpenSessionSets: vi.fn(),
     getWorkoutTemplate: vi.fn(),
+    getRecentExerciseIds: vi.fn(),
+    getSetsSince: vi.fn(),
     renameWorkout: vi.fn(),
     logSet: vi.fn(),
+  };
+});
+
+vi.mock('../../db/weights', async () => {
+  const actual = await vi.importActual<typeof import('../../db/weights')>('../../db/weights');
+  return { ...actual, getWeightHistory: vi.fn() };
+});
+
+vi.mock('../../db/nutrition', async () => {
+  const actual = await vi.importActual<typeof import('../../db/nutrition')>('../../db/nutrition');
+  return { ...actual, getEntriesSince: vi.fn() };
+});
+
+vi.mock('../../db/advice-events', async () => {
+  const actual = await vi.importActual<typeof import('../../db/advice-events')>('../../db/advice-events');
+  return {
+    ...actual,
+    recordAdviceShown: vi.fn(),
+    suppressClaim: vi.fn(),
+    suppressedClaimIds: vi.fn(),
+    recentlyShownClaimIds: vi.fn(),
+    shownInWorkout: vi.fn(),
   };
 });
 
@@ -45,8 +80,17 @@ const mockGetRecentWorkouts = vi.mocked(getRecentWorkouts);
 const mockGetLastSetForExercise = vi.mocked(getLastSetForExercise);
 const mockGetOpenSessionSets = vi.mocked(getOpenSessionSets);
 const mockGetWorkoutTemplate = vi.mocked(getWorkoutTemplate);
+const mockGetRecentExerciseIds = vi.mocked(getRecentExerciseIds);
+const mockGetSetsSince = vi.mocked(getSetsSince);
 const mockRenameWorkout = vi.mocked(renameWorkout);
 const mockLogSet = vi.mocked(logSet);
+const mockGetWeightHistory = vi.mocked(getWeightHistory);
+const mockGetEntriesSince = vi.mocked(getEntriesSince);
+const mockRecordAdviceShown = vi.mocked(recordAdviceShown);
+const mockSuppressClaim = vi.mocked(suppressClaim);
+const mockSuppressedClaimIds = vi.mocked(suppressedClaimIds);
+const mockRecentlyShownClaimIds = vi.mocked(recentlyShownClaimIds);
+const mockShownInWorkout = vi.mocked(shownInWorkout);
 
 const consentedUser: User = {
   id: 'local-user',
@@ -103,8 +147,17 @@ function resetMocks() {
   mockGetLastSetForExercise.mockReset();
   mockGetOpenSessionSets.mockReset();
   mockGetWorkoutTemplate.mockReset();
+  mockGetRecentExerciseIds.mockReset();
+  mockGetSetsSince.mockReset();
   mockRenameWorkout.mockReset();
   mockLogSet.mockReset();
+  mockGetWeightHistory.mockReset();
+  mockGetEntriesSince.mockReset();
+  mockRecordAdviceShown.mockReset();
+  mockSuppressClaim.mockReset();
+  mockSuppressedClaimIds.mockReset();
+  mockRecentlyShownClaimIds.mockReset();
+  mockShownInWorkout.mockReset();
 
   mockGetUser.mockResolvedValue(consentedUser);
   mockFindOpenWorkout.mockResolvedValue(undefined);
@@ -112,8 +165,17 @@ function resetMocks() {
   mockGetLastSetForExercise.mockResolvedValue(undefined);
   mockGetOpenSessionSets.mockResolvedValue([]);
   mockGetWorkoutTemplate.mockResolvedValue([]);
+  mockGetRecentExerciseIds.mockResolvedValue([]);
+  mockGetSetsSince.mockResolvedValue([]);
   mockRenameWorkout.mockResolvedValue(undefined);
   mockFinishWorkout.mockResolvedValue(undefined);
+  mockGetWeightHistory.mockResolvedValue([]);
+  mockGetEntriesSince.mockResolvedValue([]);
+  mockRecordAdviceShown.mockResolvedValue(undefined as never);
+  mockSuppressClaim.mockResolvedValue(undefined);
+  mockSuppressedClaimIds.mockResolvedValue([]);
+  mockRecentlyShownClaimIds.mockResolvedValue([]);
+  mockShownInWorkout.mockResolvedValue(false);
 }
 
 describe('LogWorkout — GR-5: unreachable without consent', () => {
