@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactElement } from 'react';
 import { getUser } from '../../db/user';
 import { logFood, type MealSlot } from '../../db/nutrition';
 import { useOnline } from '../../food/connectivity';
@@ -103,12 +103,13 @@ function WifiNotice(): ReactElement {
 
 export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps): ReactElement {
   const online = useOnline();
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useState<boolean | null>(null);
   const [recent, setRecent] = useState<FoodItem[]>([]);
   const [common, setCommon] = useState<FoodItem[]>([]);
   const [query, setQuery] = useState('');
   const [localResults, setLocalResults] = useState<FoodItem[]>([]);
   const [onlineResults, setOnlineResults] = useState<FoodItemDraft[]>([]);
+  const [onlineResultsQuery, setOnlineResultsQuery] = useState('');
   const [onlineHidden, setOnlineHidden] = useState(0);
   const [onlineFailed, setOnlineFailed] = useState(false);
   const [selected, setSelected] = useState<PickedFood | null>(null);
@@ -116,6 +117,9 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   const [quickAdd, setQuickAdd] = useState(false);
   const [quickDraft, setQuickDraft] = useState({ name: '', kcal: '', protein: '', grams: '' });
   const [busy, setBusy] = useState(false);
+  const queryRef = useRef(query);
+  const onlineRef = useRef(online);
+  const searchRequestRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,9 +135,21 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   }, []);
 
   useEffect(() => {
+    onlineRef.current = online;
+    if (!online) {
+      searchRequestRef.current += 1;
+      setOnlineResults([]);
+      setOnlineResultsQuery('');
+      setOnlineHidden(0);
+    }
+  }, [online]);
+
+  useEffect(() => {
     let cancelled = false;
     const term = query.trim();
+    searchRequestRef.current += 1;
     setOnlineResults([]);
+    setOnlineResultsQuery('');
     setOnlineHidden(0);
     setOnlineFailed(false);
     if (!term) {
@@ -150,6 +166,8 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
     };
   }, [query]);
 
+  const figuresHidden = hidden !== false;
+
   const quantity = Number(grams);
   const validQuantity = Number.isFinite(quantity) && quantity > 0;
   const macros = useMemo(
@@ -164,15 +182,20 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   }
 
   async function runOnlineSearch() {
-    const term = query.trim();
+    const term = queryRef.current.trim();
     if (!term || !online) return;
+    const request = ++searchRequestRef.current;
     try {
       const result = await searchFoodOnline(term);
+      if (request !== searchRequestRef.current || queryRef.current.trim() !== term || !onlineRef.current) return;
       setOnlineResults(result.drafts);
+      setOnlineResultsQuery(term);
       setOnlineHidden(result.hidden);
       setOnlineFailed(false);
     } catch {
+      if (request !== searchRequestRef.current || queryRef.current.trim() !== term || !onlineRef.current) return;
       setOnlineResults([]);
+      setOnlineResultsQuery('');
       setOnlineHidden(0);
       setOnlineFailed(true);
     }
@@ -299,8 +322,16 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
             <p className={`${LABEL} mt-1`}>{sourceLabel(selected.source)}</p>
           </div>
         </header>
-        {hidden ? (
+        {figuresHidden ? (
           <div className="p-4">
+            <button
+              type="button"
+              onClick={() => void addSelected()}
+              disabled={!macros || busy}
+              className="min-h-[48px] w-full bg-ink font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-paper disabled:opacity-50"
+            >
+              Add to {SLOT_LABEL[mealSlot]}
+            </button>
             <button type="button" onClick={() => setQuickAdd(true)} className={`${LABEL} min-h-[44px] text-ink-faint`}>
               Quick add instead &rsaquo;
             </button>
@@ -369,7 +400,8 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   }
 
   const isSearching = query.trim().length > 0;
-  const showWifiNotice = !online || onlineFailed || (isSearching && !online && localResults.length === 0);
+  const showWifiNotice = !online || onlineFailed;
+  const showOnlineResults = online && onlineResultsQuery === query.trim();
 
   return (
     <section aria-label={`Add food to ${SLOT_LABEL[mealSlot]}`} className="border-y border-rule">
@@ -387,7 +419,10 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
           type="search"
           role="searchbox"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            queryRef.current = event.target.value;
+            setQuery(event.target.value);
+          }}
           onKeyDown={(event) => {
             if (event.key !== 'Enter') return;
             event.preventDefault();
@@ -407,16 +442,16 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
           {localResults.length > 0 && (
             <section>
               <div className="px-4 pb-1 pt-3"><p className={LABEL}>Local results</p></div>
-              <ul>{localResults.map((food) => <FoodRow key={food.id} food={food} hidden={hidden} onSelect={() => pick(food)} />)}</ul>
+              <ul>{localResults.map((food) => <FoodRow key={food.id} food={food} hidden={figuresHidden} onSelect={() => pick(food)} />)}</ul>
             </section>
           )}
-          {onlineResults.length > 0 && (
+          {showOnlineResults && onlineResults.length > 0 && (
             <section>
               <div className="px-4 pb-1 pt-3"><p className={LABEL}>Results · Open Food Facts</p></div>
-              <ul>{onlineResults.map((food, index) => <FoodRow key={`${food.barcode ?? food.name}-${index}`} food={food} hidden={hidden} onSelect={() => pick(food)} />)}</ul>
+              <ul>{onlineResults.map((food, index) => <FoodRow key={`${food.barcode ?? food.name}-${index}`} food={food} hidden={figuresHidden} onSelect={() => pick(food)} />)}</ul>
             </section>
           )}
-          {!hidden && onlineHidden > 0 && (
+          {!figuresHidden && showOnlineResults && onlineHidden > 0 && (
             <p className="px-4 py-2 font-serif text-[10px] italic text-ink-faint">
               {onlineHidden} {onlineHidden === 1 ? 'result' : 'results'} hidden &mdash; missing protein or energy. Not shown rather than guessed.
             </p>
@@ -427,13 +462,13 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
           {recent.length > 0 && (
             <section>
               <div className="px-4 pb-1 pt-3"><p className={LABEL}>Recent</p></div>
-              <ul>{recent.map((food) => <FoodRow key={food.id} food={food} hidden={hidden} onSelect={() => pick(food)} />)}</ul>
+              <ul>{recent.map((food) => <FoodRow key={food.id} food={food} hidden={figuresHidden} onSelect={() => pick(food)} />)}</ul>
             </section>
           )}
           {common.length > 0 && (
             <section>
               <div className="px-4 pb-1 pt-3"><p className={LABEL}>Common foods</p></div>
-              <ul>{common.map((food) => <FoodRow key={food.id} food={food} hidden={hidden} onSelect={() => pick(food)} />)}</ul>
+              <ul>{common.map((food) => <FoodRow key={food.id} food={food} hidden={figuresHidden} onSelect={() => pick(food)} />)}</ul>
             </section>
           )}
         </>

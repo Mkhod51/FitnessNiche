@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getUser, type User } from '../../db/user';
 import { logFood } from '../../db/nutrition';
@@ -73,8 +73,8 @@ function food(overrides: Partial<FoodItem> = {}): FoodItem {
   };
 }
 
-function renderPicker() {
-  return render(<FoodPicker mealSlot="dinner" day={new Date(2026, 6, 31)} onLogged={vi.fn()} onClose={vi.fn()} />);
+function renderPicker(day = new Date(2026, 6, 31)) {
+  return render(<FoodPicker mealSlot="dinner" day={day} onLogged={vi.fn()} onClose={vi.fn()} />);
 }
 
 describe('FoodPicker', () => {
@@ -173,5 +173,114 @@ describe('FoodPicker', () => {
     expect(screen.getByText('CoFID')).toBeInTheDocument();
     expect(screen.queryByText(/165 kcal/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/31 P/i)).not.toBeInTheDocument();
+  });
+
+  it('does not expose figures before the numbers-hidden preference has loaded', async () => {
+    let resolveUser: (value: User) => void;
+    const pendingUser = new Promise<User>((resolve) => {
+      resolveUser = resolve;
+    });
+    mockGetUser.mockReturnValueOnce(pendingUser);
+    mockSearchFoodLocal.mockResolvedValue([food({ name: 'Skyr, plain' })]);
+
+    renderPicker();
+
+    fireEvent.change(await screen.findByRole('searchbox'), { target: { value: 'skyr' } });
+    expect(await screen.findByText('Skyr, plain')).toBeInTheDocument();
+    expect(screen.queryByText(/165 kcal/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/31 P/i)).not.toBeInTheDocument();
+
+    resolveUser!(user);
+    await waitFor(() => expect(screen.getByText(/165 kcal/i)).toBeInTheDocument());
+  });
+
+  it('ignores a submitted OFF response once the query has changed', async () => {
+    let resolveSearch: (value: { drafts: Array<{ source: 'off'; name: string; kcalPer100g: number; proteinGPer100g: number }>; hidden: number }) => void;
+    const pendingSearch = new Promise<{ drafts: Array<{ source: 'off'; name: string; kcalPer100g: number; proteinGPer100g: number }>; hidden: number }>((resolve) => {
+      resolveSearch = resolve;
+    });
+    mockSearchFoodOnline.mockReturnValueOnce(pendingSearch);
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'skyr' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    fireEvent.change(input, { target: { value: 'yogurt' } });
+    await act(async () => {
+      resolveSearch!({ drafts: [{ source: 'off', name: 'Skyr Plain', kcalPer100g: 62, proteinGPer100g: 11 }], hidden: 0 });
+    });
+
+    expect(screen.queryByText('Skyr Plain')).not.toBeInTheDocument();
+  });
+
+  it('keeps the hidden-mode selected-food workflow usable without rendering figures', async () => {
+    mockGetUser.mockResolvedValue({ ...user, numbersHidden: true });
+    mockGetCommonFoods.mockResolvedValue([food({ id: 'cofid-chicken' })]);
+    mockMacrosForQuantity.mockReturnValue({ kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 });
+    renderPicker();
+
+    fireEvent.click(await screen.findByRole('button', { name: /chicken breast, grilled/i }));
+
+    expect(screen.getByRole('button', { name: /add to dinner/i })).toBeInTheDocument();
+    expect(screen.queryByText(/165 kcal/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /add to dinner/i }));
+    await waitFor(() => expect(mockLogFood).toHaveBeenCalledWith(expect.objectContaining({ foodItemId: 'cofid-chicken' }), expect.any(Date)));
+  });
+
+  it('caches an OFF selection before logging it', async () => {
+    mockSearchFoodOnline.mockResolvedValue({
+      drafts: [{ source: 'off', name: 'Skyr Plain', kcalPer100g: 62, proteinGPer100g: 11 }],
+      hidden: 0,
+    });
+    mockSaveFoodItem.mockResolvedValue(food({ id: 'saved-skyr', source: 'off', name: 'Skyr Plain' }));
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'skyr' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    fireEvent.click(await screen.findByRole('button', { name: /skyr plain/i }));
+    fireEvent.click(screen.getByRole('button', { name: /add to dinner/i }));
+
+    await waitFor(() => expect(mockLogFood).toHaveBeenCalledWith(expect.objectContaining({ foodItemId: 'saved-skyr' }), expect.any(Date)));
+    expect(mockSaveFoodItem.mock.invocationCallOrder[0]).toBeLessThan(mockLogFood.mock.invocationCallOrder[0]);
+  });
+
+  it('shows the wifi notice when the submitted OFF search fails', async () => {
+    mockSearchFoodOnline.mockRejectedValueOnce(new Error('network failed'));
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'skyr' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(await screen.findByTestId('food-offline-notice')).toBeInTheDocument();
+  });
+
+  it('timestamps a historical selected-food entry at local noon', async () => {
+    mockGetCommonFoods.mockResolvedValue([food({ id: 'cofid-chicken' })]);
+    renderPicker(new Date(2020, 0, 2));
+
+    fireEvent.click(await screen.findByRole('button', { name: /chicken breast, grilled/i }));
+    fireEvent.click(screen.getByRole('button', { name: /add to dinner/i }));
+
+    await waitFor(() => expect(mockLogFood).toHaveBeenCalled());
+    const loggedAt = mockLogFood.mock.calls[0][1] as Date;
+    expect(loggedAt.getFullYear()).toBe(2020);
+    expect(loggedAt.getMonth()).toBe(0);
+    expect(loggedAt.getDate()).toBe(2);
+    expect(loggedAt.getHours()).toBe(12);
+  });
+
+  it('timestamps a today selected-food entry at the current time', async () => {
+    const today = new Date();
+    mockGetCommonFoods.mockResolvedValue([food({ id: 'cofid-chicken' })]);
+    renderPicker(today);
+
+    fireEvent.click(await screen.findByRole('button', { name: /chicken breast, grilled/i }));
+    fireEvent.click(screen.getByRole('button', { name: /add to dinner/i }));
+
+    await waitFor(() => expect(mockLogFood).toHaveBeenCalled());
+    const loggedAt = mockLogFood.mock.calls[0][1] as Date;
+    expect(Math.abs(loggedAt.getTime() - Date.now())).toBeLessThan(1_000);
   });
 });
