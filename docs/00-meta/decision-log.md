@@ -230,3 +230,12 @@ matching preparation), black beans (no row), boiled quinoa (raw only), boiled gr
 only), and olive oil (protein is `Tr`). Do not replace those values with estimates or different
 foods; OFF search is the honest fallback. Each included seed records its CoFID code and source
 name in `seed-foods.ts` for review.
+
+36. **OFF keyword search is browser-readable through the legacy search route.** A Playwright
+probe from `about:blank` fetched
+`https://world.openfoodfacts.org/cgi/search.pl?search_terms=skyr&search_simple=1&action=process&json=1&page_size=1&fields=code,product_name,nutriments`
+and received `200`, `count: 4013`, and a product with `energy-kcal_100g`, `proteins_100g`,
+`carbohydrates_100g`, `fat_100g`, and `fiber_100g`. That confirms CORS is usable for the v1
+direct-PWA path. The known production caveat remains: browsers cannot set OFF's requested custom
+`User-Agent`, so a deployed app should later use a small proxy that identifies the app and
+enforces OFF's search/product-read limits.
