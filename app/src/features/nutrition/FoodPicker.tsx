@@ -8,6 +8,7 @@ import { macrosForQuantity } from '../../food/macros';
 import { lookupBarcode, searchFoodOnline } from '../../food/off';
 import { prefersReducedMotion } from '../../motion';
 import type { FoodItem, FoodItemDraft } from '../../food/types';
+import { BarcodeScanner } from './BarcodeScanner';
 
 type FoodPickerProps = {
   mealSlot: MealSlot;
@@ -110,6 +111,8 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   const [recent, setRecent] = useState<FoodItem[]>([]);
   const [common, setCommon] = useState<FoodItem[]>([]);
   const [query, setQuery] = useState('');
+  const [scanning, setScanning] = useState(false);
+  const [pendingScan, setPendingScan] = useState(false);
   const [localResults, setLocalResults] = useState<FoodItem[]>([]);
   const [onlineResults, setOnlineResults] = useState<FoodItemDraft[]>([]);
   const [onlineResultsQuery, setOnlineResultsQuery] = useState('');
@@ -271,6 +274,24 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
     event.preventDefault();
     void runOnlineSearch();
   }
+
+  // A scanned code takes the same path as a typed barcode: drop it into the
+  // search field and run the existing lookup, so scan and manual entry share
+  // one OFF resolution route and one result UI. The lookup runs from the
+  // pendingScan effect, after the [query] effect has reset results and bumped
+  // the request counter — calling runOnlineSearch synchronously here would be
+  // invalidated by the [query] effect that setQuery triggers on commit.
+  function handleBarcode(code: string) {
+    queryRef.current = code;
+    setQuery(code);
+    setPendingScan(true);
+  }
+
+  useEffect(() => {
+    if (!pendingScan) return;
+    setPendingScan(false);
+    void runOnlineSearch();
+  }, [pendingScan]);
 
   async function addSelected() {
     if (!selected || !macros || !validQuantity || controlsDisabled) return;
@@ -472,6 +493,18 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
         onBack={closeWithMotion}
       />
       <form onSubmit={(event) => void submitSearch(event)} className={`mx-4 my-3 flex h-[48px] items-center border border-rule-strong bg-paper px-3 ${!online ? 'opacity-45' : ''}`}>
+        <button
+          type="button"
+          onClick={() => setScanning(true)}
+          disabled={!online}
+          aria-label="Scan barcode"
+          className="flex min-h-[44px] items-center pr-3 text-ink disabled:text-ink-faint"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+            <path d="M3 8a2 2 0 0 1 2-2h2.3l1.3-1.7a1 1 0 0 1 .8-.4h5.2a1 1 0 0 1 .8.4L17.4 6H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z" />
+            <circle cx="12" cy="12.5" r="3.2" />
+          </svg>
+        </button>
         <input
           type="search"
           role="searchbox"
@@ -537,6 +570,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
       <button type="button" onClick={() => setQuickAdd(true)} className={`${LABEL} min-h-[48px] w-full border-t border-rule px-4 text-left text-ink-faint`}>
         Can&apos;t find it? Quick add &rsaquo;
       </button>
+      {scanning && <BarcodeScanner onDetected={handleBarcode} onClose={() => setScanning(false)} />}
     </>,
   );
 }

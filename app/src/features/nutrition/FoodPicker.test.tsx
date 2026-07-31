@@ -28,6 +28,11 @@ vi.mock('../../food/local', () => ({
 }));
 vi.mock('../../food/macros', () => ({ macrosForQuantity: vi.fn() }));
 vi.mock('../../food/off', () => ({ lookupBarcode: vi.fn(), searchFoodOnline: vi.fn() }));
+vi.mock('./BarcodeScanner', () => ({
+  BarcodeScanner: ({ onDetected }: { onDetected: (code: string) => void }) => (
+    <button data-testid="scan-fire" onClick={() => onDetected('5000159484695')}>fire</button>
+  ),
+}));
 
 const mockGetUser = vi.mocked(getUser);
 const mockLogFood = vi.mocked(logFood);
@@ -485,5 +490,19 @@ describe('FoodPicker', () => {
     await waitFor(() => expect(mockLogFood).toHaveBeenCalled());
     const loggedAt = mockLogFood.mock.calls[0][1] as Date;
     expect(Math.abs(loggedAt.getTime() - Date.now())).toBeLessThan(1_000);
+  });
+
+  it('runs the OFF barcode lookup when the scanner delivers a code', async () => {
+    const barcode = '5000159484695';
+    const draft = offDraft({ name: 'Heinz Baked Beans', barcode, kcalPer100g: 78, proteinGPer100g: 4.7, carbsGPer100g: 12.5, fatGPer100g: 0.2 });
+    mockLookupBarcode.mockResolvedValue(draft);
+    renderPicker();
+
+    fireEvent.click(await screen.findByRole('button', { name: /scan barcode/i }));
+    fireEvent.click(await screen.findByTestId('scan-fire'));
+
+    expect(await screen.findByText('Heinz Baked Beans')).toBeInTheDocument();
+    expect(mockLookupBarcode).toHaveBeenCalledWith(barcode);
+    expect(mockSearchFoodOnline).not.toHaveBeenCalled();
   });
 });
