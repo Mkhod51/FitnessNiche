@@ -42,6 +42,10 @@ export default function App() {
               : `data loss risk — storage fell back to ${mode}, nothing you do here is guaranteed to be saved`}
         </p>
       </header>
+      {/* The M1 evidence feed carries no user health data, so it needs no
+          consent and renders unconditionally, durably, regardless of
+          ConsentGate state (see features/onboarding/ConsentGate.tsx). Task 6
+          wraps the future logging surface — not this — in <ConsentGate>. */}
       <AskEvidence />
       <AdviceFeed />
     </main>
