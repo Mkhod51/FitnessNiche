@@ -4,7 +4,7 @@ import { logFood, type MealSlot } from '../../db/nutrition';
 import { useOnline } from '../../food/connectivity';
 import { getCommonFoods, getRecentFoods, saveFoodItem, searchFoodLocal } from '../../food/local';
 import { macrosForQuantity } from '../../food/macros';
-import { searchFoodOnline } from '../../food/off';
+import { lookupBarcode, searchFoodOnline } from '../../food/off';
 import type { FoodItem, FoodItemDraft } from '../../food/types';
 
 type FoodPickerProps = {
@@ -57,6 +57,10 @@ function loggedAtFor(day: Date): Date {
     day.getMonth() === today.getMonth() &&
     day.getDate() === today.getDate();
   return isToday ? new Date() : new Date(day.getFullYear(), day.getMonth(), day.getDate(), 12);
+}
+
+function isPlausibleBarcode(term: string): boolean {
+  return /^\d{8,14}$/.test(term);
 }
 
 function FoodRow({ food, hidden, onSelect }: { food: PickedFood; hidden: boolean; onSelect: () => void }): ReactElement {
@@ -186,7 +190,9 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
     if (!term || !online) return;
     const request = ++searchRequestRef.current;
     try {
-      const result = await searchFoodOnline(term);
+      const result = isPlausibleBarcode(term)
+        ? await lookupBarcode(term).then((draft) => ({ drafts: draft ? [draft] : [], hidden: 0 }))
+        : await searchFoodOnline(term);
       if (request !== searchRequestRef.current || queryRef.current.trim() !== term || !onlineRef.current) return;
       setOnlineResults(result.drafts);
       setOnlineResultsQuery(term);

@@ -5,8 +5,8 @@ import { logFood } from '../../db/nutrition';
 import { useOnline } from '../../food/connectivity';
 import { getCommonFoods, getRecentFoods, saveFoodItem, searchFoodLocal } from '../../food/local';
 import { macrosForQuantity } from '../../food/macros';
-import { searchFoodOnline } from '../../food/off';
-import type { FoodItem } from '../../food/types';
+import { lookupBarcode, searchFoodOnline } from '../../food/off';
+import type { FoodItem, FoodItemDraft } from '../../food/types';
 import { FoodPicker } from './FoodPicker';
 
 vi.mock('../../db/user', async () => {
@@ -27,7 +27,7 @@ vi.mock('../../food/local', () => ({
   searchFoodLocal: vi.fn(),
 }));
 vi.mock('../../food/macros', () => ({ macrosForQuantity: vi.fn() }));
-vi.mock('../../food/off', () => ({ searchFoodOnline: vi.fn() }));
+vi.mock('../../food/off', () => ({ lookupBarcode: vi.fn(), searchFoodOnline: vi.fn() }));
 
 const mockGetUser = vi.mocked(getUser);
 const mockLogFood = vi.mocked(logFood);
@@ -37,6 +37,7 @@ const mockGetRecentFoods = vi.mocked(getRecentFoods);
 const mockSaveFoodItem = vi.mocked(saveFoodItem);
 const mockSearchFoodLocal = vi.mocked(searchFoodLocal);
 const mockMacrosForQuantity = vi.mocked(macrosForQuantity);
+const mockLookupBarcode = vi.mocked(lookupBarcode);
 const mockSearchFoodOnline = vi.mocked(searchFoodOnline);
 
 const user: User = {
@@ -85,6 +86,7 @@ describe('FoodPicker', () => {
     mockGetRecentFoods.mockResolvedValue([]);
     mockGetCommonFoods.mockResolvedValue([]);
     mockSearchFoodLocal.mockResolvedValue([]);
+    mockLookupBarcode.mockResolvedValue(null);
     mockSearchFoodOnline.mockResolvedValue({ drafts: [], hidden: 0 });
     mockSaveFoodItem.mockResolvedValue(food({ id: 'saved-off', source: 'off' }));
     mockMacrosForQuantity.mockReturnValue({ kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 });
@@ -125,7 +127,52 @@ describe('FoodPicker', () => {
     fireEvent.change(input, { target: { value: 'skyr' } });
 
     expect(await screen.findByText('Skyr, plain')).toBeInTheDocument();
+    expect(mockLookupBarcode).not.toHaveBeenCalled();
     expect(mockSearchFoodOnline).not.toHaveBeenCalled();
+  });
+
+  it('looks up a submitted plausible barcode and renders the matching OFF food', async () => {
+    const barcode = '5000159484695';
+    const draft: FoodItemDraft = { source: 'off', name: 'Heinz Baked Beans', barcode, kcalPer100g: 78, proteinGPer100g: 4.7 };
+    mockLookupBarcode.mockResolvedValue(draft);
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: ` ${barcode} ` } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(await screen.findByText('Heinz Baked Beans')).toBeInTheDocument();
+    expect(mockLookupBarcode).toHaveBeenCalledWith(barcode);
+    expect(mockSearchFoodOnline).not.toHaveBeenCalled();
+  });
+
+  it('keeps the online results empty when a barcode has no OFF match', async () => {
+    mockLookupBarcode.mockResolvedValue(null);
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: '5000159484695' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() => expect(mockLookupBarcode).toHaveBeenCalledWith('5000159484695'));
+    expect(screen.queryByText('Results · Open Food Facts')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('food-offline-notice')).not.toBeInTheDocument();
+  });
+
+  it('searches OFF by keyword for a submitted non-barcode query', async () => {
+    mockSearchFoodOnline.mockResolvedValue({
+      drafts: [{ source: 'off', name: 'Skyr Plain', kcalPer100g: 62, proteinGPer100g: 11 }],
+      hidden: 0,
+    });
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'skyr' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(await screen.findByText('Skyr Plain')).toBeInTheDocument();
+    expect(mockSearchFoodOnline).toHaveBeenCalledWith('skyr');
+    expect(mockLookupBarcode).not.toHaveBeenCalled();
   });
 
   it('renders CoFID and OFF provenance labels on food rows', async () => {
