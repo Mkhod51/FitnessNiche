@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { getDrizzle } from './client';
+import { getDrizzle, initDb } from './client';
 import { users } from './schema';
 
 // This is a local-first, single-user app — exactly one person per install
@@ -17,6 +17,13 @@ export type User = typeof users.$inferSelect;
  * UNIQUE-constraint crash.
  */
 export async function getUser(): Promise<User> {
+  // Open the store before asking it anything. Callers mount at unpredictable
+  // times — a consent gate on a deep-linked route renders before App's boot
+  // resolves — and getDrizzle() throws until init completes. Making every UI
+  // component remember to await the boot is a rule that gets forgotten once;
+  // owning it here means every caller is correct by default. initDb() caches
+  // its in-flight promise, so this is a no-op after the first call.
+  await initDb();
   const db = getDrizzle();
   const existing = await db.select().from(users).where(eq(users.id, LOCAL_USER_ID)).get();
   if (existing) return existing;
