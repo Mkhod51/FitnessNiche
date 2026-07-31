@@ -8,7 +8,7 @@ import { getUser, recordConsent, hasConsented } from '../../db/user';
 const BUTTON_BASE =
   'min-h-[44px] flex-1 border border-ink px-4 font-sans text-[13px] font-semibold uppercase tracking-[0.08em]';
 
-type Status = 'checking' | 'needed' | 'granted';
+type Status = 'checking' | 'needed' | 'granted' | 'unavailable';
 
 /**
  * Wraps a logging surface and renders it only once explicit consent
@@ -25,10 +25,18 @@ export function ConsentGate({ children }: { children: ReactNode }): ReactElement
 
   useEffect(() => {
     let cancelled = false;
-    getUser().then((user) => {
-      if (cancelled) return;
-      setStatus(hasConsented(user) ? 'granted' : 'needed');
-    });
+    getUser()
+      .then((user) => {
+        if (cancelled) return;
+        setStatus(hasConsented(user) ? 'granted' : 'needed');
+      })
+      // Fail closed, but say so. If the store can't be read we cannot know
+      // whether consent was given, so children stay unrendered — silently
+      // rendering nothing would look like a broken screen instead of a
+      // refusal, and an unhandled rejection would hide the cause entirely.
+      .catch(() => {
+        if (!cancelled) setStatus('unavailable');
+      });
     return () => {
       cancelled = true;
     };
@@ -36,6 +44,13 @@ export function ConsentGate({ children }: { children: ReactNode }): ReactElement
 
   if (status === 'checking') return null;
   if (status === 'granted') return <>{children}</>;
+  if (status === 'unavailable') {
+    return (
+      <p data-testid="consent-unavailable" className="mx-auto max-w-[480px] bg-paper p-4 font-serif text-[15px] leading-[1.45] text-flag">
+        Storage isn&rsquo;t reachable, so logging is off until it is. Nothing has been recorded.
+      </p>
+    );
+  }
 
   async function handleAccept() {
     await recordConsent();
