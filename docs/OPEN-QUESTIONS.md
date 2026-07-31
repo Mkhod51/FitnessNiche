@@ -55,20 +55,20 @@ count — so *adding* an exercise propagates, but *editing* one never reaches th
 
 ## Q4 — Where does real food data come from, and when?
 
-**Status:** unanswered, and it gates the food *search* path only.
+**Status: superseded 2026-07-31 by FR-LOG-6.**
 
-FR-LOG-6 names Open Food Facts (UK) + CoFID + USDA FDC, self-hosted. That is an ETL and a
-PWA bundle-size problem — roughly 134k UK-tagged barcodes is not something to precache
-casually — and it is the largest single piece of unbuilt work in the project.
+FR-LOG-6 now ships with a smaller honest open-data stack: a curated CoFID seed for common
+foods, Open Food Facts keyword search on submit, manual barcode lookup, and selected-item
+caching in `food_items`. USDA FDC is deferred as a later backend/proxy fallback, not a direct
+browser dependency.
 
-**Default taken:** build quick-add first, which needs no food database at all, and ship
-the day view working entirely without one. The food table exists and stays empty; the UI
-says so plainly rather than pretending. **No food rows are hand-authored** — inventing
-macro values would be exactly the fabrication this product refuses.
+**Current follow-ups:** CoFID seed expansion, Worker-side OFF proxy/rate limiting,
+USDA/FatSecret-style provider adapter, barcode camera scanning, and a cross-device recents
+decision. See `docs/agent-handoff/REMAINING-WORK.md`.
 
 ## Q5 — Maintenance calories before the calculator exists
 
-**Status:** unanswered.
+**Status: superseded 2026-07-31 by the goal setup flow.**
 
 `clampCalorieTarget` needs a maintenance figure. Until the Mifflin–St Jeor calculator and
 observed-maintenance logic land, there is nothing to give it for an existing user.

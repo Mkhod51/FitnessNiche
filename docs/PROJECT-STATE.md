@@ -1,34 +1,36 @@
 # Project State
 
-**Updated:** 2026-07-31 · **Phase:** Build · **Branch:** `main` — M0–M4 merged; **M5
-(sync + data rights) and FR-LOG-6 food database are feature-complete on `OpenSourceMod`,
-not merged.**
-`main` is **87+ commits ahead of `origin/main` and has not been pushed.**
+**Updated:** 2026-07-31 · **Phase:** Build · **Branch:** `main` — M0–M5 and
+FR-LOG-6 food database are feature-complete at `a380c9a`.
+`main`, `OpenSourceMod`, `origin/main`, and `origin/OpenSourceMod` all contain this commit in
+the current workspace. Older notes saying this work is unmerged from `OpenSourceMod` are stale.
 
 ---
 
 ## ▶ START HERE (new session)
 
-1. **Read [`superpowers/plans/2026-07-27-trackers-redesign.md`](superpowers/plans/2026-07-27-trackers-redesign.md).**
+1. **Read [`agent-handoff/README.md`](agent-handoff/README.md).**
+   This is the fresh handoff packet for the next agent, including ranked remaining work and
+   a paste-ready kickoff prompt.
+2. **Read [`superpowers/plans/2026-07-27-trackers-redesign.md`](superpowers/plans/2026-07-27-trackers-redesign.md).**
    Six consulted design gates for the health-hub trackers, the schema plan, and the build
    order. It supersedes the unfinished tail of the M2 plan.
-2. **Read [`OPEN-QUESTIONS.md`](OPEN-QUESTIONS.md)** — five questions awaiting the developer,
+3. **Read [`OPEN-QUESTIONS.md`](OPEN-QUESTIONS.md)** — five questions awaiting the developer,
    each with the default that was taken so work could continue.
-3. **Verify state before trusting any document, including this one.** Documents here have gone
+4. **Verify state before trusting any document, including this one.** Documents here have gone
    stale mid-flight more than once:
    ```bash
    cd app && ls src/domain src/features && npm run typecheck && npm test -- --run
    ```
 
-**Verified 2026-07-31 (latest):** typecheck clean · **633 unit tests / 61 files** ·
-**e2e 23/23**.
+**Verified 2026-07-31 (handoff):** typecheck clean · **639 unit tests / 61 files** ·
+production build OK · full Playwright e2e **23/23** after clearing a stale preview on `:4173`.
 
 **Gates closed 2026-07-30 (developer verdict: yes on both):** the M1 A+C interaction is
 decisive-and-honest enough to ship, and the M4 reconciliation verdict earns its keep beyond
-two overlaid charts. OQ-4 is resolved. **M5 (sync + data rights) is feature-complete on branch
-`OpenSourceMod`** — not merged (and the developer merges `main` themselves; never merge for
-them). **FR-LOG-6 food database is also feature-complete on `OpenSourceMod`**. Next on the
-agenda: M6 curation expansion and hardening.
+two overlaid charts. OQ-4 is resolved. **M5 (sync + data rights) and FR-LOG-6 food database
+are feature-complete on current `main`.** Next on the agenda: M6 curation expansion and
+hardening, plus the named food/sync follow-ups below.
 
 ## What exists now
 
@@ -88,7 +90,7 @@ real, but whether the verdict earns its keep is the developer's call, not a pass
 
 ## M5 — sync + data rights (2026-07-30)
 
-**Feature-complete on branch `OpenSourceMod`, not merged.** A Cloudflare Worker (Hono) + D1
+**Feature-complete on current `main`.** A Cloudflare Worker (Hono) + D1
 endpoint takes a single `POST` push/pull: bearer-token auth (`timingSafeEqual` against
 `SYNC_TOKEN`), a validated `PushPullRequest`, and `applySync` settling every row by `updated_at`
 last-write-wins (no CRDT — NFR-2). The client (`src/sync/`) keeps an append-log queue fed from
@@ -126,9 +128,9 @@ Two things M5 does **not** close, both disclosed in the UI rather than hidden:
 - The old unit-test isolation issue that emitted 43 unhandled DB/mock errors from
   `LogWorkout.test.tsx` and `App.test.tsx` is fixed on this branch.
 
-## Food database (FR-LOG-6) — built on `OpenSourceMod` (2026-07-31, not merged)
+## Food database (FR-LOG-6) — feature-complete on current `main` (2026-07-31)
 
-FR-LOG-6 is feature-complete on the branch: FoodPicker opens from each meal on the Eat day,
+FR-LOG-6 is feature-complete on current `main`: FoodPicker opens from each meal on the Eat day,
 loads recents and a curated CoFID common-food seed, filters local foods while typing, searches
 Open Food Facts only on Enter/Search, routes 8-14 digit barcode submissions through OFF product
 lookup, caches selected OFF items into `food_items`, and logs grams-first quantities into
@@ -136,9 +138,9 @@ lookup, caches selected OFF items into `food_items`, and logs grams-first quanti
 missing energy or protein rather than zero-filling them, and keeps quick-add as the offline
 fallback.
 
-**Verified 2026-07-31:** focused food/provider/privacy tests **72/72** passed, focused food
-Playwright spec **2/2** passed, full Vitest **633/633** passed, and full Playwright e2e
-**23/23** passed. Typecheck is clean.
+**Verified 2026-07-31:** focused food/provider/privacy tests passed, focused food
+Playwright spec **2/2** passed during the food-picker polish pass. See the handoff snapshot
+above for the current full baseline.
 
 Honest gaps:
 
@@ -160,7 +162,7 @@ fallback integration, Worker-side OFF proxy/self-hosting, and barcode camera sca
 built yet · the predicate-focused curation tranche that would make the advice peek fire more
 than rarely.
 
-**Sync (M5) shipped on `OpenSourceMod` with two honest gaps** (detailed in the M5 section):
+**Sync (M5) shipped with two honest gaps** (detailed in the M5 section):
 server-side erasure is not wired — "Delete all my data" is device-only and says so — and the
 browser → Worker round-trip is proven at the contract level, not by a Playwright run against a
 real D1 (the e2e harness serves the client only).

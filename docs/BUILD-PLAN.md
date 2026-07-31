@@ -1,5 +1,10 @@
 # Master Build Plan — MyoStat (Evidence-Graded Lifting & Nutrition PWA)
 
+> **Status note, 2026-07-31:** This remains the master scope and requirement map, but its
+> milestone checkboxes are historical. M0-M5 and FR-LOG-6 are feature-complete in the current
+> repo state. For the live handoff, read [`PROJECT-STATE.md`](PROJECT-STATE.md) and
+> [`agent-handoff/README.md`](agent-handoff/README.md) before acting on unchecked boxes below.
+
 > **For agentic workers:** This is the top-level plan. Before coding each milestone, the orchestrator MUST expand it into a detailed task plan using `superpowers:writing-plans`, then execute via `superpowers:subagent-driven-development` (fresh Sonnet subagent per task, review between tasks). Milestone tasks below use checkbox syntax for tracking.
 
 **Goal:** Ship the v1 defined in [REQUIREMENTS.md](REQUIREMENTS.md) — an offline-first PWA combining lift + nutrition tracking with a structurally-honest, citation-graded advice engine — in ~12 weeks of solo build via Claude Code.
