@@ -25,9 +25,12 @@ export default function App() {
         </h1>
         <p
           data-testid="storage-mode"
+          // A healthy backend is not news. Showing "opfs-sahpool" to a lifter is
+          // debug output wearing a UI; it stays in the DOM for the platform e2e
+          // checks but out of sight. Only the data-loss mode earns pixels.
           className={
             isDurable || isBooting
-              ? 'mt-1 font-mono text-[9px] text-ink-faint'
+              ? 'sr-only'
               : 'mt-2 border border-flag p-2 font-sans text-[13px] font-semibold text-flag'
           }
         >

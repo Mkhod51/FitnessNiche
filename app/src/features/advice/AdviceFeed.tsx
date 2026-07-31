@@ -53,11 +53,13 @@ export function AdviceFeed(): ReactElement {
     <div className="mx-auto max-w-[480px]">
       <section className="border-b border-rule px-4 py-4" aria-label="for you">
         {ruleTriggered.length === 0 ? (
-          <p data-testid="no-user-data" className="font-serif text-[16.5px] leading-[1.3] tracking-[-0.005em] text-ink">
-            Nothing here is earned by your own data yet — logging hasn't shipped, so
-            there is nothing yet to personalise from. What follows is the evidence
-            base itself: everything the app currently knows, exactly as strong or as
-            weak as the studies behind it.
+          // Honest, but it must not cost a third of the first screen every visit —
+          // the scene is a glance between sets. Same admission, fewer words, set as
+          // a note rather than as the headline.
+          <p data-testid="no-user-data" className="font-serif text-[13px] leading-[1.45] text-ink-soft">
+            Nothing here is earned by your own data yet — logging ships next. Below is
+            the evidence base itself, exactly as strong or as weak as the studies
+            behind it.
           </p>
         ) : (
           ruleTriggered.map((item) => {
