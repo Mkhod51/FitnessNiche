@@ -74,9 +74,18 @@ describe('Settings sync section', () => {
     render(<Settings />);
     await screen.findByText(/data sources/i);
 
-    expect(screen.getByText(/open food facts/i)).toBeInTheDocument();
-    expect(screen.getByText(/cofid/i)).toBeInTheDocument();
-    expect(screen.getByText(/each entry shows its source/i)).toBeInTheDocument();
+    const attribution = screen.getByText('Data sources.').closest('p');
+    expect(attribution?.textContent).toBe(
+      'Data sources. Food data from Open Food Facts (© ODbL) and the CoFID dataset (© Crown / OGL). Each entry shows its source.',
+    );
+    expect(screen.getByRole('link', { name: 'Open Food Facts' })).toHaveAttribute(
+      'href',
+      'https://world.openfoodfacts.org',
+    );
+    expect(screen.getByRole('link', { name: 'CoFID' })).toHaveAttribute(
+      'href',
+      'https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid',
+    );
   });
 
   it('saving url + token calls setSyncConfig, re-arms auto-sync, and reflects configured status with the URL in the notice', async () => {

@@ -408,14 +408,14 @@ export function Settings(): ReactElement {
           <a className="underline decoration-rule-strong underline-offset-4" href="https://world.openfoodfacts.org">
             Open Food Facts
           </a>{' '}
-          (ODbL) and the{' '}
+          (© ODbL) and the{' '}
           <a
             className="underline decoration-rule-strong underline-offset-4"
             href="https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid"
           >
             CoFID
           </a>{' '}
-          dataset (Crown / OGL). Each entry shows its source.
+          dataset (© Crown / OGL). Each entry shows its source.
         </p>
       </div>
     </div>
