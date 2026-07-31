@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useNavigate } from 'react-router';
 import { ConsentGate } from '../onboarding/ConsentGate';
 import { ClaimCard } from '../../components/ClaimCard';
 import { CLAIMS } from '../../generated/claims';
@@ -69,6 +70,7 @@ function Segmented<T extends string>({
 }
 
 function GoalForm(): ReactElement {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [sex, setSex] = useState<Sex>('unspecified');
   const [heightCm, setHeightCm] = useState('');
@@ -150,10 +152,22 @@ function GoalForm(): ReactElement {
 
   return (
     <div className="mx-auto max-w-[480px] px-4 pt-5 pb-10">
-      <h1 className="font-serif text-[20px] leading-[1.2] text-ink">Your goal</h1>
-      <p className="mt-1 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-        You can change this whenever you like.
-      </p>
+      <header className="flex items-start gap-3">
+        <button
+          type="button"
+          aria-label="Back"
+          onClick={() => navigate(-1)}
+          className={`${LABEL} -ml-2 flex min-h-[44px] min-w-[44px] items-center justify-center text-ink ${TAP} active:bg-paper-sunk`}
+        >
+          &lsaquo;
+        </button>
+        <div className="min-w-0 pt-0.5">
+          <h1 className="font-serif text-[20px] leading-[1.2] text-ink">Your goal</h1>
+          <p className="mt-1 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
+            You can change this whenever you like.
+          </p>
+        </div>
+      </header>
 
       <section className="mt-5">
         <p className={LABEL}>Goal</p>

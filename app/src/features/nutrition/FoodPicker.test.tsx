@@ -7,7 +7,7 @@ import { getCommonFoods, getRecentFoods, saveFoodItem, searchFoodLocal } from '.
 import { macrosForQuantity } from '../../food/macros';
 import { lookupBarcode, searchFoodOnline } from '../../food/off';
 import type { FoodItem, FoodItemDraft } from '../../food/types';
-import { FoodPicker } from './FoodPicker';
+import { FoodPicker, prefersReducedMotion } from './FoodPicker';
 
 vi.mock('../../db/user', async () => {
   const actual = await vi.importActual<typeof import('../../db/user')>('../../db/user');
@@ -108,6 +108,60 @@ describe('FoodPicker', () => {
     mockSaveFoodItem.mockResolvedValue(food({ id: 'saved-off', source: 'off' }));
     mockMacrosForQuantity.mockReturnValue({ kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 });
     mockLogFood.mockResolvedValue({} as Awaited<ReturnType<typeof logFood>>);
+  });
+
+  it('opens as an inline panel so adding food has a visible transition', async () => {
+    renderPicker();
+
+    const panel = await screen.findByTestId('food-picker-panel');
+
+    expect(panel).toHaveAttribute('data-state', 'open');
+  });
+
+  it('plays the close transition before asking the meal section to unmount it', async () => {
+    const onClose = vi.fn();
+    renderPicker(new Date(2026, 6, 31), vi.fn(), onClose);
+    const panel = await screen.findByTestId('food-picker-panel');
+
+    vi.useFakeTimers();
+    try {
+      fireEvent.click(screen.getByRole('button', { name: /back/i }));
+
+      expect(panel).toHaveAttribute('data-state', 'closing');
+      expect(onClose).not.toHaveBeenCalled();
+
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('detects reduced motion so closing can skip the panel transition', () => {
+    const originalMatchMedia = window.matchMedia;
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: query === '(prefers-reduced-motion: reduce)',
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+
+    try {
+      expect(prefersReducedMotion()).toBe(true);
+      expect(window.matchMedia).toHaveBeenCalledWith('(prefers-reduced-motion: reduce)');
+    } finally {
+      Object.defineProperty(window, 'matchMedia', { writable: true, value: originalMatchMedia });
+    }
   });
 
   it('keeps recent foods available and explains the connection requirement offline', async () => {
@@ -257,6 +311,40 @@ describe('FoodPicker', () => {
     expect(onClose).not.toHaveBeenCalled();
     finishRefresh!();
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
+  it('cannot log the selected food twice during the closing transition', async () => {
+    let finishRefresh: () => void;
+    const onLogged = vi.fn(() => new Promise<void>((resolve) => {
+      finishRefresh = resolve;
+    }));
+    const onClose = vi.fn();
+    mockGetCommonFoods.mockResolvedValue([food({ id: 'cofid-chicken' })]);
+    renderPicker(new Date(2026, 6, 31), onLogged, onClose);
+
+    fireEvent.click(await screen.findByRole('button', { name: /chicken breast, grilled/i }));
+    const addButton = screen.getByRole('button', { name: /add to dinner/i });
+    fireEvent.click(addButton);
+    await waitFor(() => expect(onLogged).toHaveBeenCalledTimes(1));
+
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        finishRefresh!();
+      });
+
+      expect(screen.getByTestId('food-picker-panel')).toHaveAttribute('data-state', 'closing');
+      expect(addButton).toBeDisabled();
+      fireEvent.click(addButton);
+      expect(mockLogFood).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
+      expect(onClose).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('awaits the quick-add refresh before closing the picker', async () => {

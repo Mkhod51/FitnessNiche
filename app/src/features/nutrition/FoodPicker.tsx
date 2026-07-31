@@ -18,6 +18,7 @@ type PickedFood = FoodItem | FoodItemDraft;
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 const FIGURE = 'font-figure tabular-nums';
+const PICKER_MOTION_MS = 200;
 const SLOT_LABEL: Record<MealSlot, string> = {
   breakfast: 'Breakfast',
   lunch: 'Lunch',
@@ -61,6 +62,10 @@ function loggedAtFor(day: Date): Date {
 
 function isPlausibleBarcode(term: string): boolean {
   return /^\d{8,14}$/.test(term);
+}
+
+export function prefersReducedMotion(): boolean {
+  return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 function FoodRow({ food, hidden, onSelect }: { food: PickedFood; hidden: boolean; onSelect: () => void }): ReactElement {
@@ -121,9 +126,70 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   const [quickAdd, setQuickAdd] = useState(false);
   const [quickDraft, setQuickDraft] = useState({ name: '', kcal: '', protein: '', grams: '' });
   const [busy, setBusy] = useState(false);
+  const [closing, setClosing] = useState(false);
   const queryRef = useRef(query);
   const onlineRef = useRef(online);
   const searchRequestRef = useRef(0);
+  const closeTimerRef = useRef<number | null>(null);
+
+  function closeWithMotion() {
+    if (closing) return;
+    setClosing(true);
+    if (prefersReducedMotion()) {
+      onClose();
+      return;
+    }
+    closeTimerRef.current = window.setTimeout(onClose, PICKER_MOTION_MS);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
+    };
+  }, []);
+
+  const controlsDisabled = busy || closing;
+
+  function pickerFrame(label: string, children: ReactElement): ReactElement {
+    return (
+      <section
+        aria-label={label}
+        data-testid="food-picker-panel"
+        data-state={closing ? 'closing' : 'open'}
+        className={`border-y border-rule ${closing ? 'food-picker-exit' : 'food-picker-enter'}`}
+      >
+        <div>{children}</div>
+      </section>
+    );
+  }
+
+  function PickerHeader({
+    title,
+    subtitle,
+    onBack,
+    subtitleClassName = '',
+  }: {
+    title: string;
+    subtitle: string;
+    onBack: () => void;
+    subtitleClassName?: string;
+  }): ReactElement {
+    return (
+      <header className="border-b border-rule px-4 pb-4 pt-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className={`${LABEL} -ml-2 flex min-h-[44px] items-center px-2 text-ink transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)] active:bg-paper-sunk`}
+        >
+          Back
+        </button>
+        <div className="mt-1">
+          <p className="font-serif text-[20px] leading-[1.1] text-ink">{title}</p>
+          <p className={`${LABEL} mt-1 ${subtitleClassName}`}>{subtitle}</p>
+        </div>
+      </header>
+    );
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -213,7 +279,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   }
 
   async function addSelected() {
-    if (!selected || !macros || !validQuantity || busy) return;
+    if (!selected || !macros || !validQuantity || controlsDisabled) return;
     setBusy(true);
     try {
       const item = selected.source === 'off' ? await saveFoodItem(asDraft(selected)) : selected;
@@ -232,14 +298,14 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
         loggedAtFor(day),
       );
       await onLogged();
-      onClose();
+      closeWithMotion();
     } finally {
       setBusy(false);
     }
   }
 
   async function addQuickFood() {
-    if (busy) return;
+    if (controlsDisabled) return;
     const kcal = Number(quickDraft.kcal);
     const protein = Number(quickDraft.protein);
     if (!quickDraft.name.trim() || !Number.isFinite(kcal) || kcal <= 0) return;
@@ -257,24 +323,17 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
         loggedAtFor(day),
       );
       await onLogged();
-      onClose();
+      closeWithMotion();
     } finally {
       setBusy(false);
     }
   }
 
   if (quickAdd && figuresHidden) {
-    return (
-      <section aria-label="Quick add unavailable while figures are hidden" className="border-y border-rule">
-        <header className="flex items-center gap-2 border-b border-rule px-4 py-3">
-          <button type="button" onClick={() => setQuickAdd(false)} className={`${LABEL} min-h-[44px] text-ink`}>
-            Back
-          </button>
-          <div>
-            <p className="font-serif text-[18px] leading-[1.1] text-ink">Quick add unavailable</p>
-            <p className={`${LABEL} mt-1`}>Figures are hidden</p>
-          </div>
-        </header>
+    return pickerFrame(
+      'Quick add unavailable while figures are hidden',
+      <>
+        <PickerHeader title="Quick add unavailable" subtitle="Figures are hidden" onBack={() => setQuickAdd(false)} />
         <div className="p-4">
           <p className="font-serif text-[14px] leading-[1.5] text-ink-soft">
             Quick add with nutrition figures is unavailable while figures are hidden. Sourced foods can still be logged without showing their figures.
@@ -287,22 +346,15 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
             Back to sourced foods
           </button>
         </div>
-      </section>
+      </>,
     );
   }
 
   if (quickAdd) {
-    return (
-      <section aria-label={`Quick add to ${SLOT_LABEL[mealSlot]}`} className="border-y border-rule">
-        <header className="flex items-center gap-2 border-b border-rule px-4 py-3">
-          <button type="button" onClick={() => setQuickAdd(false)} className={`${LABEL} min-h-[44px] text-ink`}>
-            Back
-          </button>
-          <div>
-            <p className="font-serif text-[18px] leading-[1.1] text-ink">Quick add</p>
-            <p className={`${LABEL} mt-1`}>Add to {SLOT_LABEL[mealSlot]}</p>
-          </div>
-        </header>
+    return pickerFrame(
+      `Quick add to ${SLOT_LABEL[mealSlot]}`,
+      <>
+        <PickerHeader title="Quick add" subtitle={`Add to ${SLOT_LABEL[mealSlot]}`} onBack={() => setQuickAdd(false)} />
         <div className="p-4">
           <input
             data-testid="food-name-input"
@@ -335,29 +387,22 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
             type="button"
             data-testid="food-save-button"
             onClick={() => void addQuickFood()}
-            disabled={busy}
+            disabled={controlsDisabled}
             className="mt-3 min-h-[48px] w-full bg-ink font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-paper disabled:opacity-50"
           >
             Add to {SLOT_LABEL[mealSlot]}
           </button>
         </div>
-      </section>
+      </>,
     );
   }
 
   if (selected) {
     const serving = selected.servingGrams;
-    return (
-      <section aria-label={`Add ${selected.name} to ${SLOT_LABEL[mealSlot]}`} className="border-y border-rule">
-        <header className="flex items-center gap-2 border-b border-rule px-4 py-3">
-          <button type="button" onClick={() => setSelected(null)} className={`${LABEL} min-h-[44px] text-ink`}>
-            Back
-          </button>
-          <div>
-            <p className="font-serif text-[18px] leading-[1.1] text-ink">{selected.name}</p>
-            <p className={`${LABEL} mt-1`}>{sourceLabel(selected.source)}</p>
-          </div>
-        </header>
+    return pickerFrame(
+      `Add ${selected.name} to ${SLOT_LABEL[mealSlot]}`,
+      <>
+        <PickerHeader title={selected.name} subtitle={sourceLabel(selected.source)} onBack={() => setSelected(null)} />
         {!figuresHidden && (
           <p className={`${FIGURE} px-4 py-3 text-[12.5px] text-ink-faint`}>
             {Math.round(selected.kcalPer100g)} kcal · {selected.proteinGPer100g} g protein · {selected.carbsGPer100g} g carbs ·{' '}
@@ -406,7 +451,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
           <button
             type="button"
             onClick={() => void addSelected()}
-            disabled={!macros || busy}
+            disabled={!macros || controlsDisabled}
             className="min-h-[48px] w-full bg-ink font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-paper disabled:opacity-50"
           >
             Add to {SLOT_LABEL[mealSlot]}
@@ -415,7 +460,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
             Quick add instead &rsaquo;
           </button>
         </div>
-      </section>
+      </>,
     );
   }
 
@@ -423,17 +468,15 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   const showWifiNotice = !online || onlineFailed;
   const showOnlineResults = online && onlineResultsQuery === query.trim();
 
-  return (
-    <section aria-label={`Add food to ${SLOT_LABEL[mealSlot]}`} className="border-y border-rule">
-      <header className="flex items-center gap-2 border-b border-rule px-4 py-3">
-        <button type="button" onClick={onClose} className={`${LABEL} min-h-[44px] text-ink`}>
-          Back
-        </button>
-        <div>
-          <p className="font-serif text-[18px] leading-[1.1] text-ink">Add to {SLOT_LABEL[mealSlot]}</p>
-          <p className={`${LABEL} mt-1 ${!online ? 'text-flag' : ''}`}>{online ? 'Food database' : 'No connection'}</p>
-        </div>
-      </header>
+  return pickerFrame(
+    `Add food to ${SLOT_LABEL[mealSlot]}`,
+    <>
+      <PickerHeader
+        title={`Add to ${SLOT_LABEL[mealSlot]}`}
+        subtitle={online ? 'Food database' : 'No connection'}
+        subtitleClassName={!online ? 'text-flag' : ''}
+        onBack={closeWithMotion}
+      />
       <form onSubmit={(event) => void submitSearch(event)} className={`mx-4 my-3 flex h-[48px] items-center border border-rule-strong bg-paper px-3 ${!online ? 'opacity-45' : ''}`}>
         <input
           type="search"
@@ -500,6 +543,6 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
       <button type="button" onClick={() => setQuickAdd(true)} className={`${LABEL} min-h-[48px] w-full border-t border-rule px-4 text-left text-ink-faint`}>
         Can&apos;t find it? Quick add &rsaquo;
       </button>
-    </section>
+    </>,
   );
 }

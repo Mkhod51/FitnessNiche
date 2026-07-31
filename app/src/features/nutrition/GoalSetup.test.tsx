@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GoalSetup } from './GoalSetup';
 import { getUser, updateProfile, setCalorieTarget, type User } from '../../db/user';
@@ -37,9 +38,47 @@ beforeEach(() => {
   ] as never);
 });
 
+function renderGoalSetup() {
+  return render(
+    <MemoryRouter>
+      <GoalSetup />
+    </MemoryRouter>,
+  );
+}
+
 describe('GoalSetup — the estimate is told honestly', () => {
+  it('offers a back button that returns to the previous screen', async () => {
+    render(
+      <MemoryRouter initialEntries={['/eat', '/goal']} initialIndex={1}>
+        <Routes>
+          <Route path="/goal" element={<GoalSetup />} />
+          <Route path="/eat" element={<p>Eat screen</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /back/i }));
+
+    expect(screen.getByText('Eat screen')).toBeInTheDocument();
+  });
+
+  it('returns to Settings when the goal screen was opened from Settings', async () => {
+    render(
+      <MemoryRouter initialEntries={['/settings', '/goal']} initialIndex={1}>
+        <Routes>
+          <Route path="/goal" element={<GoalSetup />} />
+          <Route path="/settings" element={<p>Settings screen</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /back/i }));
+
+    expect(screen.getByText('Settings screen')).toBeInTheDocument();
+  });
+
   it('never shows the point without the band beside it', async () => {
-    render(<GoalSetup />);
+    renderGoalSetup();
     await waitFor(() => expect(screen.getByTestId('maintenance-estimate')).toBeInTheDocument());
     const band = screen.getByTestId('maintenance-band');
     expect(band).toHaveTextContent(/plausibly/i);
@@ -47,20 +86,20 @@ describe('GoalSetup — the estimate is told honestly', () => {
   });
 
   it('says the estimate is a starting point the data replaces', async () => {
-    render(<GoalSetup />);
+    renderGoalSetup();
     await waitFor(() => expect(screen.getByText(/starting point, and the app will replace it/i)).toBeInTheDocument());
   });
 
   it('refuses to estimate from a partial answer rather than guessing', async () => {
     mockGetUser.mockResolvedValue({ ...user, birthYear: null, heightCm: null });
     mockWeights.mockResolvedValue([]);
-    render(<GoalSetup />);
+    renderGoalSetup();
     await waitFor(() => expect(screen.getByTestId('estimate-missing')).toBeInTheDocument());
     expect(screen.queryByTestId('maintenance-estimate')).not.toBeInTheDocument();
   });
 
   it('defaults the goal to maintenance and says nothing pushes you off it', async () => {
-    render(<GoalSetup />);
+    renderGoalSetup();
     await waitFor(() => expect(screen.getByTestId('goal-maintain')).toHaveAttribute('aria-pressed', 'true'));
     expect(screen.getByText(/maintenance is the default/i)).toBeInTheDocument();
   });
@@ -68,7 +107,7 @@ describe('GoalSetup — the estimate is told honestly', () => {
 
 describe('GoalSetup — GR-1 in the control, not in a warning', () => {
   it('caps the deficit slider so it stops rather than clamping back afterwards', async () => {
-    render(<GoalSetup />);
+    renderGoalSetup();
     await waitFor(() => expect(screen.getByTestId('maintenance-estimate')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('goal-cut'));
 
@@ -81,7 +120,7 @@ describe('GoalSetup — GR-1 in the control, not in a warning', () => {
   // D-G3.4: the cap does not assert itself, it renders its own evidence through
   // the same component as any other claim, at its own grade.
   it('renders the deficit cap as a real cited claim, bound to a claim id', async () => {
-    render(<GoalSetup />);
+    renderGoalSetup();
     await waitFor(() => expect(screen.getByTestId('maintenance-estimate')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('goal-cut'));
 
@@ -92,14 +131,14 @@ describe('GoalSetup — GR-1 in the control, not in a warning', () => {
   // GR-4: the claim's own record calls it population-level, so the copy must not
   // present it as a number worked out for this person.
   it('says the threshold is population-level, not calculated for you', async () => {
-    render(<GoalSetup />);
+    renderGoalSetup();
     await waitFor(() => expect(screen.getByTestId('maintenance-estimate')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('goal-cut'));
     expect(await screen.findByText(/not a number\s+calculated for you/i)).toBeInTheDocument();
   });
 
   it('saves the clamped target rather than whatever was asked for', async () => {
-    render(<GoalSetup />);
+    renderGoalSetup();
     await waitFor(() => expect(screen.getByTestId('maintenance-estimate')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('save-goal-button'));
 

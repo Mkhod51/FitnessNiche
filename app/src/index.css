@@ -174,6 +174,42 @@ input[type="number"]::-webkit-inner-spin-button {
   animation-duration: var(--motion-settle);
 }
 
+/* Food logging opens inline inside a meal rather than as a modal. The grid
+   track makes the panel arrive from zero height, so the user sees which meal it
+   belongs to; closing reverses that relationship before unmount. */
+@keyframes food-picker-open {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+.food-picker-enter,
+.food-picker-exit {
+  display: grid;
+  overflow: hidden;
+}
+.food-picker-enter {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  animation: food-picker-open var(--motion-move) var(--motion-ease) backwards;
+}
+.food-picker-exit {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--motion-move) var(--motion-ease),
+    opacity var(--motion-move) var(--motion-ease);
+}
+.food-picker-enter > *,
+.food-picker-exit > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
 /* Start → session → finish is a sequence, so the pane carries the order: a step
    deeper arrives from the right, a step back from the left. Same grammar as the
    tab panes, one level down, so the two never contradict each other. */
