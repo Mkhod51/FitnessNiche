@@ -93,10 +93,14 @@ export function ExercisePicker({
     );
   }, [query]);
 
-  const recents = useMemo(
-    () => (query.trim() ? [] : recentIds.map((id) => SEED_EXERCISES.find((e) => e.id === id)).filter(Boolean)),
-    [recentIds, query],
-  );
+  // Collapsed, recents are capped so the catalogue starts above the fold —
+  // six recents plus a header filled the short sheet entirely, which made it
+  // look as though searching was the only way through.
+  const recents = useMemo(() => {
+    if (query.trim()) return [];
+    const found = recentIds.map((id) => SEED_EXERCISES.find((e) => e.id === id)).filter(Boolean);
+    return expanded ? found : found.slice(0, 2);
+  }, [recentIds, query, expanded]);
 
   if (!open) return null;
 
@@ -128,8 +132,11 @@ export function ExercisePicker({
         className="scrim-enter absolute inset-0 w-full cursor-default bg-[rgba(20,18,16,0.28)]"
       />
 
-      {/* Half height by default so the session stays readable behind it, growing
-          only once you start typing — the list has nothing to show until then. */}
+      {/* Half height by default so the session stays readable behind it. It grows
+          on any of the three signals that mean "I want more room": typing,
+          scrolling the list, or pulling the handle. The whole catalogue is
+          present at half height too — searching is a shortcut, never the only
+          way through. */}
       <div
         data-testid="exercise-sheet"
         data-expanded={expanded ? 'true' : 'false'}
@@ -137,7 +144,16 @@ export function ExercisePicker({
           expanded ? 'h-[92%]' : 'h-[58%]'
         }`}
       >
-        <div aria-hidden="true" className="mx-auto mt-2 h-[3px] w-9 bg-rule-strong" />
+        <button
+          type="button"
+          data-testid="sheet-handle"
+          aria-expanded={expanded}
+          aria-label={expanded ? 'Collapse the list' : 'Expand the list'}
+          onClick={() => setExpanded((v) => !v)}
+          className="flex min-h-[28px] w-full items-center justify-center"
+        >
+          <span aria-hidden="true" className="h-[3px] w-9 bg-rule-strong" />
+        </button>
 
         <div className="px-4 pt-3">
           <input
@@ -156,7 +172,15 @@ export function ExercisePicker({
           />
         </div>
 
-        <div className="mt-3 flex-1 overflow-y-auto overscroll-contain">
+        <div
+          data-testid="exercise-list"
+          // Scrolling is itself a request for more room, so the sheet grows on
+          // the first scroll rather than making you find a control for it.
+          onScroll={(e) => {
+            if (!expanded && e.currentTarget.scrollTop > 4) setExpanded(true);
+          }}
+          className="mt-3 flex-1 overflow-y-auto overscroll-contain"
+        >
           {recents.length > 0 && (
             <>
               <p className={`${LABEL} border-b border-rule bg-paper-sunk px-4 py-2`}>Recent</p>
