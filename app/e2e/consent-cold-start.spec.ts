@@ -20,7 +20,9 @@ test('the consent gate survives a cold start straight to the logging route', asy
   await expect(page.getByTestId('consent-gate')).toBeVisible();
   await expect(page.getByTestId('consent-unavailable')).toHaveCount(0);
 
-  // And it has to be usable, not merely visible — accepting opens the form.
+  // And it has to be usable, not merely visible — accepting opens the screen.
+  // With the session model, the first thing behind the gate is the start
+  // control, not a set form: a set now belongs to a session you started.
   await page.getByTestId('consent-accept').click();
-  await expect(page.getByTestId('log-set-button')).toBeVisible();
+  await expect(page.getByTestId('start-workout-button')).toBeVisible();
 });
