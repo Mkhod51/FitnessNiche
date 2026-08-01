@@ -1,4 +1,4 @@
-# CLAUDE.md — Evidence-Graded Lifting & Nutrition PWA
+# CLAUDE.md — MyoStat (Evidence-Graded Lifting & Nutrition PWA)
 
 Standing context for every session in this repo. The spec is `../docs/REQUIREMENTS.md`; the plan is `../docs/BUILD-PLAN.md`. Requirement IDs (FR/NFR/GR/AC/T) are the shared vocabulary — cite them in commits and PR-style summaries.
 
