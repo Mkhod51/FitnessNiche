@@ -211,12 +211,12 @@ describe('LogWorkout — State B: an open session', () => {
     expect(mockLogSet).toHaveBeenCalledWith(expect.objectContaining({ rir: 2 }));
   });
 
-  it('"+ Warm-up" then ticking calls logSet with setType: \'warmup\'', async () => {
+  it('tapping the set number marks the row a warm-up, and ticking logs it as one', async () => {
     mockLogSet.mockResolvedValue(makeSet({ id: 'set-2', setType: 'warmup' }));
     render(<LogWorkout />);
 
     await screen.findByTestId('weight-input');
-    fireEvent.click(screen.getByTestId('add-warmup-button'));
+    fireEvent.click(screen.getByTestId('set-type-toggle'));
     fireEvent.click(screen.getByTestId('tick-button'));
 
     await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
@@ -234,7 +234,7 @@ describe('LogWorkout — State B: an open session', () => {
     fireEvent.click(await screen.findByTestId('add-exercise-button'));
     fireEvent.change(screen.getByTestId('add-exercise-select'), { target: { value: BENCH_ID } });
 
-    fireEvent.click(await screen.findByTestId('add-warmup-button'));
+    fireEvent.click(await screen.findByTestId('set-type-toggle'));
     fireEvent.change(screen.getByTestId('weight-input'), { target: { value: '40' } });
     fireEvent.change(screen.getByTestId('reps-input'), { target: { value: '8' } });
     fireEvent.click(screen.getByTestId('tick-button'));
@@ -265,7 +265,7 @@ describe('LogWorkout — State B: an open session', () => {
 
     expect(screen.queryByTestId('warmup-note')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('add-warmup-button'));
+    fireEvent.click(screen.getByTestId('set-type-toggle'));
     fireEvent.click(screen.getByTestId('tick-button'));
 
     await waitFor(() => expect(screen.getByTestId('warmup-note')).toBeInTheDocument());
@@ -283,36 +283,70 @@ describe('LogWorkout — State B: an open session', () => {
     expect(screen.queryByText(/volume/i)).not.toBeInTheDocument();
   });
 
-  it('the set-type control shows which kind the pending row is, and toggles back', async () => {
+  it('the set number reports which kind the row is, and toggles back', async () => {
     mockLogSet.mockResolvedValue(makeSet({ id: 'set-2' }));
     render(<LogWorkout />);
     await screen.findByTestId('weight-input');
 
-    // Defaults to working, and says so rather than leaving it implicit.
-    expect(screen.getByTestId('set-type-working')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByTestId('add-warmup-button')).toHaveAttribute('aria-pressed', 'false');
+    const toggle = () => screen.getByTestId('set-type-toggle');
+    expect(toggle()).toHaveAccessibleName(/working set/i);
+    // 2, not 1: this describe's fixture already has one working set logged, so
+    // the open row is the session's second.
+    expect(toggle()).toHaveTextContent('2');
 
-    fireEvent.click(screen.getByTestId('add-warmup-button'));
-    expect(screen.getByTestId('add-warmup-button')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByTestId('set-type-working')).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(toggle());
+    expect(toggle()).toHaveAccessibleName(/warm-up set/i);
+    expect(toggle()).toHaveTextContent('W');
 
-    // Toggling back must be possible — the old "+ Add set" could not do this,
-    // because it set the type it was already on.
-    fireEvent.click(screen.getByTestId('set-type-working'));
+    // Toggling back must be possible — the pair of text buttons this replaced
+    // could not do it, because once warm-up was set there was nothing that
+    // could set it back.
+    fireEvent.click(toggle());
     fireEvent.click(screen.getByTestId('tick-button'));
 
     await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
     expect(mockLogSet).toHaveBeenCalledWith(expect.objectContaining({ setType: 'working' }));
   });
 
-  it('marking the pending row as a warm-up clears any RIR already tapped in', async () => {
+  it('several rows can be queued and filled before any of them is ticked', async () => {
+    mockGetOpenSessionSets.mockResolvedValue([]);
+    mockLogSet.mockResolvedValue(makeSet({ id: 'set-x' }));
+
+    render(<LogWorkout />);
+    fireEvent.click(await screen.findByTestId('add-exercise-button'));
+    fireEvent.change(screen.getByTestId('add-exercise-select'), { target: { value: BENCH_ID } });
+    await screen.findByTestId('weight-input');
+
+    // Queue two more WITHOUT ticking anything — the previous model made the
+    // next row impossible until the current one was saved.
+    fireEvent.click(screen.getByTestId('add-set-button'));
+    fireEvent.click(screen.getByTestId('add-set-button'));
+
+    const weights = screen.getAllByTestId('weight-input');
+    expect(weights).toHaveLength(3);
+
+    fireEvent.change(weights[0], { target: { value: '60' } });
+    fireEvent.change(weights[2], { target: { value: '80' } });
+    expect(screen.getAllByTestId('weight-input')[0]).toHaveValue('60');
+    expect(screen.getAllByTestId('weight-input')[2]).toHaveValue('80');
+
+    // Ticking the middle row must not disturb what is typed in the others.
+    fireEvent.click(screen.getAllByTestId('tick-button')[1]);
+    await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
+    const left = screen.getAllByTestId('weight-input');
+    expect(left).toHaveLength(2);
+    expect(left[0]).toHaveValue('60');
+    expect(left[1]).toHaveValue('80');
+  });
+
+  it('marking a row as a warm-up clears any RIR already tapped in', async () => {
     mockLogSet.mockResolvedValue(makeSet({ id: 'set-2', setType: 'warmup' }));
     render(<LogWorkout />);
     await screen.findByTestId('weight-input');
 
     fireEvent.click(screen.getByTestId('rir-cell'));
     fireEvent.click(await screen.findByTestId('rir-option-2'));
-    fireEvent.click(screen.getByTestId('add-warmup-button'));
+    fireEvent.click(screen.getByTestId('set-type-toggle'));
     fireEvent.click(screen.getByTestId('tick-button'));
 
     await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
