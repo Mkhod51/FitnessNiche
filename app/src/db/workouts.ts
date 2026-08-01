@@ -88,26 +88,37 @@ export async function renameWorkout(id: string, name: string, now: Date = new Da
     .run();
 }
 
+export type TemplateSet = { weightKg: number; reps: number; setType: 'working' | 'warmup' };
+export type SessionTemplate = { exerciseId: string; sets: TemplateSet[] }[];
+
 /**
- * The exercises a past session contained, in the order they were first worked.
+ * A past session's shape — its exercises in the order they were first worked,
+ * each with the sets it actually contained.
  *
- * This is what "pick up a previous session" actually needs. Carrying only the
- * name across would leave the user re-adding the same five exercises by hand,
- * which is the friction the affordance exists to remove.
+ * This is what "pick up a previous session" needs. Carrying the name alone
+ * leaves you re-adding the same lifts by hand, and carrying only the exercises
+ * still leaves you retyping every weight. What you want is last week's session
+ * laid out again, unticked, ready to work through and adjust.
  *
- * It reads a workout that genuinely happened rather than a saved template —
- * NG3 rules out programme-template authoring for v1, and this stays the right
- * side of that line because there is nothing to author.
+ * It reads a workout that genuinely happened rather than a saved template, so
+ * it stays the right side of NG3 (no programme-template authoring in v1) —
+ * there is nothing here to author.
  */
-export async function getWorkoutExerciseIds(workoutId: string): Promise<string[]> {
-  const rows = await getSetsForWorkout(workoutId);
-  const order: string[] = [];
-  [...rows]
-    .sort((a, b) => a.performedAt.localeCompare(b.performedAt))
-    .forEach((s) => {
-      if (!order.includes(s.exerciseId)) order.push(s.exerciseId);
-    });
-  return order;
+export async function getWorkoutTemplate(workoutId: string): Promise<SessionTemplate> {
+  const rows = [...(await getSetsForWorkout(workoutId))].sort((a, b) =>
+    a.performedAt.localeCompare(b.performedAt),
+  );
+
+  const out: SessionTemplate = [];
+  for (const s of rows) {
+    let group = out.find((g) => g.exerciseId === s.exerciseId);
+    if (!group) {
+      group = { exerciseId: s.exerciseId, sets: [] };
+      out.push(group);
+    }
+    group.sets.push({ weightKg: s.weightKg, reps: s.reps, setType: s.setType });
+  }
+  return out;
 }
 
 /**

@@ -38,6 +38,7 @@ import {
   startWorkout,
   finishWorkout,
   getRecentWorkouts,
+  getWorkoutTemplate,
   logSet,
   getLastSetForExercise,
   getOpenSessionSets,
@@ -182,6 +183,50 @@ describe('set type — warm-ups are recorded as such so they can be excluded lat
 
     const reread = await testDz.select().from(schema.sets).where(eq(schema.sets.id, created.id)).get();
     expect(reread?.setType).toBe('warmup');
+  });
+});
+
+describe('getWorkoutTemplate — what "pick up a previous session" actually carries', () => {
+  beforeEach(async () => {
+    testDz = await makeTestDb();
+  });
+
+  it('returns each exercise in the order first worked, with the sets it contained', async () => {
+    const w = await startWorkout('Push day', new Date('2026-07-20T18:00:00.000Z'));
+    await logSet({ exerciseId: BENCH, weightKg: 40, reps: 8, rir: null, setType: 'warmup' }, new Date('2026-07-20T18:01:00.000Z'));
+    await logSet({ exerciseId: BENCH, weightKg: 100, reps: 5, rir: 2 }, new Date('2026-07-20T18:05:00.000Z'));
+    await logSet({ exerciseId: SQUAT, weightKg: 140, reps: 5, rir: 1 }, new Date('2026-07-20T18:20:00.000Z'));
+    await logSet({ exerciseId: BENCH, weightKg: 100, reps: 4, rir: 0 }, new Date('2026-07-20T18:30:00.000Z'));
+    await finishWorkout(w.id, new Date('2026-07-20T19:00:00.000Z'));
+
+    const template = await getWorkoutTemplate(w.id);
+
+    expect(template.map((g) => g.exerciseId)).toEqual([BENCH, SQUAT]);
+    expect(template[0].sets).toEqual([
+      { weightKg: 40, reps: 8, setType: 'warmup' },
+      { weightKg: 100, reps: 5, setType: 'working' },
+      { weightKg: 100, reps: 4, setType: 'working' },
+    ]);
+    expect(template[1].sets).toEqual([{ weightKg: 140, reps: 5, setType: 'working' }]);
+  });
+
+  it('carries nothing from a session that was started and finished empty', async () => {
+    const w = await startWorkout('Aborted', new Date('2026-07-20T18:00:00.000Z'));
+    await finishWorkout(w.id, new Date('2026-07-20T18:02:00.000Z'));
+    expect(await getWorkoutTemplate(w.id)).toEqual([]);
+  });
+
+  it('does not leak sets from a different workout', async () => {
+    const a = await startWorkout('A', new Date('2026-07-20T18:00:00.000Z'));
+    await logSet({ exerciseId: BENCH, weightKg: 100, reps: 5, rir: 2 }, new Date('2026-07-20T18:05:00.000Z'));
+    await finishWorkout(a.id, new Date('2026-07-20T19:00:00.000Z'));
+
+    const b = await startWorkout('B', new Date('2026-07-22T18:00:00.000Z'));
+    await logSet({ exerciseId: SQUAT, weightKg: 140, reps: 5, rir: 2 }, new Date('2026-07-22T18:05:00.000Z'));
+    await finishWorkout(b.id, new Date('2026-07-22T19:00:00.000Z'));
+
+    expect((await getWorkoutTemplate(a.id)).map((g) => g.exerciseId)).toEqual([BENCH]);
+    expect((await getWorkoutTemplate(b.id)).map((g) => g.exerciseId)).toEqual([SQUAT]);
   });
 });
 

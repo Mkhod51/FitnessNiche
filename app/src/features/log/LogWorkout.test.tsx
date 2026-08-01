@@ -9,7 +9,7 @@ import {
   getRecentWorkouts,
   getLastSetForExercise,
   getOpenSessionSets,
-  getWorkoutExerciseIds,
+  getWorkoutTemplate,
   renameWorkout,
   logSet,
   type Workout,
@@ -31,7 +31,7 @@ vi.mock('../../db/workouts', async () => {
     getRecentWorkouts: vi.fn(),
     getLastSetForExercise: vi.fn(),
     getOpenSessionSets: vi.fn(),
-    getWorkoutExerciseIds: vi.fn(),
+    getWorkoutTemplate: vi.fn(),
     renameWorkout: vi.fn(),
     logSet: vi.fn(),
   };
@@ -44,7 +44,7 @@ const mockFinishWorkout = vi.mocked(finishWorkout);
 const mockGetRecentWorkouts = vi.mocked(getRecentWorkouts);
 const mockGetLastSetForExercise = vi.mocked(getLastSetForExercise);
 const mockGetOpenSessionSets = vi.mocked(getOpenSessionSets);
-const mockGetWorkoutExerciseIds = vi.mocked(getWorkoutExerciseIds);
+const mockGetWorkoutTemplate = vi.mocked(getWorkoutTemplate);
 const mockRenameWorkout = vi.mocked(renameWorkout);
 const mockLogSet = vi.mocked(logSet);
 
@@ -97,7 +97,7 @@ function resetMocks() {
   mockGetRecentWorkouts.mockReset();
   mockGetLastSetForExercise.mockReset();
   mockGetOpenSessionSets.mockReset();
-  mockGetWorkoutExerciseIds.mockReset();
+  mockGetWorkoutTemplate.mockReset();
   mockRenameWorkout.mockReset();
   mockLogSet.mockReset();
 
@@ -106,7 +106,7 @@ function resetMocks() {
   mockGetRecentWorkouts.mockResolvedValue([]);
   mockGetLastSetForExercise.mockResolvedValue(undefined);
   mockGetOpenSessionSets.mockResolvedValue([]);
-  mockGetWorkoutExerciseIds.mockResolvedValue([]);
+  mockGetWorkoutTemplate.mockResolvedValue([]);
   mockRenameWorkout.mockResolvedValue(undefined);
   mockFinishWorkout.mockResolvedValue(undefined);
 }
@@ -151,10 +151,19 @@ describe('LogWorkout — State A: no open session', () => {
   // session" means to anyone using it — you get the name back and then re-add
   // the same five lifts by hand. Gate 2 specified carrying the exercise list;
   // the implementation followed this test instead of the design.
-  it('tapping a previous session brings its exercises back, not just its name', async () => {
+  it('tapping a previous session lays out its exercises AND its sets, unticked', async () => {
     mockGetRecentWorkouts.mockResolvedValue([makeWorkout({ id: 'w-old', name: 'Leg Day' })]);
     mockStartWorkout.mockResolvedValue(makeWorkout({ id: 'w-new', name: 'Leg Day' }));
-    mockGetWorkoutExerciseIds.mockResolvedValue([BENCH_ID]);
+    mockGetWorkoutTemplate.mockResolvedValue([
+      {
+        exerciseId: BENCH_ID,
+        sets: [
+          { weightKg: 40, reps: 8, setType: 'warmup' },
+          { weightKg: 100, reps: 5, setType: 'working' },
+          { weightKg: 100, reps: 5, setType: 'working' },
+        ],
+      },
+    ]);
 
     render(<LogWorkout />);
     const row = await screen.findByTestId('recent-workout-row');
@@ -162,11 +171,25 @@ describe('LogWorkout — State A: no open session', () => {
     fireEvent.click(row);
 
     await waitFor(() => expect(mockStartWorkout).toHaveBeenCalledWith('Leg Day'));
-    expect(mockGetWorkoutExerciseIds).toHaveBeenCalledWith('w-old');
-    // The carried exercise is on screen with a live row ready, so the next set
-    // is one tap away rather than five.
+    expect(mockGetWorkoutTemplate).toHaveBeenCalledWith('w-old');
     expect(await screen.findByText('Barbell Bench Press')).toBeInTheDocument();
-    await screen.findByTestId('weight-input');
+
+    // Three rows, pre-filled with what was actually done last time.
+    const weights = await screen.findAllByTestId('weight-input');
+    expect(weights).toHaveLength(3);
+    expect(weights[0]).toHaveValue('40');
+    expect(weights[1]).toHaveValue('100');
+    expect(weights[2]).toHaveValue('100');
+    expect(screen.getAllByTestId('reps-input')[0]).toHaveValue('8');
+
+    // The warm-up carries its type across.
+    expect(screen.getAllByTestId('set-type-toggle')[0]).toHaveTextContent('W');
+    expect(screen.getAllByTestId('set-type-toggle')[1]).toHaveTextContent('1');
+
+    // NOTHING is logged by repeating — you are about to do the workout, not
+    // copy the record of it.
+    expect(mockLogSet).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('set-number')).not.toBeInTheDocument();
   });
 });
 
