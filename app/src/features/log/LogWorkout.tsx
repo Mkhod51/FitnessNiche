@@ -470,24 +470,45 @@ function LoggingSurface(): ReactElement {
               </div>
             )}
 
+            {/* There is always a live row, so "+ Add set" was a no-op that set
+                the pending row to the type it already had — and at 9px with no
+                border neither control read as tappable. What the row actually
+                needs is to say which KIND of set it is, which DESIGN.md
+                specifies as a segmented control. */}
             {isCurrent && live && (
-              <div className="mt-3 flex gap-5">
-                <button
-                  type="button"
-                  data-testid="add-set-button"
-                  onClick={() => setLive({ ...live, setType: 'working' })}
-                  className={`${LABEL} min-h-[44px] text-ink`}
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <span className={LABEL}>This set</span>
+                <div
+                  className="flex border border-rule-strong"
+                  role="group"
+                  aria-label="set type"
                 >
-                  + Add set
-                </button>
-                <button
-                  type="button"
-                  data-testid="add-warmup-button"
-                  onClick={() => setLive({ ...live, setType: 'warmup', rir: null })}
-                  className={`${LABEL} min-h-[44px] text-ink`}
-                >
-                  + Warm-up
-                </button>
+                  <button
+                    type="button"
+                    data-testid="set-type-working"
+                    aria-pressed={live.setType === 'working'}
+                    onClick={() => setLive({ ...live, setType: 'working' })}
+                    className={`min-h-[44px] px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.08em] ${TAP} ${
+                      live.setType === 'working' ? 'bg-ink text-paper' : 'bg-paper text-ink-faint'
+                    }`}
+                  >
+                    Working
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="add-warmup-button"
+                    aria-pressed={live.setType === 'warmup'}
+                    // A warm-up carries no RIR — rating effort on a warm-up is
+                    // meaningless, and leaving a stale value would feed it to
+                    // the e1RM qualification check.
+                    onClick={() => setLive({ ...live, setType: 'warmup', rir: null })}
+                    className={`min-h-[44px] border-l border-rule-strong px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.08em] ${TAP} ${
+                      live.setType === 'warmup' ? 'bg-ink text-paper' : 'bg-paper text-ink-faint'
+                    }`}
+                  >
+                    Warm-up
+                  </button>
+                </div>
               </div>
             )}
           </section>
