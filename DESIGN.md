@@ -6,6 +6,13 @@ The durable visual system. `PRODUCT.md` owns product truth; this file owns how i
 and behaves. Established 2026-07-25 during M1, the milestone that builds the advice
 surface. Tokens marked *provisional* are expected to settle during the first build.
 
+**Extended 2026-07-28** for the trackers redesign (three tabs, Hevy-idiom workout logging,
+MyFitnessPal-structured nutrition). Three additions, each decided with the developer over
+rendered options: a **Controls** section, which this file previously lacked entirely; a
+**dark ground**, derived rather than inverted; and a change to the **figure face**. The
+world itself is unchanged — Hevy and MyFitnessPal contributed structure only. Full
+reasoning and reversal triggers: `docs/superpowers/plans/2026-07-27-trackers-redesign.md`.
+
 ---
 
 ## Direction contract
@@ -43,11 +50,15 @@ recency ordering the content does not have.
 The scene that decides the rest: *a lifter holding a phone at arm's length under bright
 overhead gym lighting, glancing for a few seconds between sets, one thumb free.*
 
-That forces a **light ground**. High ambient light constricts the pupil and turns dark
-UI muddy behind screen glare, and this surface is read in exactly that condition. Dark
-mode is deliberately **not** shipped in M1 — it is a real request for a gym app and it
-is deferred rather than refused, because a second ground has to be designed, not
-inverted, and the confidence ramp below would need re-deriving for it.
+That forces a **light ground as the default**. High ambient light constricts the pupil and
+turns dark UI muddy behind screen glare, and this surface is read in exactly that
+condition. **That reasoning is unchanged and still decides the default.**
+
+**Dark mode shipped 2026-07-28**, on the condition this section originally set: a second
+ground had to be *designed*, not inverted, and the confidence ramp *re-derived*. Both were
+done — see Colour below. Light remains the documented default; the runtime follows
+`prefers-color-scheme` with a manual override in Settings, because a lifter under a
+skylight and one in a dim free-weight room want different things and neither is wrong.
 
 **Mobile is the design target, not a breakpoint.** Layouts are authored single-column
 first and allowed to breathe on wider screens. Nothing essential may sit off the first
@@ -93,6 +104,46 @@ genuine data-loss and harm states elsewhere in the app.
 `--flag` `#B0453A` is that reserved red: storage-fallback warnings, destructive
 confirmations. It must never be used for a grade.
 
+### The dark ground
+
+Added 2026-07-28. **Not an inversion.** The ground is a warm near-black in the paper's own
+hue family, not a blue-black, so the world reads as the same printed matter under different
+light. The ramp keeps its ordering — deep green through olive and amber to neutral grey —
+and the two rules that give it meaning survive unchanged: **no red anywhere in the ramp**,
+and **[D] resolves to grey**, not to a danger colour.
+
+| Token | Light | Dark |
+|---|---|---|
+| `--paper` | `#FBFAF7` | `#1A1816` |
+| `--paper-sunk` | `#F6F3EB` | `#22201D` |
+| `--ink` | `#141414` | `#F2EFE7` |
+| `--ink-soft` | `#57534A` | `#B8B2A6` |
+| `--ink-faint` | `#767162` | `#8F887C` |
+| `--rule` | `#E6E1D4` | `#302D28` |
+| `--rule-strong` | `#DAD5C7` | `#4A453C` |
+| `--conf-a` | `#1F5C3D` | `#6FBF8F` |
+| `--conf-b` | `#5B7B3A` | `#9FC46A` |
+| `--conf-c` | `#8A6A00` | `#D6A83C` |
+| `--conf-d` | `#6B6459` | `#A39C8E` |
+| `--flag` | `#B0453A` | `#E8776A` |
+
+**Contrast against each ground, computed rather than eyeballed** — same discipline as the
+light ramp, and the same requirement that 9px tracked labels get no large-text exemption:
+
+ink 15.41 · ink-soft 8.39 · ink-faint 5.04 · A 8.03 · B 8.92 · C 8.03 · D 6.49 · flag 6.14.
+
+All ≥4.5:1. Re-run the check on any token change in **both** grounds; the light ramp has
+little headroom and the dark one must not be assumed safe because it looks brighter.
+
+**`paper-sunk` is lighter than `paper` in dark mode**, where it is darker in light mode.
+Depth is still a change of surface rather than a shadow — it simply moves the other way,
+because a recessed panel on a dark ground reads as lifted, not sunk.
+
+**Cost this carries, recorded honestly:** dark doubles the surface every screen must be
+checked against, and the components written before this date — `ConfidenceTicks`,
+`ClaimCard`, `EvidencePanel`, `FigureChart`, `TrendChart` — hard-code the light ramp. The
+two that draw hand-rolled SVG are the real work.
+
 ---
 
 ## Type
@@ -105,10 +156,19 @@ the fallback contract and the roles are durable.
 | Advice, claim statements | `ui-serif, Georgia, serif` | 16.5–19px, line-height 1.3, `-0.005em` |
 | Source lines | `ui-serif, Georgia, serif` | 12–12.5px italic, `--ink-soft` |
 | Labels, confidence text | `ui-sans-serif, system-ui` | 9px, 600, `0.12em` tracking, uppercase |
-| Figures, counts, units | `ui-monospace, Menlo, monospace` | tabular numerals, 9–11px |
+| Figures, counts, units | `system-ui, -apple-system, sans-serif` + `font-variant-numeric: tabular-nums` | 14–34px in trackers, 9–11px in meta |
 
-Serif for anything the user reads as language; sans caps only for labels; mono only for
-numbers. A number set in the serif face is a bug — figures must align in columns.
+Serif for anything the user reads as language; sans caps only for labels. **A number set
+in the serif face is a bug — figures must align in columns.** That rule is unchanged and
+is the durable one.
+
+**Figures moved off monospace on 2026-07-28.** The rule was always *tabular alignment*;
+monospace was merely how it was implemented, and Menlo is a coding face that made a set of
+reps read as console output. `system-ui` with `tabular-nums` aligns just as strictly —
+SF Pro on the iPhone this is actually used on, Roboto on Android — and costs nothing to
+ship. **Consequence to hold:** figures are no longer visually distinct from sans labels by
+face alone, so the type system now leans on size and case to separate them. A figure and a
+label at the same size is a bug this change introduced the possibility of.
 
 ---
 
@@ -161,6 +221,97 @@ grade. A contested card is marked as contested in the default state.
 
 ---
 
+## Controls
+
+Added 2026-07-28. **This file previously specified no interactive controls at all** — it was
+written for a read-mostly advice feed, so every button and field in the trackers was
+undefined vocabulary. These are the rules; the scene decides all of them.
+
+**The scene is the spec: one hand, phone at arm's length, ~90 seconds between sets, gym
+lighting, possibly sweaty.** Every control below is judged against that, not against a
+desktop.
+
+### Universals
+
+- **Minimum 44px touch target**, including invisible padding. A 30px control with 7px of
+  padding is fine; a 30px control is not.
+- **Flat.** No rounded corners on content, no shadows, no gradients — controls are printed
+  forms, not floating chrome. A 1px `--rule-strong` border is the whole affordance.
+- **The filled state is `--ink` on `--paper`**, never a colour. Colour belongs to the
+  confidence ramp; a coloured button would compete with the only thing colour means here.
+- **No control may animate on state change.** See Motion.
+
+### Buttons
+
+| Kind | Treatment |
+|---|---|
+| Primary | `--ink` ground, `--paper` text, 9–12px sans caps `0.1em`, min-height 48px full-width / 36px inline |
+| Secondary | Transparent ground, 1px `--ink` border, `--ink` text |
+| Text affordance | Sans caps `--ink-faint`, trailing `›`. This is the disclosure idiom the advice cards already use |
+| Destructive | `--flag` text on transparent. **Never a filled red button** — a filled destructive control invites the mis-tap it should prevent |
+
+### Numeric entry
+
+**Never a numeric keyboard where a tap target will do.** The keyboard is the wrong control
+in the design scene, and RIR is the proof: a 0/1/2/3/4+ row of targets is one thumb motion,
+where a keyboard is a focus change, a keypress and a dismiss.
+
+- **Field:** 1px `--rule-strong` box, `--paper` ground, figure face, right-aligned, unit as
+  a sans-caps suffix in `--ink-faint`.
+- **Completed values lose their border** and sit as plain figures. A box means editable; no
+  box means recorded. This is what lets a set table show four completed rows and one live
+  row without any highlight.
+- **Empty-but-expected renders as a dashed box**, not as nothing. A field you cannot see is
+  a field that gets skipped forever — this is why the optional RIR column is visible.
+
+### Completion control
+
+A 30px square, 1px `--rule-strong`, filling to `--ink` with a `--paper` check when set. It
+is the only place in the system where a filled solid block means "done" rather than "one
+unit of quantity", so it never appears adjacent to a countable-mark meter.
+
+### Segmented control and switch
+
+- **Segmented:** one 1px box divided by hairlines; the selected segment takes `--ink` /
+  `--paper`. Used where options are few, exclusive and named (kg/lb, Light/Dark/Auto).
+- **Switch:** 44×26 box, 20px knob, `--rule-strong` when off and `--ink` when on. Used only
+  for genuine on/off state. **It does not animate.**
+
+### Countable-mark meters
+
+The Isotype rule extends to controls: **a progress or quantity meter is a row of repeated
+marks, never a single scaled bar.** A continuous fill implies resolution the underlying
+number does not have — which is exactly wrong for calorie and volume figures whose error
+bars are large. Every meter states its unit ("each mark is 100 kcal").
+
+**A meter must never be drawn as a depleting budget.** Meters fill toward a target; they do
+not drain toward zero. This is a GR-1 requirement, not a stylistic one — see
+`REQUIREMENTS.md` GR-1 on eat-back-to-zero framing.
+
+### Tab bar
+
+Three tabs — Hub, Train, Eat. `--paper` ground, 1px `--rule` top border, sans caps 9px,
+`--ink-faint` inactive and `--ink` active. **It stays visible during a live workout**, a
+decision that knowingly costs ~54px in the design scene in exchange for one navigation
+grammar instead of two.
+
+Evidence is **not** a tab. It is the Hub's own content, and Settings sits behind a gear in
+the Hub header — a tab bar is for destinations visited often, and settings is visited twice
+a year.
+
+### Session and advice surfaces
+
+- **Session header:** name, working-set progress, elapsed time, and Finish top-right, always
+  reachable without scrolling.
+- **Advice peek:** `--paper-sunk` panel above the tab bar, with a grab handle. Carries the
+  confidence counter **at full size regardless of available space** — the grade is the one
+  thing that may never be traded for compactness (principle 7). Expands on **tap or drag**;
+  drag alone is the least reliable gesture with wet hands.
+- **The peek renders a curated `peekStatement` from the claim record, never a truncation.**
+  A CSS ellipsis through a claim statement cuts the nuance principle 7 exists to protect.
+
+---
+
 ## Motion
 
 Almost none, deliberately. Disclosure expands without animation by default; the surface
@@ -200,6 +351,16 @@ dislikes.
   this direction exists to refuse.
 - **No component may hard-code a grade word, verb, DOI, author, or journal.** Those come
   from the claim record via `src/advice/language.ts` (T1/GR-6).
+- **No meter that depletes toward zero.** Meters fill toward a target. A draining bar is
+  eat-back-to-zero framing expressed as geometry, and GR-1 bans the framing however it is
+  drawn (added 2026-07-28).
+- **No truncated claim statement.** If a surface is too small for the claim, it renders the
+  curated `peekStatement` from the record — never an ellipsis. Nuance is the part that must
+  not be cut (added 2026-07-28).
+- **No filled red button.** Destructive actions are `--flag` text on transparent; a filled
+  red target invites the mis-tap it exists to prevent (added 2026-07-28).
+- **No numeric keyboard where a tap target will do** in the mid-workout scene
+  (added 2026-07-28).
 
 ---
 

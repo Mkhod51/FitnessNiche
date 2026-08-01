@@ -1,6 +1,50 @@
 # Project State
 
-**Updated:** 2026-07-25 · **Phase:** Build — M0 of `BUILD-PLAN.md` complete, on top of completed Phase 1–3 research/planning · **Stage:** **M0 is done and merged to `main`. The TA-1 iOS gate PASSED on a real iPhone (`opfs-sahpool`) on 2026-07-25** — the offline-first premise holds and no Expo/React Native pivot is needed. M1 (the A+C interaction on real claims) is cleared to start.
+**Updated:** 2026-07-28 · **Phase:** Build · **Branch:** `m2-training-loop`, in sync with origin, nothing merged to `main` past M0.
+
+---
+
+## ▶ START HERE (new session)
+
+1. **Read `superpowers/plans/2026-07-27-trackers-redesign.md` first.** It is the live plan: six
+   consulted design gates for the health-hub trackers, the schema and migration plan, and the
+   revised build order. It supersedes the unfinished tail of `superpowers/plans/2026-07-26-m2-training-loop.md`.
+2. **Verify state before trusting any document, including this one.** Two sessions have worked
+   this branch concurrently and documents have already gone stale mid-flight:
+   ```bash
+   cd "app" && ls src/domain src/features && npm run typecheck && npm test -- --run
+   ```
+3. **Agree who owns `app/` before dispatching any worker.** Concurrent sessions on this branch
+   collide — that has already happened once.
+
+**Verified 2026-07-28:** typecheck clean · **279 unit tests / 31 files** · build OK · e2e 11/11
+at last run. `git stash@{0}` holds work-in-progress on the trends screen (`getSetsSince` plus a
+red `Trends.test.tsx`), stashed deliberately, **recoverable and not discarded**.
+
+**Design is signed off; implementation has not started.** No schema change and no tracker code
+has been written. The only spec change made is FR-LOG-3 (gram-first entry); **GR-1 was pressed
+and held.**
+
+---
+
+**M0 complete and merged.** The TA-1 iOS gate PASSED on a real iPhone (`opfs-sahpool`) on
+2026-07-25 — the offline-first premise holds and no Expo/React Native pivot is needed.
+
+**M1 complete** (unmerged): 17 curated claims, the advice engine, grade-calibrated language,
+`ConfidenceTicks` / `ClaimCard` / `EvidencePanel` / `FigureChart`, the evidence feed and the
+minisearch question surface.
+
+**M2 substantially complete** (unmerged): the snapshot fallback, `ConsentGate`, `domain/e1rm.ts`,
+`domain/trends.ts`, `domain/volume.ts`, `components/TrendChart.tsx`, `db/weights.ts`,
+`features/log/LogWorkout.tsx` and `features/log/LogWeight.tsx`.
+
+**Outstanding in M2:** `features/trends/Trends.tsx` (the screen itself — `TrendChart` exists),
+and the Hevy CSV import, which also closes OQ-2. **Note:** `LogWeight.tsx` exists but is not
+reachable from any route; `App.tsx` still routes only `/` and `/log`.
+
+**The M2 set-logging screen's layout was rejected by the developer.** Its *behaviour* is the
+reference — defaults from the last set of the same exercise, immediate write, no save button —
+and its *layout* is what the trackers redesign replaces.
 
 **Structure note:** `04-sources/` (renamed from the prior sources dir to clear the numbering for `03-thesis-review/`), `archive/phase1-ideation/` (consolidated Phase 1 ideation archive), `03-thesis-review/` (new, empty, Phase 3 output). Full detail in `MIGRATION.md`.
 
