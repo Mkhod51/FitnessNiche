@@ -14,7 +14,7 @@ import { test, expect } from '@playwright/test';
  * Only a cold navigation directly to /log reproduces it.
  */
 test('the consent gate survives a cold start straight to the logging route', async ({ page }) => {
-  await page.goto('/log');
+  await page.goto('/train');
 
   // The gate must ask for consent, not report the store as unreachable.
   await expect(page.getByTestId('consent-gate')).toBeVisible();

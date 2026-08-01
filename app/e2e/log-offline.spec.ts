@@ -6,12 +6,12 @@ import { test, expect } from '@playwright/test';
 //
 // The reload deliberately happens from the root path ("/"), not "/log": the
 // PWA's generateSW strategy precaches exact URLs but sets no navigateFallback,
-// so a real network request for a client-routed path like "/log" has nothing
+// so a real network request for a client-routed path like "/train" has nothing
 // to be served from while offline (verified while writing this test — a
-// reload attempted at "/log" offline fails to load at all). Root is precached
+// reload attempted at "/train" offline fails to load at all). Root is precached
 // (it's the PWA start_url), so a reload there succeeds offline exactly like
 // offline.spec.ts's reload already does. Client-side navigation back to
-// "/log" afterwards needs no network at all — the app shell is already
+// "/train" afterwards needs no network at all — the app shell is already
 // loaded — so it still proves the set survived, both at the UI layer (the
 // session list rehydrates from sqlite via getOpenSessionSets) and, as a second,
 // independent check, directly against the database through the e2e-only
@@ -23,7 +23,7 @@ test('a set logged with the network cut survives a reload', async ({ page, conte
 
   await context.setOffline(true);
 
-  await page.getByRole('link', { name: /log a set/i }).click();
+  await page.getByRole('link', { name: /train/i }).click();
   await page.getByTestId('consent-accept').click();
 
   // A set belongs to a session now, so the session is started first. Starting
@@ -53,7 +53,7 @@ test('a set logged with the network cut survives a reload', async ({ page, conte
 
   // Back to root (client-side nav, no network) before reloading, so the
   // reload's own network request is for a precached URL.
-  await page.getByRole('link', { name: /evidence/i }).click();
+  await page.getByRole('link', { name: /hub/i }).click();
   await page.reload();
   await expect(page.getByTestId('storage-mode')).toHaveText('opfs-sahpool');
 
@@ -66,7 +66,7 @@ test('a set logged with the network cut survives a reload', async ({ page, conte
 
   // Independent proof #3: the UI itself shows it — consent already recorded
   // persisted too, so this goes straight to the logging form, no re-consenting.
-  await page.getByRole('link', { name: /log a set/i }).click();
+  await page.getByRole('link', { name: /train/i }).click();
   await expect(page.getByTestId('set-number')).toHaveCount(1);
   await expect(page.getByTestId('set-number').first()).toHaveText('1');
 

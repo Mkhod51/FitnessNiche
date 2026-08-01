@@ -20,9 +20,12 @@ const INK_DARK = 'rgb(242, 239, 231)';
 
 function groundOf(page: import('@playwright/test').Page) {
   return page.evaluate(() => {
-    const main = document.querySelector('main');
-    if (!main) throw new Error('no <main> to read a ground from');
-    return getComputedStyle(main).backgroundColor;
+    // Read the element that actually paints the ground, by an explicit hook —
+    // an earlier version read <main>, which silently returned transparent once
+    // the shell moved the background one level out.
+    const el = document.querySelector('[data-testid="app-ground"]');
+    if (!el) throw new Error('no [data-testid="app-ground"] to read a ground from');
+    return getComputedStyle(el).backgroundColor;
   });
 }
 
