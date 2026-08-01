@@ -3,7 +3,7 @@ import { ConsentGate } from '../onboarding/ConsentGate';
 import { SEED_EXERCISES } from '../../db/seed-exercises';
 import { logSet, getLastSetForExercise, getTodaysSets, type LoggedSet } from '../../db/workouts';
 
-const INPUT_CLASS = 'mt-1 min-h-[44px] w-full border border-rule bg-paper px-3 font-mono text-[16px] text-ink';
+const INPUT_CLASS = 'mt-1 min-h-[44px] w-full border border-rule bg-paper px-3 font-figure tabular-nums text-[16px] text-ink';
 const LABEL_CLASS = 'block font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 
 function exerciseName(exerciseId: string): string {
@@ -161,7 +161,7 @@ function LoggingSurface(): ReactElement {
                 className="mt-2 flex justify-between gap-3 border-b border-rule pb-2"
               >
                 <span className="font-serif text-[13px] text-ink-soft">{exerciseName(s.exerciseId)}</span>
-                <span className="font-mono text-[13px] text-ink">
+                <span className="font-figure tabular-nums text-[13px] text-ink">
                   {s.weightKg}kg &times; {s.reps}
                   {s.rir != null ? ` @RIR${s.rir}` : ''}
                 </span>

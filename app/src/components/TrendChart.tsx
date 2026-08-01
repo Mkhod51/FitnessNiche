@@ -80,7 +80,7 @@ export function TrendChart({ points, band, withinNoise, unit }: TrendChartProps)
         {bandPath && <path data-testid="trend-band" d={bandPath} fill="currentColor" opacity={0.12} />}
         <path data-testid="trend-line" d={linePath} fill="none" stroke="currentColor" strokeWidth={1.5} />
       </svg>
-      <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-ink-faint">measured in {unit}</p>
+      <p className="mt-1 font-sans text-[9px] uppercase tracking-[0.12em] text-ink-faint">measured in {unit}</p>
     </div>
   );
 }

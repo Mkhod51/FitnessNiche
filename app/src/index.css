@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* The light ground. DESIGN.md §Colour — every value contrast-checked against
+   --color-paper, and the ramp has little headroom, so re-run the check on any
+   change. */
 @theme {
   --color-paper: #FBFAF7;
   --color-paper-sunk: #F6F3EB;
@@ -13,4 +16,61 @@
   --color-conf-c: #8A6A00;
   --color-conf-d: #6B6459;
   --color-flag: #B0453A;
+
+  /* Figures, counts and units. DESIGN.md §Type: the durable rule is tabular
+     ALIGNMENT, not monospace — mono was only how it was first implemented, and
+     a coding face made a set of reps read as console output. Pair this with
+     the `tabular-nums` utility; the family alone does not align columns. */
+  --font-figure: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+
+/* The dark ground. NOT an inversion — a warm near-black in the paper's own hue
+   family, with the confidence ramp re-derived against it (DESIGN.md §The dark
+   ground). Ordering preserved, no red anywhere in the ramp, [D] still grey.
+   Contrast measured against #1A1816 rather than eyeballed:
+   ink 15.41 · ink-soft 8.39 · ink-faint 5.04 · A 8.03 · B 8.92 · C 8.03
+   · D 6.49 · flag 6.14 — all >= 4.5:1, so the 9px tracked labels stay legal.
+
+   --color-paper-sunk is LIGHTER than --color-paper here, where it is darker in
+   the light ground: a recessed panel on a dark surface reads as lifted, not
+   sunk, and depth must stay a change of surface rather than a shadow.
+
+   Two blocks, deliberately (D-G1.6): follow the OS, but let an explicit
+   data-theme beat it in BOTH directions. A lifter under a skylight and one in
+   a dim free-weight room want different things and neither is wrong. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-paper: #1A1816;
+    --color-paper-sunk: #22201D;
+    --color-ink: #F2EFE7;
+    --color-ink-soft: #B8B2A6;
+    --color-ink-faint: #8F887C;
+    --color-rule: #302D28;
+    --color-rule-strong: #4A453C;
+    --color-conf-a: #6FBF8F;
+    --color-conf-b: #9FC46A;
+    --color-conf-c: #D6A83C;
+    --color-conf-d: #A39C8E;
+    --color-flag: #E8776A;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-paper: #1A1816;
+  --color-paper-sunk: #22201D;
+  --color-ink: #F2EFE7;
+  --color-ink-soft: #B8B2A6;
+  --color-ink-faint: #8F887C;
+  --color-rule: #302D28;
+  --color-rule-strong: #4A453C;
+  --color-conf-a: #6FBF8F;
+  --color-conf-b: #9FC46A;
+  --color-conf-c: #D6A83C;
+  --color-conf-d: #A39C8E;
+  --color-flag: #E8776A;
+}
+
+/* Tells the browser to render native controls (form fields, scrollbars) to
+   match, so an input does not stay a white slab on the dark ground. */
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }

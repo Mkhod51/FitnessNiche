@@ -12,27 +12,26 @@ const POPULATION_LABEL: Record<Population, string> = {
   unstated: NOT_STATED,
 };
 
-// DESIGN.md §Components "FigureChart"/brief: field rows are a mono label above
-// a value. Numeric values get the mono/tabular treatment ("a number set in the
-// serif face is a bug"); prose values (population words, ci text, absence
-// statements) are serif, since they are read as language, not counted.
+// DESIGN.md §Components "FigureChart": a sans-caps label above its value.
+// Every field this renders — population, effect size, confidence interval — is
+// read as language rather than counted, so all three are serif. There was a
+// `mono` flag here for a figure-faced variant; no caller ever passed it, so the
+// branch was unreachable and is gone. Numeric fields that DO need the figure
+// face render through FigureValues and the sample-size block below, which set
+// it directly.
 function FieldRow({
   testId,
   label,
   value,
-  mono,
 }: {
   testId: string;
   label: string;
   value: string;
-  mono?: boolean;
 }): ReactElement {
   return (
     <div data-testid={testId}>
-      <span className="block font-mono text-[9px] uppercase tracking-[0.12em] text-ink-faint">{label}</span>
-      <span className={mono ? 'font-mono text-[13px] tabular-nums text-ink' : 'font-serif text-[14px] text-ink'}>
-        {value}
-      </span>
+      <span className="block font-sans text-[9px] uppercase tracking-[0.12em] text-ink-faint">{label}</span>
+      <span className="font-serif text-[14px] text-ink">{value}</span>
     </div>
   );
 }
@@ -61,7 +60,7 @@ function SampleMarks({ n }: { n: number }): ReactElement {
           />
         )}
       </div>
-      <p className="mt-1 font-mono text-[9px] text-ink-faint">each mark = 100 people</p>
+      <p className="mt-1 font-sans text-[9px] text-ink-faint">each mark = 100 people</p>
     </div>
   );
 }
@@ -100,14 +99,14 @@ function UnitPlot({ unit, figures }: { unit: string; figures: Figure[] }): React
 
   return (
     <div data-testid="figure-plot" data-unit={unit}>
-      <span className="block font-mono text-[9px] uppercase tracking-[0.12em] text-ink-faint">
+      <span className="block font-sans text-[9px] uppercase tracking-[0.12em] text-ink-faint">
         measured in {unit}
       </span>
       {figures.map((f) => {
         const x = pct(f.value);
         return (
           <div key={f.label} className="mt-1.5">
-            <span className="block font-mono text-[10px] text-ink">
+            <span className="block font-figure tabular-nums text-[10px] text-ink">
               {f.label} — {f.value} {unit}
             </span>
             <svg viewBox="0 0 100 8" preserveAspectRatio="none" className="mt-0.5 h-2 w-full text-ink" role="presentation">
@@ -135,8 +134,8 @@ function FigureValues({ figures }: { figures: Figure[] }): ReactElement {
   return (
     <div data-testid="figure-values" className="flex flex-col gap-1">
       {figures.map((f) => (
-        <span key={f.label} className="font-mono text-[10px] text-ink">
-          {f.label} — <span className="tabular-nums">{f.value}</span>
+        <span key={f.label} className="font-figure tabular-nums text-[10px] text-ink">
+          {f.label} — {f.value}
           {f.unit ? ` ${f.unit}` : ''}
         </span>
       ))}
@@ -155,12 +154,12 @@ export function FigureChart({ citation }: { citation: Citation }): ReactElement 
   return (
     <div className="flex flex-col gap-3">
       <div data-testid="figure-n">
-        <span className="block font-mono text-[9px] uppercase tracking-[0.12em] text-ink-faint">sample size</span>
+        <span className="block font-sans text-[9px] uppercase tracking-[0.12em] text-ink-faint">sample size</span>
         {n === null ? (
           <span className="font-serif text-[14px] text-ink">{NOT_STATED}</span>
         ) : (
           <>
-            <span className="font-mono text-[13px] tabular-nums text-ink">{n}</span>
+            <span className="font-figure text-[13px] tabular-nums text-ink">{n}</span>
             <SampleMarks n={n} />
           </>
         )}
