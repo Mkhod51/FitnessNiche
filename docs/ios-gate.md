@@ -13,12 +13,17 @@ result recorded below.**
 
 Service workers only register in a "secure context." `https://` origins qualify, and so
 does `http://localhost` — but a plain LAN IP like `http://192.168.1.23:4173` does **not**.
-If you serve the build over bare HTTP to your phone, the app will still load and the
-database will still work, but **the service worker will never register**, which means:
+If you serve the build over bare HTTP to your phone, **both halves of this gate break**,
+not just the service worker:
 
-- no install prompt / no offline precache
-- the airplane-mode reload step below will fail even though OPFS persistence itself is fine
-- you will *not* be testing the thing this gate exists to test
+- `navigator.storage.getDirectory()` is secure-context-only, so **OPFS is unavailable** and
+  the app drops to `memory-fallback`. You will see the red data-loss banner and nothing
+  will persist across a reload — which looks exactly like the failure this gate is meant
+  to detect, but is caused by the URL rather than by iOS.
+- the service worker never registers either: no install prompt, no offline precache, and
+  the airplane-mode reload step cannot pass.
+
+So over plain HTTP you are not testing iOS at all — you are testing an insecure origin.
 
 So pick one of the two routes below. Route A gives you a full check (including offline).
 Route B is faster to set up but only proves storage persistence, not the offline reload.
@@ -41,10 +46,10 @@ Route B is faster to set up but only proves storage persistence, not the offline
 2. Generate a local cert (e.g. with `mkcert`, if installed: `mkcert 192.168.1.23
    localhost`) and point `vite preview` at it, or simply run
    `npx vite preview --host --port 4173` over **plain HTTP** and accept the limitation.
-3. **Caveat if you stay on plain HTTP:** the service worker will not register. You can
-   still check storage-mode, seeding, force-quit persistence, and the ~7-day eviction
-   risk — but you cannot validate the airplane-mode reload (there's no cached shell to
-   serve). Note this explicitly in your results.
+3. **Plain HTTP proves nothing here.** An earlier version of this doc said storage still
+   worked over bare HTTP and only the service worker was lost. That was wrong: OPFS needs
+   a secure context too, so the app falls back to in-memory and *every* persistence check
+   below fails for the wrong reason. If you cannot get a trusted cert, use Route A.
 4. If you do get a self-signed HTTPS cert loaded, Safari will show an "untrusted
    certificate" warning on first visit — go to Settings → General → About → Certificate
    Trust Settings and enable full trust for the cert, otherwise the page (and the
