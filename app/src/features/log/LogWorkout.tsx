@@ -8,15 +8,21 @@ import {
   getRecentWorkouts,
   getLastSetForExercise,
   getOpenSessionSets,
+  getWorkoutExerciseIds,
+  renameWorkout,
   logSet,
   type Workout,
   type LoggedSet,
 } from '../../db/workouts';
+import { setE1rm } from '../../domain/e1rm';
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 const FIGURE = 'font-figure tabular-nums';
+// Text inputs with a decimal keypad, deliberately not type="number": the
+// spinner arrows are unhittable at thumb scale, steal width from the figure,
+// and sprout browser chrome onto a form that is meant to read as printed.
 const CELL =
-  'w-[62px] border border-rule bg-paper px-2 py-1.5 text-right text-[15px] text-ink outline-none focus:border-ink';
+  'h-[44px] w-full border border-rule bg-paper px-2 text-right text-[16px] text-ink outline-none focus:border-ink';
 const TAP = 'transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)]';
 
 function exerciseName(exerciseId: string): string {
@@ -60,6 +66,8 @@ function LoggingSurface(): ReactElement {
   const [live, setLive] = useState<LiveRow | null>(null);
   const [rirOpen, setRirOpen] = useState(false);
   const [picking, setPicking] = useState(false);
+  const [finishing, setFinishing] = useState(false);
+  const [draftName, setDraftName] = useState('');
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState(false);
 
@@ -124,19 +132,37 @@ function LoggingSurface(): ReactElement {
   const workingCount = logged.filter((s) => s.setType === 'working').length;
   const hasWarmup = logged.some((s) => s.setType === 'warmup');
 
-  async function handleStart(name: string | null) {
+  async function handleStart(name: string | null, repeatOf?: string) {
     const created = await startWorkout(name);
+    // "Pick up a previous session" means the exercises come back too. Carrying
+    // only the name would leave the user re-adding the same five lifts by hand,
+    // which is the friction the affordance exists to remove.
+    const carried = repeatOf ? await getWorkoutExerciseIds(repeatOf) : [];
     setWorkout(created);
     setLogged([]);
+    setExtras(carried);
+    setLive(null);
+  }
+
+  function openFinish() {
+    if (!workout) return;
+    setDraftName(workout.name ?? '');
+    setFinishing(true);
   }
 
   async function handleFinish() {
     if (!workout) return;
+    // Name first, so the session is already named when it is closed and shows
+    // up correctly in the "pick up a previous session" list.
+    if (draftName.trim() && draftName.trim() !== workout.name) {
+      await renameWorkout(workout.id, draftName);
+    }
     await finishWorkout(workout.id);
     setWorkout(null);
     setLogged([]);
     setExtras([]);
     setLive(null);
+    setFinishing(false);
     setRecent(await getRecentWorkouts(5));
   }
 
@@ -157,6 +183,95 @@ function LoggingSurface(): ReactElement {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (workout && finishing) {
+    const working = logged.filter((s) => s.setType === 'working');
+    const warmups = logged.length - working.length;
+    // FR-SIG-1: a set only feeds the 1RM estimate at RIR <= 3 and <= 10 reps,
+    // and a set with no RIR cannot be used at all. Saying so plainly is the
+    // honest number here, and it is the one no incumbent shows.
+    const qualifying = working.filter((s) => s.rir !== null && setE1rm(s.weightKg, s.reps, s.rir) !== null);
+    const heaviest = working.reduce<LoggedSet | null>(
+      (best, s) => (best === null || s.weightKg > best.weightKg ? s : best),
+      null,
+    );
+
+    return (
+      <div className="mx-auto max-w-[480px] px-4 pt-5 pb-10">
+        <p className={LABEL}>Finishing</p>
+
+        <label className="mt-3 block">
+          <span className={LABEL}>Name this session</span>
+          <input
+            data-testid="workout-name-input"
+            className="mt-1 h-[48px] w-full border border-rule-strong bg-paper px-3 font-serif text-[16px] text-ink outline-none focus:border-ink"
+            type="text"
+            autoComplete="off"
+            placeholder="Push day"
+            value={draftName}
+            onChange={(e) => setDraftName(e.target.value)}
+          />
+          <span className="mt-1 block font-serif text-[12.5px] italic text-ink-soft">
+            Optional. It is what you will recognise this session by later.
+          </span>
+        </label>
+
+        <section className="mt-6 border-t border-rule pt-4">
+          <p className={LABEL}>Working sets logged</p>
+          <p data-testid="summary-working" className={`${FIGURE} text-[19px] text-ink`}>
+            {working.length}
+            {warmups > 0 && (
+              <span className="ml-2 text-[14px] text-ink-faint">
+                + {warmups} warm-up, not counted
+              </span>
+            )}
+          </p>
+        </section>
+
+        <section className="mt-4 border-t border-rule pt-4">
+          <p className={LABEL}>Usable for the 1RM estimate</p>
+          <p data-testid="summary-qualifying" className={`${FIGURE} text-[19px] text-ink`}>
+            {qualifying.length} of {working.length}
+          </p>
+          {qualifying.length < working.length && (
+            <p className="mt-1 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
+              The rest went past RIR 3 or 10 reps, or had no RIR recorded, so they cannot be
+              used to estimate a 1RM.
+            </p>
+          )}
+        </section>
+
+        {heaviest && (
+          <section className="mt-4 border-t border-rule pt-4">
+            <p className={LABEL}>Heaviest working set</p>
+            <p className={`${FIGURE} text-[17px] text-ink`}>
+              {exerciseName(heaviest.exerciseId)} {heaviest.weightKg} &times; {heaviest.reps}
+              {heaviest.rir !== null && <span className="text-ink-faint"> @ RIR {heaviest.rir}</span>}
+            </p>
+          </section>
+        )}
+
+        <div className="mt-7 flex flex-col gap-3">
+          <button
+            type="button"
+            data-testid="confirm-finish-button"
+            onClick={() => void handleFinish()}
+            className={`min-h-[48px] w-full bg-ink px-4 font-sans text-[12px] font-semibold uppercase tracking-[0.1em] text-paper ${TAP} active:opacity-80`}
+          >
+            Save and finish
+          </button>
+          <button
+            type="button"
+            data-testid="cancel-finish-button"
+            onClick={() => setFinishing(false)}
+            className={`min-h-[44px] w-full font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-faint ${TAP}`}
+          >
+            Keep logging
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!workout) {
@@ -181,7 +296,7 @@ function LoggingSurface(): ReactElement {
                   <button
                     type="button"
                     data-testid="recent-workout-row"
-                    onClick={() => void handleStart(w.name)}
+                    onClick={() => void handleStart(w.name, w.id)}
                     className={`flex min-h-[48px] w-full items-baseline justify-between gap-3 border-b border-rule py-2 text-left ${TAP} active:bg-paper-sunk`}
                   >
                     <span className="font-serif text-[15.5px] text-ink">{w.name ?? 'Unnamed session'}</span>
@@ -208,7 +323,7 @@ function LoggingSurface(): ReactElement {
         <button
           type="button"
           data-testid="finish-button"
-          onClick={() => void handleFinish()}
+          onClick={openFinish}
           className={`min-h-[44px] bg-ink px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-paper ${TAP} active:opacity-80`}
         >
           Finish
@@ -231,8 +346,8 @@ function LoggingSurface(): ReactElement {
                 <tr>
                   <th className={`${LABEL} w-[34px] border-b border-rule pb-1.5 text-left`}>Set</th>
                   <th className={`${LABEL} border-b border-rule pb-1.5 text-right`}>Previous</th>
-                  <th className={`${LABEL} border-b border-rule pb-1.5 text-right`}>kg</th>
-                  <th className={`${LABEL} border-b border-rule pb-1.5 text-right`}>Reps</th>
+                  <th className={`${LABEL} w-[86px] border-b border-rule pb-1.5 text-right`}>kg</th>
+                  <th className={`${LABEL} w-[68px] border-b border-rule pb-1.5 text-right`}>Reps</th>
                   <th className={`${LABEL} w-[56px] border-b border-rule pb-1.5 text-right`}>RIR</th>
                   <th className="w-[52px] border-b border-rule" />
                 </tr>
@@ -276,28 +391,30 @@ function LoggingSurface(): ReactElement {
                     <td className={`${FIGURE} border-b border-rule py-2 text-right text-[14px] text-ink-faint`}>
                       &mdash;
                     </td>
-                    <td className="border-b border-rule py-2 text-right">
+                    <td className="w-[86px] border-b border-rule py-1.5 pr-1.5">
                       <input
                         data-testid="weight-input"
                         className={`${FIGURE} ${CELL}`}
-                        type="number"
+                        type="text"
                         inputMode="decimal"
-                        step="0.5"
-                        min="0"
+                        enterKeyHint="next"
+                        autoComplete="off"
+                        aria-label="weight in kilograms"
                         value={live.weight}
-                        onChange={(e) => setLive({ ...live, weight: e.target.value })}
+                        onChange={(e) => setLive({ ...live, weight: e.target.value.replace(/[^0-9.]/g, '') })}
                       />
                     </td>
-                    <td className="border-b border-rule py-2 text-right">
+                    <td className="w-[68px] border-b border-rule py-1.5 pr-1.5">
                       <input
                         data-testid="reps-input"
-                        className={`${FIGURE} ${CELL} w-[54px]`}
-                        type="number"
+                        className={`${FIGURE} ${CELL}`}
+                        type="text"
                         inputMode="numeric"
-                        step="1"
-                        min="0"
+                        enterKeyHint="done"
+                        autoComplete="off"
+                        aria-label="reps"
                         value={live.reps}
-                        onChange={(e) => setLive({ ...live, reps: e.target.value })}
+                        onChange={(e) => setLive({ ...live, reps: e.target.value.replace(/[^0-9]/g, '') })}
                       />
                     </td>
                     <td className="border-b border-rule py-2 text-right">

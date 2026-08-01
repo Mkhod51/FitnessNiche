@@ -32,6 +32,24 @@
   --motion-ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
+/* Spinner arrows are a desktop affordance that has no business in a set table:
+   they are unhittable at thumb scale, they steal width from the figure, and
+   they make a printed-looking form sprout browser chrome. Killed globally
+   rather than per-input so a later number field cannot reintroduce them.
+
+   The set table goes further and uses text inputs with a decimal inputMode, so
+   there is nothing to strip in the first place; this covers everything else. */
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* Pane transition between tabs. Direction is set per-navigation via --pane-from,
    so moving right brings the incoming pane in from the right — the movement
    says where you went, which is the only reason it exists.

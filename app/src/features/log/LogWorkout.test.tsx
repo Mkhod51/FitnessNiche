@@ -9,6 +9,8 @@ import {
   getRecentWorkouts,
   getLastSetForExercise,
   getOpenSessionSets,
+  getWorkoutExerciseIds,
+  renameWorkout,
   logSet,
   type Workout,
   type LoggedSet,
@@ -29,6 +31,8 @@ vi.mock('../../db/workouts', async () => {
     getRecentWorkouts: vi.fn(),
     getLastSetForExercise: vi.fn(),
     getOpenSessionSets: vi.fn(),
+    getWorkoutExerciseIds: vi.fn(),
+    renameWorkout: vi.fn(),
     logSet: vi.fn(),
   };
 });
@@ -40,6 +44,8 @@ const mockFinishWorkout = vi.mocked(finishWorkout);
 const mockGetRecentWorkouts = vi.mocked(getRecentWorkouts);
 const mockGetLastSetForExercise = vi.mocked(getLastSetForExercise);
 const mockGetOpenSessionSets = vi.mocked(getOpenSessionSets);
+const mockGetWorkoutExerciseIds = vi.mocked(getWorkoutExerciseIds);
+const mockRenameWorkout = vi.mocked(renameWorkout);
 const mockLogSet = vi.mocked(logSet);
 
 const consentedUser: User = {
@@ -91,6 +97,8 @@ function resetMocks() {
   mockGetRecentWorkouts.mockReset();
   mockGetLastSetForExercise.mockReset();
   mockGetOpenSessionSets.mockReset();
+  mockGetWorkoutExerciseIds.mockReset();
+  mockRenameWorkout.mockReset();
   mockLogSet.mockReset();
 
   mockGetUser.mockResolvedValue(consentedUser);
@@ -98,6 +106,9 @@ function resetMocks() {
   mockGetRecentWorkouts.mockResolvedValue([]);
   mockGetLastSetForExercise.mockResolvedValue(undefined);
   mockGetOpenSessionSets.mockResolvedValue([]);
+  mockGetWorkoutExerciseIds.mockResolvedValue([]);
+  mockRenameWorkout.mockResolvedValue(undefined);
+  mockFinishWorkout.mockResolvedValue(undefined);
 }
 
 describe('LogWorkout — GR-5: unreachable without consent', () => {
@@ -135,9 +146,15 @@ describe('LogWorkout — State A: no open session', () => {
     expect(screen.queryByTestId('recent-workout-row')).not.toBeInTheDocument();
   });
 
-  it('tapping a previous session copies only its name into startWorkout', async () => {
+  // CHANGED deliberately. This asserted that repeating a session copied only
+  // its NAME, which is what shipped and is not what "pick up a previous
+  // session" means to anyone using it — you get the name back and then re-add
+  // the same five lifts by hand. Gate 2 specified carrying the exercise list;
+  // the implementation followed this test instead of the design.
+  it('tapping a previous session brings its exercises back, not just its name', async () => {
     mockGetRecentWorkouts.mockResolvedValue([makeWorkout({ id: 'w-old', name: 'Leg Day' })]);
-    mockStartWorkout.mockResolvedValue(makeWorkout({ name: 'Leg Day' }));
+    mockStartWorkout.mockResolvedValue(makeWorkout({ id: 'w-new', name: 'Leg Day' }));
+    mockGetWorkoutExerciseIds.mockResolvedValue([BENCH_ID]);
 
     render(<LogWorkout />);
     const row = await screen.findByTestId('recent-workout-row');
@@ -145,6 +162,11 @@ describe('LogWorkout — State A: no open session', () => {
     fireEvent.click(row);
 
     await waitFor(() => expect(mockStartWorkout).toHaveBeenCalledWith('Leg Day'));
+    expect(mockGetWorkoutExerciseIds).toHaveBeenCalledWith('w-old');
+    // The carried exercise is on screen with a live row ready, so the next set
+    // is one tap away rather than five.
+    expect(await screen.findByText('Barbell Bench Press')).toBeInTheDocument();
+    await screen.findByTestId('weight-input');
   });
 });
 
@@ -161,8 +183,11 @@ describe('LogWorkout — State B: an open session', () => {
 
     render(<LogWorkout />);
     const weightInput = await screen.findByTestId('weight-input');
-    await waitFor(() => expect(weightInput).toHaveValue(62.5));
-    expect(screen.getByTestId('reps-input')).toHaveValue(6);
+    // String values, not numbers: these are text inputs with a decimal keypad
+    // rather than type="number", because the spinner arrows are unhittable at
+    // thumb scale and put browser chrome on a form meant to read as printed.
+    await waitFor(() => expect(weightInput).toHaveValue('62.5'));
+    expect(screen.getByTestId('reps-input')).toHaveValue('6');
 
     fireEvent.click(screen.getByTestId('tick-button'));
 
@@ -256,6 +281,45 @@ describe('LogWorkout — State B: an open session', () => {
     expect(screen.queryByTestId('tonnage')).not.toBeInTheDocument();
     expect(screen.queryByText(/total/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/volume/i)).not.toBeInTheDocument();
+  });
+
+  it('finishing opens a summary before closing the session, not straight after tapping', async () => {
+    render(<LogWorkout />);
+    await screen.findByTestId('weight-input');
+
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    // The summary is a step, not a side effect: nothing is closed yet.
+    await screen.findByTestId('confirm-finish-button');
+    expect(mockFinishWorkout).not.toHaveBeenCalled();
+    expect(screen.getByTestId('summary-working')).toHaveTextContent('1');
+  });
+
+  it('names the session before closing it, so it is recognisable in the recent list', async () => {
+    mockFinishWorkout.mockResolvedValue(undefined);
+    mockRenameWorkout.mockResolvedValue(undefined);
+
+    render(<LogWorkout />);
+    await screen.findByTestId('weight-input');
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    const nameInput = await screen.findByTestId('workout-name-input');
+    fireEvent.change(nameInput, { target: { value: 'Chest and back' } });
+    fireEvent.click(screen.getByTestId('confirm-finish-button'));
+
+    await waitFor(() => expect(mockRenameWorkout).toHaveBeenCalledWith('workout-1', 'Chest and back'));
+    expect(mockFinishWorkout).toHaveBeenCalledWith('workout-1');
+  });
+
+  it('"keep logging" backs out of the summary without closing the session', async () => {
+    render(<LogWorkout />);
+    await screen.findByTestId('weight-input');
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    fireEvent.click(await screen.findByTestId('cancel-finish-button'));
+
+    await screen.findByTestId('weight-input');
+    expect(mockFinishWorkout).not.toHaveBeenCalled();
   });
 
   it('the tick control meets the 44px minimum touch target', async () => {
