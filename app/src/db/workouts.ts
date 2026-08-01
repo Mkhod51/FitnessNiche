@@ -1,4 +1,4 @@
-import { eq, and, isNull, desc } from 'drizzle-orm';
+import { eq, and, isNull, isNotNull, desc } from 'drizzle-orm';
 import { getDrizzle } from './client';
 import { workouts, sets } from './schema';
 import { LOCAL_USER_ID } from './user';
@@ -14,48 +14,100 @@ export type SetInput = {
   reps: number;
   /** FR-LOG-1: RIR is genuinely optional — null means "not recorded", never a default number. */
   rir: number | null;
+  /**
+   * Warm-up sets must be excluded from weekly volume and from e1RM input.
+   * Omitted means a working set — the overwhelmingly common case, and the same
+   * default the migration applied to every set logged before this column
+   * existed.
+   */
+  setType?: 'working' | 'warmup';
 };
 
-function isSameLocalDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
 /**
- * Session rule (Task 6, resolved ambiguity): there is no explicit "start
- * workout" action. A workout is created lazily by the first *set* of a
- * session — never by merely opening the logging screen (see getTodaysSets
- * below, which must not create one). A session ends implicitly at local
- * midnight: this reuses the user's most recent non-deleted workout if it was
- * started on today's local calendar date, otherwise the next set starts a
- * fresh one. Read-only — never inserts — so callers that just want to know
- * "is there an open session" (e.g. the screen on mount) don't create one.
+ * A session is open until it is finished — `finished_at IS NULL`, nothing else.
+ *
+ * This replaced a rule that defined a session as "the most recent workout, if
+ * it started on today's local calendar date". That rule had a real bug: a
+ * lifter starting at 23:30 had their session silently split into two workouts
+ * at midnight, so the second half of their sets landed on a different workout
+ * and every per-session number was wrong. Removing the rule removes the bug,
+ * rather than special-casing around it.
+ *
+ * The cost of the new rule is that an abandoned session stays open forever
+ * instead of lapsing overnight. That is deliberate: closing someone's session
+ * on their behalf discards the sets they have not logged yet, and NFR-1 does
+ * not permit losing a write. The UI offers resume-or-discard; the data layer
+ * does not decide.
+ *
+ * Read-only — never inserts — so a caller that only wants to know whether a
+ * session is open (a screen on mount) does not create one by asking.
  */
-export async function findOpenWorkout(now: Date = new Date()): Promise<Workout | undefined> {
+export async function findOpenWorkout(_now: Date = new Date()): Promise<Workout | undefined> {
   const db = getDrizzle();
   const [mostRecent] = await db
     .select()
     .from(workouts)
-    .where(and(eq(workouts.userId, LOCAL_USER_ID), isNull(workouts.deletedAt)))
+    .where(
+      and(eq(workouts.userId, LOCAL_USER_ID), isNull(workouts.deletedAt), isNull(workouts.finishedAt)),
+    )
     .orderBy(desc(workouts.startedAt))
     .limit(1);
 
-  if (mostRecent && isSameLocalDay(new Date(mostRecent.startedAt), now)) return mostRecent;
-  return undefined;
+  return mostRecent;
 }
 
-/** Same rule as findOpenWorkout, but creates a workout row when none is open. */
-export async function getOrCreateOpenWorkout(now: Date = new Date()): Promise<Workout> {
-  const existing = await findOpenWorkout(now);
-  if (existing) return existing;
-
+/** Starts a session explicitly. Always creates — the caller checks findOpenWorkout first. */
+export async function startWorkout(name: string | null = null, now: Date = new Date()): Promise<Workout> {
   const db = getDrizzle();
   const id = crypto.randomUUID();
   const nowIso = now.toISOString();
-  await db.insert(workouts).values({ id, userId: LOCAL_USER_ID, startedAt: nowIso, updatedAt: nowIso }).run();
+  await db
+    .insert(workouts)
+    .values({ id, userId: LOCAL_USER_ID, name, startedAt: nowIso, updatedAt: nowIso })
+    .run();
 
   const created = await db.select().from(workouts).where(eq(workouts.id, id)).get();
   if (!created) throw new Error('failed to create workout row');
   return created;
+}
+
+/** Closes a session. After this it is no longer open, and the next set starts a new one. */
+export async function finishWorkout(id: string, now: Date = new Date()): Promise<void> {
+  const db = getDrizzle();
+  const nowIso = now.toISOString();
+  await db.update(workouts).set({ finishedAt: nowIso, updatedAt: nowIso }).where(eq(workouts.id, id)).run();
+}
+
+/**
+ * Finished sessions, most recent first — the "repeat a previous session" list.
+ * Excludes the open one, which the caller resumes rather than repeats.
+ *
+ * NG3 rules out program-template authoring for v1, so this is deliberately a
+ * list of workouts that actually happened, not a routine library.
+ */
+export async function getRecentWorkouts(limit = 5): Promise<Workout[]> {
+  const db = getDrizzle();
+  return db
+    .select()
+    .from(workouts)
+    .where(
+      and(eq(workouts.userId, LOCAL_USER_ID), isNull(workouts.deletedAt), isNotNull(workouts.finishedAt)),
+    )
+    .orderBy(desc(workouts.startedAt))
+    .limit(limit);
+}
+
+/**
+ * Same rule as findOpenWorkout, but creates a workout when none is open.
+ *
+ * Kept as a fallback even though the UI starts sessions explicitly: a set must
+ * always be storable (FR-LOG-4/NFR-1), so logging without having pressed start
+ * writes the set into a fresh session rather than throwing it away.
+ */
+export async function getOrCreateOpenWorkout(now: Date = new Date()): Promise<Workout> {
+  const existing = await findOpenWorkout(now);
+  if (existing) return existing;
+  return startWorkout(null, now);
 }
 
 /**
@@ -77,6 +129,7 @@ export async function logSet(input: SetInput, now: Date = new Date()): Promise<L
       weightKg: input.weightKg,
       reps: input.reps,
       rir: input.rir,
+      setType: input.setType ?? 'working',
       performedAt: nowIso,
       updatedAt: nowIso,
     })
@@ -113,12 +166,15 @@ async function getSetsForWorkout(workoutId: string): Promise<LoggedSet[]> {
 }
 
 /**
- * Enough of the current session to confirm a write landed (Task 6 scope —
- * not the trends/volume screen, that's Task 7). Read-only: uses
- * findOpenWorkout, so visiting the screen without logging anything never
- * creates a workout row.
+ * The sets in the currently open session. Read-only: uses findOpenWorkout, so
+ * visiting a screen without logging anything never creates a workout row.
+ *
+ * Named for the session rather than the day. It was `getTodaysSets` while a
+ * session *was* a day; now that a session is "unfinished", one can legitimately
+ * span midnight, and a name promising "today" would be wrong exactly when the
+ * midnight bug used to bite.
  */
-export async function getTodaysSets(now: Date = new Date()): Promise<LoggedSet[]> {
+export async function getOpenSessionSets(now: Date = new Date()): Promise<LoggedSet[]> {
   const workout = await findOpenWorkout(now);
   if (!workout) return [];
   return getSetsForWorkout(workout.id);
