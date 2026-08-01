@@ -71,6 +71,47 @@ input[type="number"]::-webkit-inner-spin-button {
   animation: pane-enter var(--motion-move) var(--motion-ease) both;
 }
 
+/* A sheet arrives from the edge it lives on, and the scrim fades with it. The
+   movement says where the sheet came from and therefore where dismissing it
+   sends it back to. */
+@keyframes sheet-enter {
+  from { transform: translate3d(0, 100%, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+.sheet-enter {
+  animation: sheet-enter var(--motion-move) var(--motion-ease) both;
+}
+
+@keyframes scrim-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.scrim-enter {
+  animation: scrim-enter var(--motion-move) var(--motion-ease) both;
+}
+
+/* A row you added should be seen to arrive, rather than the table silently
+   reflowing under your thumb. Height is animated deliberately here — it is the
+   property that carries the meaning, and these lists are short. */
+@keyframes row-open {
+  from { opacity: 0; transform: translate3d(0, -4px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.row-open {
+  animation: row-open var(--motion-settle) var(--motion-ease) both;
+}
+
+/* The tick is the receipt that the write reached sqlite. With no save button,
+   "did that register?" is the expensive ambiguity, so the fill is the one piece
+   of motion in the set table that is genuinely load-bearing. */
+@keyframes tick-fill {
+  from { transform: scale(0.6); opacity: 0.4; }
+  to { transform: scale(1); opacity: 1; }
+}
+.tick-fill {
+  animation: tick-fill var(--motion-tap) var(--motion-ease) both;
+}
+
 /* Zeroed at the source, so every consumer of the tokens is covered without each
    one remembering to ask. The blanket rule underneath catches anything that
    hard-codes a duration instead of using them.

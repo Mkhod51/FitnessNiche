@@ -20,13 +20,15 @@ test('repeating a session brings back its exercises and its sets, ready to work 
   // ---- session one: two sets on one exercise -------------------------------
   await page.getByTestId('start-workout-button').click();
   await page.getByTestId('add-exercise-button').click();
-  await page.getByTestId('add-exercise-select').selectOption('barbell-bench-press');
+  await page.getByTestId('exercise-row').filter({ hasText: 'Barbell Bench Press' }).first().click();
 
   await page.getByTestId('weight-input').first().fill('100');
   await page.getByTestId('reps-input').first().fill('5');
   await page.getByTestId('tick-button').first().click();
   await expect(page.getByTestId('set-number')).toHaveCount(1);
 
+  // Ticking does not conjure a replacement row; the next one is deliberate.
+  await page.getByTestId('add-set-button').first().click();
   await page.getByTestId('weight-input').first().fill('102.5');
   await page.getByTestId('reps-input').first().fill('3');
   await page.getByTestId('tick-button').first().click();

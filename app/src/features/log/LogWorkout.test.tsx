@@ -255,7 +255,12 @@ describe('LogWorkout — State B: an open session', () => {
 
     render(<LogWorkout />);
     fireEvent.click(await screen.findByTestId('add-exercise-button'));
-    fireEvent.change(screen.getByTestId('add-exercise-select'), { target: { value: BENCH_ID } });
+    fireEvent.click(await screen.findByTestId('exercise-search'));
+    fireEvent.click(
+      (await screen.findAllByTestId('exercise-row')).find(
+        (el) => el.getAttribute('data-exercise-id') === BENCH_ID,
+      )!,
+    );
 
     fireEvent.click(await screen.findByTestId('set-type-toggle'));
     fireEvent.change(screen.getByTestId('weight-input'), { target: { value: '40' } });
@@ -264,7 +269,11 @@ describe('LogWorkout — State B: an open session', () => {
 
     await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
 
-    // next live row should already be reset to 'working' by default
+    // Ticking no longer conjures a replacement row — you add the next one
+    // deliberately, and it comes back as a working set rather than inheriting
+    // the warm-up you just logged.
+    expect(screen.queryByTestId('weight-input')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('add-set-button'));
     fireEvent.change(await screen.findByTestId('weight-input'), { target: { value: '60' } });
     fireEvent.change(screen.getByTestId('reps-input'), { target: { value: '5' } });
     fireEvent.click(screen.getByTestId('tick-button'));
@@ -283,7 +292,12 @@ describe('LogWorkout — State B: an open session', () => {
 
     render(<LogWorkout />);
     fireEvent.click(await screen.findByTestId('add-exercise-button'));
-    fireEvent.change(screen.getByTestId('add-exercise-select'), { target: { value: BENCH_ID } });
+    fireEvent.click(await screen.findByTestId('exercise-search'));
+    fireEvent.click(
+      (await screen.findAllByTestId('exercise-row')).find(
+        (el) => el.getAttribute('data-exercise-id') === BENCH_ID,
+      )!,
+    );
     await screen.findByTestId('weight-input');
 
     expect(screen.queryByTestId('warmup-note')).not.toBeInTheDocument();
@@ -331,13 +345,35 @@ describe('LogWorkout — State B: an open session', () => {
     expect(mockLogSet).toHaveBeenCalledWith(expect.objectContaining({ setType: 'working' }));
   });
 
+  it('ticking a row does not conjure a replacement — the queue empties and stays empty', async () => {
+    mockLogSet.mockResolvedValue(makeSet({ id: 'set-2' }));
+    render(<LogWorkout />);
+    await screen.findByTestId('weight-input');
+
+    fireEvent.click(screen.getByTestId('tick-button'));
+    await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
+
+    // The logged set is on screen; nothing open is left behind it.
+    expect(screen.getAllByTestId('set-number').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('weight-input')).not.toBeInTheDocument();
+
+    // And a row comes back only when asked for.
+    fireEvent.click(screen.getByTestId('add-set-button'));
+    expect(await screen.findByTestId('weight-input')).toBeInTheDocument();
+  });
+
   it('several rows can be queued and filled before any of them is ticked', async () => {
     mockGetOpenSessionSets.mockResolvedValue([]);
     mockLogSet.mockResolvedValue(makeSet({ id: 'set-x' }));
 
     render(<LogWorkout />);
     fireEvent.click(await screen.findByTestId('add-exercise-button'));
-    fireEvent.change(screen.getByTestId('add-exercise-select'), { target: { value: BENCH_ID } });
+    fireEvent.click(await screen.findByTestId('exercise-search'));
+    fireEvent.click(
+      (await screen.findAllByTestId('exercise-row')).find(
+        (el) => el.getAttribute('data-exercise-id') === BENCH_ID,
+      )!,
+    );
     await screen.findByTestId('weight-input');
 
     // Queue two more WITHOUT ticking anything — the previous model made the

@@ -88,6 +88,30 @@ export async function renameWorkout(id: string, name: string, now: Date = new Da
     .run();
 }
 
+/**
+ * Exercises worked most recently, most recent first — the picker's "recent"
+ * section, which is what makes the common case need no typing at all.
+ *
+ * Reads across every session rather than the open one: the point is the fifteen
+ * lifts you actually do, not what you happen to have touched today.
+ */
+export async function getRecentExerciseIds(limit = 6): Promise<string[]> {
+  const db = getDrizzle();
+  const rows = await db
+    .select({ exerciseId: sets.exerciseId, performedAt: sets.performedAt })
+    .from(sets)
+    .where(isNull(sets.deletedAt))
+    .orderBy(desc(sets.performedAt))
+    .limit(200);
+
+  const seen: string[] = [];
+  for (const r of rows) {
+    if (!seen.includes(r.exerciseId)) seen.push(r.exerciseId);
+    if (seen.length >= limit) break;
+  }
+  return seen;
+}
+
 export type TemplateSet = { weightKg: number; reps: number; setType: 'working' | 'warmup' };
 export type SessionTemplate = { exerciseId: string; sets: TemplateSet[] }[];
 
