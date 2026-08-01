@@ -22,6 +22,8 @@ export const workouts = sqliteTable('workouts', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull(),
   startedAt: text('started_at').notNull(),
+  name: text('name'), // nullable: a session in progress hasn't been named yet
+  finishedAt: text('finished_at'), // nullable: finishedAt IS NULL is what defines an open session
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
 });
@@ -33,6 +35,10 @@ export const sets = sqliteTable('sets', {
   weightKg: real('weight_kg').notNull(),
   reps: integer('reps').notNull(),
   rir: integer('rir'), // nullable: imported data may lack it (OQ-2)
+  // defaults to 'working' so every already-logged set is correctly classified
+  // by the migration itself; warm-up sets are excluded from weekly volume
+  // and from e1RM input
+  setType: text('set_type', { enum: ['working', 'warmup'] }).notNull().default('working'),
   performedAt: text('performed_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -43,6 +49,19 @@ export const weights = sqliteTable('weights', {
   userId: text('user_id').notNull(),
   valueKg: real('value_kg').notNull(),
   measuredAt: text('measured_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const adviceEvents = sqliteTable('advice_events', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  claimId: text('claim_id').notNull(),
+  trigger: text('trigger').notNull(),
+  workoutId: text('workout_id'), // nullable: not every claim fires from within a workout
+  shownAt: text('shown_at').notNull(),
+  dismissedAt: text('dismissed_at'),
+  suppressedAt: text('suppressed_at'),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
 });

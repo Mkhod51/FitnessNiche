@@ -40,6 +40,7 @@ function makeSet(overrides: Partial<LoggedSet> = {}): LoggedSet {
     weightKg: 60,
     reps: 5,
     rir: 2,
+    setType: 'working',
     performedAt: '2026-07-25T09:00:00.000Z',
     updatedAt: '2026-07-25T09:00:00.000Z',
     deletedAt: null,

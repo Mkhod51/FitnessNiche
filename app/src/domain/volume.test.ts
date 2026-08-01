@@ -11,6 +11,7 @@ function set(overrides: Partial<LoggedSet> = {}): LoggedSet {
     weightKg: 100,
     reps: 5,
     rir: 2,
+    setType: 'working',
     performedAt: '2026-01-08T00:00:00.000Z',
     updatedAt: '2026-01-08T00:00:00.000Z',
     deletedAt: null,
