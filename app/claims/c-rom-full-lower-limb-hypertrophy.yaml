@@ -1,0 +1,33 @@
+id: c-rom-full-lower-limb-hypertrophy
+statement: >-
+  In the cited meta-analysis, full range-of-motion training produced greater lower-limb
+  hypertrophy than partial range-of-motion training
+peekStatement: >-
+  The pooled evidence favoured full range of motion for lower-limb growth.
+grade: A
+status: settled
+domain: range-of-motion
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: rom-full-lower-limb-hypertrophy
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-rom-hypertrophy-pallares
+    claimId: c-rom-full-lower-limb-hypertrophy
+    doi: 10.1111/sms.14006
+    authors: Pallares JG, Hernandez-Belmonte A, Martinez-Cava A, Vetrovsky T, Steffl M, Courel-Ibanez J
+    year: 2021
+    journal: Scandinavian Journal of Medicine & Science in Sports
+    n: null
+    population: unstated
+    effectSize: Full range of motion favoured lower-limb hypertrophy (ES 0.88, p = 0.027).
+    ci: null
+    figures:
+      - label: effect size favouring full range of motion for lower-limb hypertrophy
+        value: 0.88
+      - label: p value for the lower-limb hypertrophy comparison
+        value: 0.027
+    quote: >-
+      Full ROM resistance training is more effective than partial ROM to maximize lower-limb muscle hypertrophy.

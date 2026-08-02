@@ -5,6 +5,179 @@ import type { Claim } from '../advice/types.ts';
 
 export const CLAIMS: Claim[] = [
   {
+    "id": "c-bulk-rate-higher-energy-body-fat",
+    "statement": "In that small four-week diet comparison, the higher-energy group had a larger relative increase in skinfold-estimated body fat (7.4% vs 0.8%); only that group had a significant pre-to-post increase",
+    "peekStatement": "A small trial suggests a significant body-fat increase only in the higher-energy group.",
+    "grade": "C",
+    "status": "settled",
+    "domain": "bulk-rate",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "bulk-rate-higher-energy-body-fat",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-bulk-rate-fat-ribeiro",
+        "claimId": "c-bulk-rate-higher-energy-body-fat",
+        "doi": "10.2478/hukin-2019-0038",
+        "authors": "Ribeiro AS, Nunes JP, Schoenfeld BJ, Aguiar AF, Cyrino ES",
+        "year": 2019,
+        "journal": "Journal of Human Kinetics",
+        "n": 11,
+        "population": "trained",
+        "effectSize": "With different macronutrient distributions, skinfold-estimated body fat changed +7.4% in the higher-energy group and +0.8% in the moderate-energy group; only the higher-energy group had a significant pre-to-post increase.",
+        "ci": null,
+        "figures": [
+          {
+            "label": "higher-energy intake",
+            "value": 67.5,
+            "unit": "kcal/kg/day"
+          },
+          {
+            "label": "moderate-energy intake",
+            "value": 50.1,
+            "unit": "kcal/kg/day"
+          },
+          {
+            "label": "relative body-fat change, higher-energy group",
+            "value": 7.4,
+            "unit": "%"
+          },
+          {
+            "label": "relative body-fat change, moderate-energy group",
+            "value": 0.8,
+            "unit": "%"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-bulk-rate-higher-energy-muscle-mass",
+    "statement": "In an 11-person, four-week trial of competitive male bodybuilders, the higher-energy diet group with a different macronutrient distribution had a larger estimated skeletal-muscle-mass increase than the moderate-energy group (2.7% vs 1.1%)",
+    "peekStatement": "A small trial suggests greater estimated muscle-mass gains in the higher-energy diet group.",
+    "grade": "C",
+    "status": "settled",
+    "domain": "bulk-rate",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "bulk-rate-higher-energy-muscle-mass",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-bulk-rate-muscle-ribeiro",
+        "claimId": "c-bulk-rate-higher-energy-muscle-mass",
+        "doi": "10.2478/hukin-2019-0038",
+        "authors": "Ribeiro AS, Nunes JP, Schoenfeld BJ, Aguiar AF, Cyrino ES",
+        "year": 2019,
+        "journal": "Journal of Human Kinetics",
+        "n": 11,
+        "population": "trained",
+        "effectSize": "With different macronutrient distributions, estimated skeletal muscle mass increased 2.7% in the higher-energy group and 1.1% in the moderate-energy group (p = 0.03).",
+        "ci": null,
+        "figures": [
+          {
+            "label": "higher-energy intake",
+            "value": 67.5,
+            "unit": "kcal/kg/day"
+          },
+          {
+            "label": "moderate-energy intake",
+            "value": 50.1,
+            "unit": "kcal/kg/day"
+          },
+          {
+            "label": "estimated skeletal-muscle-mass change, higher-energy group",
+            "value": 2.7,
+            "unit": "%"
+          },
+          {
+            "label": "estimated skeletal-muscle-mass change, moderate-energy group",
+            "value": 1.1,
+            "unit": "%"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-bulk-rate-novice-intermediate-review",
+    "statement": "For novice and intermediate natural bodybuilders in the off-season, a narrative review suggests that gaining about 0.25 to 0.5% of bodyweight per week might be useful",
+    "peekStatement": "A review suggests 0.25–0.5% weekly gain for novice/intermediate bodybuilders.",
+    "grade": "C",
+    "status": "settled",
+    "domain": "bulk-rate",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "bulk-rate-novice-intermediate-review",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-bulk-rate-iraki",
+        "claimId": "c-bulk-rate-novice-intermediate-review",
+        "doi": "10.3390/sports7070154",
+        "authors": "Iraki J, Fitschen P, Espinar S, Helms E",
+        "year": 2019,
+        "journal": "Sports",
+        "n": null,
+        "population": "unstated",
+        "effectSize": null,
+        "ci": null,
+        "figures": [
+          {
+            "label": "suggested weekly bodyweight-gain lower bound",
+            "value": 0.25,
+            "unit": "%"
+          },
+          {
+            "label": "suggested weekly bodyweight-gain upper bound",
+            "value": 0.5,
+            "unit": "%"
+          }
+        ],
+        "quote": "Aiming for a target weight gain of ~0.25–0.5% of bodyweight per week might be useful."
+      }
+    ]
+  },
+  {
+    "id": "c-bulk-rate-surplus-unknown",
+    "statement": "The specific energy surplus that maximizes resistance-training hypertrophy has not been validated",
+    "peekStatement": "A review suggests no validated energy-surplus sweet spot for hypertrophy.",
+    "grade": "C",
+    "status": "settled",
+    "domain": "bulk-rate",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "bulk-rate-surplus-unknown",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-bulk-rate-slater",
+        "claimId": "c-bulk-rate-surplus-unknown",
+        "doi": "10.3389/fnut.2019.00131",
+        "authors": "Slater GJ, Dieter BP, Marsh DJ, Helms ER, Shaw G, Iraki J",
+        "year": 2019,
+        "journal": "Frontiers in Nutrition",
+        "n": null,
+        "population": "unstated",
+        "effectSize": null,
+        "ci": null,
+        "figures": [],
+        "quote": "The specific energy surplus required to facilitate muscle hypertrophy is unknown."
+      }
+    ]
+  },
+  {
     "id": "c-deficit-beyond-500-blocks-lean-mass",
     "statement": "Around a 500 kcal per day deficit is where gaining lean mass stops being realistic, so a larger deficit trades muscle for speed",
     "peekStatement": "Past about a 500 kcal daily deficit, gaining lean mass stops being realistic",
@@ -772,6 +945,168 @@ export const CLAIMS: Claim[] = [
           }
         ],
         "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-rom-full-lower-limb-hypertrophy",
+    "statement": "In the cited meta-analysis, full range-of-motion training produced greater lower-limb hypertrophy than partial range-of-motion training",
+    "peekStatement": "The pooled evidence favoured full range of motion for lower-limb growth.",
+    "grade": "A",
+    "status": "settled",
+    "domain": "range-of-motion",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "rom-full-lower-limb-hypertrophy",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-rom-hypertrophy-pallares",
+        "claimId": "c-rom-full-lower-limb-hypertrophy",
+        "doi": "10.1111/sms.14006",
+        "authors": "Pallares JG, Hernandez-Belmonte A, Martinez-Cava A, Vetrovsky T, Steffl M, Courel-Ibanez J",
+        "year": 2021,
+        "journal": "Scandinavian Journal of Medicine & Science in Sports",
+        "n": null,
+        "population": "unstated",
+        "effectSize": "Full range of motion favoured lower-limb hypertrophy (ES 0.88, p = 0.027).",
+        "ci": null,
+        "figures": [
+          {
+            "label": "effect size favouring full range of motion for lower-limb hypertrophy",
+            "value": 0.88
+          },
+          {
+            "label": "p value for the lower-limb hypertrophy comparison",
+            "value": 0.027
+          }
+        ],
+        "quote": "Full ROM resistance training is more effective than partial ROM to maximize lower-limb muscle hypertrophy."
+      }
+    ]
+  },
+  {
+    "id": "c-rom-full-strength",
+    "statement": "In the cited meta-analysis, full range-of-motion training produced greater strength adaptations than partial range-of-motion training",
+    "peekStatement": "The pooled evidence favoured full range of motion for strength.",
+    "grade": "A",
+    "status": "settled",
+    "domain": "range-of-motion",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "rom-full-strength",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-rom-strength-pallares",
+        "claimId": "c-rom-full-strength",
+        "doi": "10.1111/sms.14006",
+        "authors": "Pallares JG, Hernandez-Belmonte A, Martinez-Cava A, Vetrovsky T, Steffl M, Courel-Ibanez J",
+        "year": 2021,
+        "journal": "Scandinavian Journal of Medicine & Science in Sports",
+        "n": null,
+        "population": "unstated",
+        "effectSize": "Full range of motion favoured strength adaptations (ES 0.56, p = 0.004).",
+        "ci": null,
+        "figures": [
+          {
+            "label": "effect size favouring full range of motion for strength",
+            "value": 0.56
+          },
+          {
+            "label": "p value for the strength comparison",
+            "value": 0.004
+          }
+        ],
+        "quote": "Full ROM resistance training is more effective than partial ROM to maximize muscle strength."
+      }
+    ]
+  },
+  {
+    "id": "c-rom-initial-partial-knee-extension",
+    "statement": "In untrained women, initial partial knee extensions from 100 to 65 degrees of knee flexion produced greater regional hypertrophy at some sites than full or final partial range of motion",
+    "peekStatement": "In untrained women, initial partial knee extensions grew some regions more.",
+    "grade": "B",
+    "status": "settled",
+    "domain": "range-of-motion",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "rom-initial-partial-knee-extension",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-rom-long-length-pedrosa",
+        "claimId": "c-rom-initial-partial-knee-extension",
+        "doi": "10.1080/17461391.2021.1927199",
+        "authors": "Pedrosa GF, Lima FV, Schoenfeld BJ, Lacerda LT, Simoes MG, Pereira MR, Diniz RCR, Chagas MH",
+        "year": 2022,
+        "journal": "European Journal of Sport Science",
+        "n": 45,
+        "population": "untrained",
+        "effectSize": null,
+        "ci": null,
+        "figures": [
+          {
+            "label": "participants",
+            "value": 45
+          },
+          {
+            "label": "initial partial-ROM start angle",
+            "value": 100,
+            "unit": "degrees knee flexion"
+          },
+          {
+            "label": "initial partial-ROM end angle",
+            "value": 65,
+            "unit": "degrees knee flexion"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-rom-upper-body-inconclusive",
+    "statement": "Upper-body hypertrophy evidence comparing full and partial range of motion is too limited and conflicting for a strong practical inference",
+    "peekStatement": "Upper-body ROM evidence appears to be too limited and conflicting for a strong inference.",
+    "grade": "C",
+    "status": "settled",
+    "domain": "range-of-motion",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "rom-upper-body-inconclusive",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-rom-upper-schoenfeld",
+        "claimId": "c-rom-upper-body-inconclusive",
+        "doi": "10.1177/2050312120901559",
+        "authors": "Schoenfeld BJ, Grgic J",
+        "year": 2020,
+        "journal": "SAGE Open Medicine",
+        "n": 74,
+        "population": "mixed",
+        "effectSize": null,
+        "ci": null,
+        "figures": [
+          {
+            "label": "upper-body studies reviewed",
+            "value": 2
+          },
+          {
+            "label": "upper-body participants reviewed",
+            "value": 74
+          }
+        ],
+        "quote": "Research on the effects of ROM for the upper limbs is limited and conflicting."
       }
     ]
   },

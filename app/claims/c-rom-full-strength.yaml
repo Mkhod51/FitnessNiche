@@ -1,0 +1,33 @@
+id: c-rom-full-strength
+statement: >-
+  In the cited meta-analysis, full range-of-motion training produced greater strength
+  adaptations than partial range-of-motion training
+peekStatement: >-
+  The pooled evidence favoured full range of motion for strength.
+grade: A
+status: settled
+domain: range-of-motion
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: rom-full-strength
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-rom-strength-pallares
+    claimId: c-rom-full-strength
+    doi: 10.1111/sms.14006
+    authors: Pallares JG, Hernandez-Belmonte A, Martinez-Cava A, Vetrovsky T, Steffl M, Courel-Ibanez J
+    year: 2021
+    journal: Scandinavian Journal of Medicine & Science in Sports
+    n: null
+    population: unstated
+    effectSize: Full range of motion favoured strength adaptations (ES 0.56, p = 0.004).
+    ci: null
+    figures:
+      - label: effect size favouring full range of motion for strength
+        value: 0.56
+      - label: p value for the strength comparison
+        value: 0.004
+    quote: >-
+      Full ROM resistance training is more effective than partial ROM to maximize muscle strength.

@@ -1,0 +1,35 @@
+id: c-bulk-rate-novice-intermediate-review
+statement: >-
+  For novice and intermediate natural bodybuilders in the off-season, a narrative review
+  suggests that gaining about 0.25 to 0.5% of bodyweight per week might be useful
+peekStatement: >-
+  A review suggests 0.25–0.5% weekly gain for novice/intermediate bodybuilders.
+grade: C
+status: settled
+domain: bulk-rate
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: bulk-rate-novice-intermediate-review
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-bulk-rate-iraki
+    claimId: c-bulk-rate-novice-intermediate-review
+    doi: 10.3390/sports7070154
+    authors: Iraki J, Fitschen P, Espinar S, Helms E
+    year: 2019
+    journal: Sports
+    n: null
+    population: unstated
+    effectSize: null
+    ci: null
+    figures:
+      - label: suggested weekly bodyweight-gain lower bound
+        value: 0.25
+        unit: "%"
+      - label: suggested weekly bodyweight-gain upper bound
+        value: 0.5
+        unit: "%"
+    quote: >-
+      Aiming for a target weight gain of ~0.25–0.5% of bodyweight per week might be useful.

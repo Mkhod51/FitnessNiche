@@ -1,0 +1,42 @@
+id: c-bulk-rate-higher-energy-muscle-mass
+statement: >-
+  In an 11-person, four-week trial of competitive male bodybuilders, the higher-energy diet
+  group with a different macronutrient distribution had a larger estimated skeletal-muscle-mass increase than the moderate-energy group (2.7% vs 1.1%)
+peekStatement: >-
+  A small trial suggests greater estimated muscle-mass gains in the higher-energy diet group.
+grade: C
+status: settled
+domain: bulk-rate
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: bulk-rate-higher-energy-muscle-mass
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-bulk-rate-muscle-ribeiro
+    claimId: c-bulk-rate-higher-energy-muscle-mass
+    doi: 10.2478/hukin-2019-0038
+    authors: Ribeiro AS, Nunes JP, Schoenfeld BJ, Aguiar AF, Cyrino ES
+    year: 2019
+    journal: Journal of Human Kinetics
+    n: 11
+    population: trained
+    effectSize: >-
+      With different macronutrient distributions, estimated skeletal muscle mass increased
+      2.7% in the higher-energy group and 1.1% in the moderate-energy group (p = 0.03).
+    ci: null
+    figures:
+      - label: higher-energy intake
+        value: 67.5
+        unit: kcal/kg/day
+      - label: moderate-energy intake
+        value: 50.1
+        unit: kcal/kg/day
+      - label: estimated skeletal-muscle-mass change, higher-energy group
+        value: 2.7
+        unit: "%"
+      - label: estimated skeletal-muscle-mass change, moderate-energy group
+        value: 1.1
+        unit: "%"
+    quote: null

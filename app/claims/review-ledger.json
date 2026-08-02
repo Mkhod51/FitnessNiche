@@ -357,7 +357,320 @@
       "firstReview": null,
       "secondReview": null,
       "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-rom-full-strength",
+      "citationId": "cit-rom-strength-pallares",
+      "doi": "10.1111/sms.14006",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "PubMed author abstract for PMID 34170576; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PubMed PMID 34170576, Results: 16 included studies; full ROM strength ES = 0.56, p = 0.004.",
+        "PubMed PMID 34170576, Conclusion: full ROM more effective than partial ROM for muscle strength."
+      ],
+      "nullRationales": [
+        "The directly read abstract does not report a pooled participant count, confidence interval, or training-status breakdown, so n, ci, and population remain null/unstated.",
+        "No publisher figure is stored; the effect size is transcribed as text and a re-plottable number only."
+      ],
+      "populationRationale": "The directly read abstract does not identify the pooled participants' training status, so the citation population is unstated and the claim makes no trained-lifter assertion.",
+      "gradeRationale": "A quantitative systematic review and meta-analysis directly reports the strength comparison. Grade A applies only to that pooled comparison, not to a named training-status subgroup.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement is limited to the full-versus-partial strength comparison.",
+          "ES and p value match the directly read Results text.",
+          "No population or personal-programming inference was added."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved",
+        "checks": [
+          "PubMed Results directly supports 16 studies, ES = 0.56 and p = 0.004 for strength.",
+          "Scope remains pooled full-versus-partial ROM only; no training-status or programming inference.",
+          "The available abstract supports the recorded null population, n, and CI; Grade A matches quantitative synthesis."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-rom-full-lower-limb-hypertrophy",
+      "citationId": "cit-rom-hypertrophy-pallares",
+      "doi": "10.1111/sms.14006",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "PubMed author abstract for PMID 34170576; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PubMed PMID 34170576, Results: full ROM lower-limb hypertrophy ES = 0.88, p = 0.027.",
+        "PubMed PMID 34170576, Conclusion: full ROM more effective than partial ROM for lower-limb muscle hypertrophy."
+      ],
+      "nullRationales": [
+        "The directly read abstract does not report a pooled participant count, confidence interval, or training-status breakdown, so n, ci, and population remain null/unstated.",
+        "No publisher figure is stored; the effect size is transcribed as text and a re-plottable number only."
+      ],
+      "populationRationale": "The directly read abstract does not identify the pooled participants' training status, so the citation population is unstated and the claim makes no trained-lifter assertion.",
+      "gradeRationale": "A quantitative systematic review and meta-analysis directly reports the lower-limb hypertrophy comparison. Grade A applies only to this lower-limb outcome.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement is restricted to lower-limb hypertrophy, not all muscles.",
+          "ES and p value match the directly read Results text.",
+          "No population or personal-programming inference was added."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved",
+        "checks": [
+          "PubMed Results directly supports lower-limb hypertrophy ES = 0.88 and p = 0.027.",
+          "Statement does not generalize to upper body or all muscles.",
+          "The available abstract supports the recorded null n, CI, and training-status breakdown; Grade A matches the meta-analysis."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-rom-upper-body-inconclusive",
+      "citationId": "cit-rom-upper-schoenfeld",
+      "doi": "10.1177/2050312120901559",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "Europe PMC full-text XML for PMCID PMC6977096; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PMC6977096, Results/Table 1: two upper-extremity studies; 30 untrained men and 44 resistance-trained men.",
+        "PMC6977096, Discussion and Conclusion: upper-body evidence is limited and conflicting, precluding strong practical inferences."
+      ],
+      "nullRationales": [
+        "No pooled effect size or confidence interval for the upper-body comparison is reported in this qualitative systematic review, so effectSize and ci remain null.",
+        "No publisher figure is stored; only source-read study and participant counts are retained."
+      ],
+      "populationRationale": "The relevant upper-body evidence contains 74 young men across one untrained and one resistance-trained study, so mixed is the directly supported population label.",
+      "gradeRationale": "This is a qualitative systematic review with sparse, conflicting upper-body evidence. Grade C reflects the uncertainty rather than the review format alone.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement reports uncertainty rather than treating limited evidence as equivalence.",
+          "Study and participant counts match the full-text Results section.",
+          "The claim does not generalize the lower-body finding to upper-body muscles."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved after population-scope correction",
+        "checks": [
+          "The full text identifies two upper-extremity studies and explicitly calls their findings limited and conflicting.",
+          "Population was corrected from the whole review to the relevant upper-body evidence: 74 young men across one untrained and one resistance-trained study.",
+          "No pooled upper-body effect or CI is reported; Grade C expresses sparse conflicting evidence rather than equivalence."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-rom-initial-partial-knee-extension",
+      "citationId": "cit-rom-long-length-pedrosa",
+      "doi": "10.1080/17461391.2021.1927199",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "PubMed author abstract for PMID 33977835; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PubMed PMID 33977835, Methods: 45 untrained women randomized across full, initial partial (100 to 65 degrees knee flexion), final partial, varied ROM, and control knee-extension groups.",
+        "PubMed PMID 33977835, Results/Conclusion: the initial partial-ROM group had greater regional hypertrophy at stated femur locations than specified comparison groups."
+      ],
+      "nullRationales": [
+        "The directly read abstract gives no confidence intervals or a single effect-size estimate, so ci and a numeric effectSize remain null.",
+        "No publisher figure is stored; the participant count is retained as a re-plottable source-read number."
+      ],
+      "populationRationale": "The abstract explicitly identifies untrained women; the claim retains both the training status and knee-extension exercise scope.",
+      "gradeRationale": "This is one randomized trial with a narrow population, exercise, and regional outcome. Grade B does not generalize it to trained lifters or all exercises.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement retains untrained women, knee extension, and regional qualification.",
+          "No claim of universal partial-ROM superiority is made.",
+          "The stored participant count matches the abstract."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved after wording narrowing",
+        "checks": [
+          "The abstract directly reports 45 untrained women, the four configurations plus control, and the regional-hypertrophy pattern.",
+          "The claim uses the source-defined initial partial ROM (100 to 65 degrees knee flexion), not a generic long-muscle-length label.",
+          "No CI, numerical effect size, or p value is available in the abstract; Grade B is confined to this focused trial."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-bulk-rate-novice-intermediate-review",
+      "citationId": "cit-bulk-rate-iraki",
+      "doi": "10.3390/sports7070154",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "Europe PMC full-text XML for PMCID PMC6680710; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PMC6680710, Energy/Positive Energy Balance: the authors state that aiming for ~0.25-0.5% bodyweight per week might be useful.",
+        "PMC6680710, Abstract: the review frames ~0.25-0.5% bodyweight/week as a target for novice/intermediate bodybuilders."
+      ],
+      "nullRationales": [
+        "This narrative review reports no pooled sample, confidence interval, or single effect size for the recommendation, so n, effectSize, and ci remain null.",
+        "No publisher figure is stored; only the review's stated percentage bounds are retained."
+      ],
+      "populationRationale": "The recommendation is explicitly scoped to novice/intermediate bodybuilders, but the review does not provide a single underlying sample population for it; the citation population is therefore unstated.",
+      "gradeRationale": "This is a narrative-review recommendation in a literature the authors describe as limited, not a validated rate threshold. Grade C and search-only reachability preserve that limitation.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement attributes the rate to the narrative review rather than presenting it as a universal target.",
+          "Both percentage bounds match the directly read abstract and Energy section.",
+          "No predicate turns this into personal bulk-rate advice."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved after scope wording correction",
+        "checks": [
+          "The full text gives ~0.25-0.5% bodyweight/week for novice/intermediate bodybuilders.",
+          "The claim retains off-season natural-bodybuilding context and the source's tentative 'might be useful' framing; it is not a validated personal target.",
+          "Narrative-review nulls remain justified and Grade C is appropriate."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-bulk-rate-surplus-unknown",
+      "citationId": "cit-bulk-rate-slater",
+      "doi": "10.3389/fnut.2019.00131",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "Europe PMC full-text XML for PMCID PMC6710320; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PMC6710320, Abstract: the specific energy surplus required to facilitate resistance-training hypertrophy is unknown and proposed sweet spots have not been validated in a resistance-training population.",
+        "PMC6710320, Energy Balance: authors report no rigorously controlled extended investigations directly assessing an energy surplus on resistance-training hypertrophy and strength/power outcomes."
+      ],
+      "nullRationales": [
+        "This review reports an evidence gap rather than a pooled intervention effect, so n, effectSize, ci, and figures remain null.",
+        "No publisher figure or derived rate threshold is stored."
+      ],
+      "populationRationale": "The statement concerns the absence of validated rate evidence in resistance-training populations; it makes no claim about a particular athlete subgroup.",
+      "gradeRationale": "A scientific review directly documents the lack of rigorous controlled evidence, but it is not a quantitative synthesis establishing an effect. Grade C preserves the uncertainty.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement says the precise surplus is unknown; it does not imply that a surplus has no effect.",
+          "It preserves the review's controlled-study limitation.",
+          "No numeric bulk-rate threshold or personal recommendation is introduced."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved",
+        "checks": [
+          "The abstract directly states that the specific surplus is unknown and proposed sweet spots have not been validated in resistance-training populations.",
+          "The claim preserves the evidence gap and does not infer that an energy surplus has no effect or yield a personal rate.",
+          "No pooled intervention effect, n, or CI exists for this evidence-gap claim; Grade C is appropriate."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-bulk-rate-higher-energy-muscle-mass",
+      "citationId": "cit-bulk-rate-muscle-ribeiro",
+      "doi": "10.2478/hukin-2019-0038",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "Europe PMC full-text XML for PMCID PMC6942464; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PMC6942464, Participants: 11 male competitive bodybuilders, all off-season and regularly training six days weekly, randomized to higher (n=6) or moderate (n=5) energy intake.",
+        "PMC6942464, Methods/Body composition: skeletal muscle mass was estimated with an anthropometric prediction equation.",
+        "PMC6942464, Results/Table 2 and Table 3: 67.5 versus 50.1 kcal/kg/day with different macronutrient distributions; estimated skeletal muscle mass +2.7% versus +1.1%, with greater increase in the higher-energy group (p = 0.03)."
+      ],
+      "nullRationales": [
+        "The paper reports p values and standardized effect-size values but no confidence intervals for the between-group outcome, so ci remains null.",
+        "No publisher figure is stored; all retained values are transcribed from source tables."
+      ],
+      "populationRationale": "The source identifies male IFBB-affiliated competitive bodybuilders with at least one year of competition and regular six-day training; trained is directly supported.",
+      "gradeRationale": "This very small, four-week randomized diet comparison has different macronutrient distributions and an anthropometric skeletal-muscle estimate, so it cannot isolate energy alone. Grade C records the descriptive group difference without overclaiming causation.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved after source-methods re-review",
+        "checks": [
+          "Statement is limited to the 11 competitive male bodybuilders and four-week study.",
+          "The direct methods read confirms anthropometric estimation and the diet tables confirm different macronutrient distributions, so the statement does not claim an energy-only effect.",
+          "Energy intake, group sizes, muscle-mass changes, and p value match the source tables and Results prose."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved",
+        "checks": [
+          "PMC6942464 reports 11 competitive male bodybuilders randomized to higher (n=6) versus moderate (n=5) energy intake for four training weeks.",
+          "Table 2 confirms different energy and macronutrient distributions; Table 3 reports estimated skeletal muscle mass +2.7% versus +1.1%, with Results prose reporting p = 0.03.",
+          "Wording avoids an energy-only causal inference and identifies the estimate; Grade C reflects the very small, short single trial."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-bulk-rate-higher-energy-body-fat",
+      "citationId": "cit-bulk-rate-fat-ribeiro",
+      "doi": "10.2478/hukin-2019-0038",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "Europe PMC full-text XML for PMCID PMC6942464; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PMC6942464, Participants: 11 male competitive bodybuilders, all off-season and regularly training six days weekly, randomized to higher (n=6) or moderate (n=5) energy intake.",
+        "PMC6942464, Methods/Body composition: body fat was estimated by seven-site skinfold technique and prediction equations.",
+        "PMC6942464, Results/Table 2 and Table 3: 67.5 versus 50.1 kcal/kg/day with different macronutrient distributions; body fat +7.4% versus +0.8% relative change, with a significant pre-to-post increase only in the higher-energy group."
+      ],
+      "nullRationales": [
+        "The paper reports p values and standardized effect-size values but no confidence intervals for the between-group outcome, so ci remains null.",
+        "No publisher figure is stored; all retained values are transcribed from source tables."
+      ],
+      "populationRationale": "The source identifies male IFBB-affiliated competitive bodybuilders with at least one year of competition and regular six-day training; trained is directly supported.",
+      "gradeRationale": "This very small, four-week randomized diet comparison has different macronutrient distributions and skinfold-estimated body fat, so it cannot isolate energy alone. Grade C records the descriptive group outcome without treating the other within-group non-significance as equivalence.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved after source-methods re-review",
+        "checks": [
+          "Statement reports group outcomes rather than treating the moderate group's non-significant change as equivalence.",
+          "The direct methods read confirms skinfold estimation and the diet tables confirm different macronutrient distributions, so the statement does not claim an energy-only effect.",
+          "Energy intake, group sizes, and relative body-fat changes match the source tables."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved",
+        "checks": [
+          "Table 3 reports body fat +7.4% in the higher-energy group versus +0.8% in the moderate-energy group; values are derived from skinfold estimation.",
+          "Only the higher-energy group has the pre-to-post significance marker; the wording does not treat the other within-group non-significance as equivalence.",
+          "Scope remains the small four-week competitive-male-bodybuilder diet comparison with different macronutrient distributions; Grade C is appropriate."
+        ]
+      },
+      "nextReview": "2027-08-02"
     }
   ]
 }
-

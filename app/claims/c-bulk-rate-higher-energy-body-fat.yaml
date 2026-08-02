@@ -1,0 +1,43 @@
+id: c-bulk-rate-higher-energy-body-fat
+statement: >-
+  In that small four-week diet comparison, the higher-energy group had a larger relative increase
+  in skinfold-estimated body fat (7.4% vs 0.8%); only that group had a significant pre-to-post increase
+peekStatement: >-
+  A small trial suggests a significant body-fat increase only in the higher-energy group.
+grade: C
+status: settled
+domain: bulk-rate
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: bulk-rate-higher-energy-body-fat
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-bulk-rate-fat-ribeiro
+    claimId: c-bulk-rate-higher-energy-body-fat
+    doi: 10.2478/hukin-2019-0038
+    authors: Ribeiro AS, Nunes JP, Schoenfeld BJ, Aguiar AF, Cyrino ES
+    year: 2019
+    journal: Journal of Human Kinetics
+    n: 11
+    population: trained
+    effectSize: >-
+      With different macronutrient distributions, skinfold-estimated body fat changed
+      +7.4% in the higher-energy group and +0.8% in the moderate-energy group; only
+      the higher-energy group had a significant pre-to-post increase.
+    ci: null
+    figures:
+      - label: higher-energy intake
+        value: 67.5
+        unit: kcal/kg/day
+      - label: moderate-energy intake
+        value: 50.1
+        unit: kcal/kg/day
+      - label: relative body-fat change, higher-energy group
+        value: 7.4
+        unit: "%"
+      - label: relative body-fat change, moderate-energy group
+        value: 0.8
+        unit: "%"
+    quote: null

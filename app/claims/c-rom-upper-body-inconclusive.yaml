@@ -1,0 +1,33 @@
+id: c-rom-upper-body-inconclusive
+statement: >-
+  Upper-body hypertrophy evidence comparing full and partial range of motion is too
+  limited and conflicting for a strong practical inference
+peekStatement: >-
+  Upper-body ROM evidence appears to be too limited and conflicting for a strong inference.
+grade: C
+status: settled
+domain: range-of-motion
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: rom-upper-body-inconclusive
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-rom-upper-schoenfeld
+    claimId: c-rom-upper-body-inconclusive
+    doi: 10.1177/2050312120901559
+    authors: Schoenfeld BJ, Grgic J
+    year: 2020
+    journal: SAGE Open Medicine
+    n: 74
+    population: mixed
+    effectSize: null
+    ci: null
+    figures:
+      - label: upper-body studies reviewed
+        value: 2
+      - label: upper-body participants reviewed
+        value: 74
+    quote: >-
+      Research on the effects of ROM for the upper limbs is limited and conflicting.

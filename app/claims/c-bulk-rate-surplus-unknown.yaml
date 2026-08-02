@@ -1,0 +1,28 @@
+id: c-bulk-rate-surplus-unknown
+statement: >-
+  The specific energy surplus that maximizes resistance-training hypertrophy has not been validated
+peekStatement: >-
+  A review suggests no validated energy-surplus sweet spot for hypertrophy.
+grade: C
+status: settled
+domain: bulk-rate
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: bulk-rate-surplus-unknown
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-bulk-rate-slater
+    claimId: c-bulk-rate-surplus-unknown
+    doi: 10.3389/fnut.2019.00131
+    authors: Slater GJ, Dieter BP, Marsh DJ, Helms ER, Shaw G, Iraki J
+    year: 2019
+    journal: Frontiers in Nutrition
+    n: null
+    population: unstated
+    effectSize: null
+    ci: null
+    figures: []
+    quote: >-
+      The specific energy surplus required to facilitate muscle hypertrophy is unknown.

@@ -1,0 +1,36 @@
+id: c-rom-initial-partial-knee-extension
+statement: >-
+  In untrained women, initial partial knee extensions from 100 to 65 degrees of knee
+  flexion produced greater regional hypertrophy at some sites than full or final partial range of motion
+peekStatement: >-
+  In untrained women, initial partial knee extensions grew some regions more.
+grade: B
+status: settled
+domain: range-of-motion
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: rom-initial-partial-knee-extension
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-rom-long-length-pedrosa
+    claimId: c-rom-initial-partial-knee-extension
+    doi: 10.1080/17461391.2021.1927199
+    authors: Pedrosa GF, Lima FV, Schoenfeld BJ, Lacerda LT, Simoes MG, Pereira MR, Diniz RCR, Chagas MH
+    year: 2022
+    journal: European Journal of Sport Science
+    n: 45
+    population: untrained
+    effectSize: null
+    ci: null
+    figures:
+      - label: participants
+        value: 45
+      - label: initial partial-ROM start angle
+        value: 100
+        unit: degrees knee flexion
+      - label: initial partial-ROM end angle
+        value: 65
+        unit: degrees knee flexion
+    quote: null
