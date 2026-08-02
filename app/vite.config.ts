@@ -9,6 +9,9 @@ export default defineConfig({
   // HTTPS tunnel, and vite's host check rejects the tunnel's hostname by default.
   // A leading dot matches subdomains, so this allows any *.loca.lt tunnel without
   // switching the check off entirely.
+  server: {
+    allowedHosts: ['.loca.lt', '.trycloudflare.com'],
+  },
   preview: { allowedHosts: ['.loca.lt', '.trycloudflare.com'] },
   plugins: [
     react(),

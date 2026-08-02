@@ -7,4 +7,6 @@
 # Local agent/tooling scratch output.
 .firecrawl/
 .playwright-mcp/
+.claude/
 graphify-out/
+
