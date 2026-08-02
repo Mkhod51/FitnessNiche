@@ -270,6 +270,18 @@ input[type="number"]::-webkit-inner-spin-button {
   animation: figure-settle var(--motion-settle) var(--motion-ease) backwards;
 }
 
+/* Food search is remote enough to need a receipt. The indicator uses repeated
+   marks from the app's measurement language: the search is alive, but it does
+   not pretend to know progress it cannot measure. */
+@keyframes food-search-mark {
+  0%, 100% { opacity: 0.25; transform: scaleY(0.35); }
+  45% { opacity: 1; transform: scaleY(1); }
+}
+.food-search-mark {
+  transform-origin: bottom;
+  animation: food-search-mark 900ms var(--motion-ease) infinite;
+}
+
 /* Zeroed at the source, so every consumer of the tokens is covered without each
    one remembering to ask. The blanket rule underneath catches anything that
    hard-codes a duration instead of using them.

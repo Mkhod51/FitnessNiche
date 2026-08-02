@@ -18,6 +18,7 @@ type FoodPickerProps = {
 };
 
 type PickedFood = FoodItem | FoodItemDraft;
+type SearchPhase = 'idle' | 'searching' | 'done';
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 const FIGURE = 'font-figure tabular-nums';
@@ -105,6 +106,40 @@ function WifiNotice({ quickAddAvailable }: { quickAddAvailable: boolean }): Reac
   );
 }
 
+function SearchProgress(): ReactElement {
+  return (
+    <div
+      data-testid="food-searching"
+      role="status"
+      aria-live="polite"
+      className="mx-4 mb-1 mt-1 flex min-h-[34px] items-center justify-between border-y border-rule bg-paper-sunk px-3"
+    >
+      <span className={`${LABEL} text-ink-soft`}>Searching database</span>
+      <span aria-hidden="true" className="flex items-end gap-1">
+        {[0, 1, 2, 3].map((index) => (
+          <span
+            key={index}
+            className="food-search-mark h-3 w-[3px] bg-ink"
+            style={{ animationDelay: `${index * 90}ms` }}
+          />
+        ))}
+      </span>
+    </div>
+  );
+}
+
+function NoResults({ online }: { online: boolean }): ReactElement {
+  return (
+    <div data-testid="food-no-results" className="mx-4 mb-2 mt-2 bg-paper-sunk px-3.5 py-3">
+      <p className="font-serif text-[13.5px] leading-[1.45] text-ink-soft">
+        {online
+          ? 'No matching foods found. Try a simpler name, scan a barcode, or quick add it.'
+          : 'No matching local foods found. Recent and common foods are still here when the search is cleared.'}
+      </p>
+    </div>
+  );
+}
+
 export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps): ReactElement {
   const online = useOnline();
   const [hidden, setHidden] = useState<boolean | null>(null);
@@ -112,7 +147,9 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   const [common, setCommon] = useState<FoodItem[]>([]);
   const [query, setQuery] = useState('');
   const [scanning, setScanning] = useState(false);
-  const [pendingScan, setPendingScan] = useState(false);
+  const [searchPhase, setSearchPhase] = useState<SearchPhase>('idle');
+  const [searchNonce, setSearchNonce] = useState(0);
+  const [completedSearchQuery, setCompletedSearchQuery] = useState('');
   const [localResults, setLocalResults] = useState<FoodItem[]>([]);
   const [onlineResults, setOnlineResults] = useState<FoodItemDraft[]>([]);
   const [onlineResultsQuery, setOnlineResultsQuery] = useState('');
@@ -203,35 +240,73 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
 
   useEffect(() => {
     onlineRef.current = online;
-    if (!online) {
-      searchRequestRef.current += 1;
-      setOnlineResults([]);
-      setOnlineResultsQuery('');
-      setOnlineHidden(0);
-    }
   }, [online]);
 
   useEffect(() => {
     let cancelled = false;
     const term = query.trim();
-    searchRequestRef.current += 1;
+    queryRef.current = query;
+    const request = ++searchRequestRef.current;
     setOnlineResults([]);
     setOnlineResultsQuery('');
     setOnlineHidden(0);
     setOnlineFailed(false);
+    setCompletedSearchQuery('');
     if (!term) {
       setLocalResults([]);
+      setSearchPhase('idle');
       return () => {
         cancelled = true;
       };
     }
+
+    setSearchPhase('searching');
+    let localDone = false;
+    let onlineDone = !online;
+    const finishIfCurrent = () => {
+      if (cancelled || request !== searchRequestRef.current || queryRef.current.trim() !== term) return;
+      if (!localDone || !onlineDone) return;
+      setCompletedSearchQuery(term);
+      setSearchPhase('done');
+    };
+
     void searchFoodLocal(term).then((foods) => {
       if (!cancelled) setLocalResults(foods);
+    }).catch(() => {
+      if (!cancelled) setLocalResults([]);
+    }).finally(() => {
+      localDone = true;
+      finishIfCurrent();
     });
+
+    if (online) {
+      void (async () => {
+        try {
+          const result = isPlausibleBarcode(term)
+            ? await lookupBarcode(term).then((draft) => ({ drafts: draft ? [draft] : [], hidden: 0 }))
+            : await searchFoodOnline(term);
+          if (cancelled || request !== searchRequestRef.current || queryRef.current.trim() !== term || !onlineRef.current) return;
+          setOnlineResults(result.drafts);
+          setOnlineResultsQuery(term);
+          setOnlineHidden(result.hidden);
+          setOnlineFailed(false);
+        } catch {
+          if (cancelled || request !== searchRequestRef.current || queryRef.current.trim() !== term || !onlineRef.current) return;
+          setOnlineResults([]);
+          setOnlineResultsQuery('');
+          setOnlineHidden(0);
+          setOnlineFailed(true);
+        } finally {
+          onlineDone = true;
+          finishIfCurrent();
+        }
+      })();
+    }
+
     return () => {
       cancelled = true;
     };
-  }, [query]);
+  }, [query, online, searchNonce]);
 
   const figuresHidden = hidden !== false;
 
@@ -248,50 +323,18 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
     setGrams(String(food.servingGrams ?? 100));
   }
 
-  async function runOnlineSearch() {
-    const term = queryRef.current.trim();
-    if (!term || !online) return;
-    const request = ++searchRequestRef.current;
-    try {
-      const result = isPlausibleBarcode(term)
-        ? await lookupBarcode(term).then((draft) => ({ drafts: draft ? [draft] : [], hidden: 0 }))
-        : await searchFoodOnline(term);
-      if (request !== searchRequestRef.current || queryRef.current.trim() !== term || !onlineRef.current) return;
-      setOnlineResults(result.drafts);
-      setOnlineResultsQuery(term);
-      setOnlineHidden(result.hidden);
-      setOnlineFailed(false);
-    } catch {
-      if (request !== searchRequestRef.current || queryRef.current.trim() !== term || !onlineRef.current) return;
-      setOnlineResults([]);
-      setOnlineResultsQuery('');
-      setOnlineHidden(0);
-      setOnlineFailed(true);
-    }
-  }
-
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    void runOnlineSearch();
+    if (queryRef.current.trim()) setSearchNonce((value) => value + 1);
   }
 
   // A scanned code takes the same path as a typed barcode: drop it into the
-  // search field and run the existing lookup, so scan and manual entry share
-  // one OFF resolution route and one result UI. The lookup runs from the
-  // pendingScan effect, after the [query] effect has reset results and bumped
-  // the request counter — calling runOnlineSearch synchronously here would be
-  // invalidated by the [query] effect that setQuery triggers on commit.
+  // search field, so scan and manual entry share one OFF resolution route and
+  // one result UI through the automatic query effect.
   function handleBarcode(code: string) {
     queryRef.current = code;
     setQuery(code);
-    setPendingScan(true);
   }
-
-  useEffect(() => {
-    if (!pendingScan) return;
-    setPendingScan(false);
-    void runOnlineSearch();
-  }, [pendingScan]);
 
   async function addSelected() {
     if (!selected || !macros || !validQuantity || controlsDisabled) return;
@@ -482,6 +525,13 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   const isSearching = query.trim().length > 0;
   const showWifiNotice = !online || onlineFailed;
   const showOnlineResults = online && onlineResultsQuery === query.trim();
+  const searchComplete = searchPhase === 'done' && completedSearchQuery === query.trim();
+  const showNoResults =
+    searchComplete &&
+    localResults.length === 0 &&
+    onlineResults.length === 0 &&
+    onlineHidden === 0 &&
+    !onlineFailed;
 
   return pickerFrame(
     `Add food to ${SLOT_LABEL[mealSlot]}`,
@@ -513,22 +563,18 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
             queryRef.current = event.target.value;
             setQuery(event.target.value);
           }}
-          onKeyDown={(event) => {
-            if (event.key !== 'Enter') return;
-            event.preventDefault();
-            void runOnlineSearch();
-          }}
           className="min-w-0 flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-faint"
           placeholder="Search foods, brands or barcode"
           autoComplete="off"
         />
-        <button type="submit" disabled={!online || !query.trim()} className={`${LABEL} min-h-[44px] pl-3 text-ink disabled:text-ink-faint`}>
-          Search
+        <button type="submit" disabled={!online || !query.trim() || searchPhase === 'searching'} className={`${LABEL} min-h-[44px] pl-3 text-ink disabled:text-ink-faint`}>
+          {searchPhase === 'searching' ? 'Searching' : 'Search'}
         </button>
       </form>
       {showWifiNotice && <WifiNotice quickAddAvailable={!figuresHidden} />}
       {isSearching ? (
         <>
+          {searchPhase === 'searching' && <SearchProgress />}
           {localResults.length > 0 && (
             <section>
               <div className="px-4 pb-1 pt-3"><p className={LABEL}>Local results</p></div>
@@ -550,6 +596,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
               )}
             </p>
           )}
+          {showNoResults && <NoResults online={online} />}
         </>
       ) : (
         <>

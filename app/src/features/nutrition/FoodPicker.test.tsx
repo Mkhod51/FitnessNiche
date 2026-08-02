@@ -184,19 +184,21 @@ describe('FoodPicker', () => {
     expect(screen.queryByText(/2 results hidden/i)).not.toBeInTheDocument();
   });
 
-  it('filters local foods while typing without calling OFF until the query is submitted', async () => {
+  it('filters local foods and searches OFF automatically while typing', async () => {
     mockSearchFoodLocal.mockResolvedValue([food({ name: 'Skyr, plain' })]);
+    mockSearchFoodOnline.mockResolvedValue({ drafts: [offDraft({ name: 'Skyr Plain OFF' })], hidden: 0 });
     renderPicker();
 
     const input = await screen.findByRole('searchbox');
     fireEvent.change(input, { target: { value: 'skyr' } });
 
     expect(await screen.findByText('Skyr, plain')).toBeInTheDocument();
+    expect(await screen.findByText('Skyr Plain OFF')).toBeInTheDocument();
+    expect(mockSearchFoodOnline).toHaveBeenCalledWith('skyr');
     expect(mockLookupBarcode).not.toHaveBeenCalled();
-    expect(mockSearchFoodOnline).not.toHaveBeenCalled();
   });
 
-  it('looks up a submitted plausible barcode and renders the matching OFF food', async () => {
+  it('looks up a plausible barcode automatically and renders the matching OFF food', async () => {
     const barcode = '5000159484695';
     const draft = offDraft({ name: 'Heinz Baked Beans', barcode, kcalPer100g: 78, proteinGPer100g: 4.7, carbsGPer100g: 12.5, fatGPer100g: 0.2 });
     mockLookupBarcode.mockResolvedValue(draft);
@@ -204,7 +206,6 @@ describe('FoodPicker', () => {
 
     const input = await screen.findByRole('searchbox');
     fireEvent.change(input, { target: { value: ` ${barcode} ` } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
     expect(await screen.findByText('Heinz Baked Beans')).toBeInTheDocument();
     expect(mockLookupBarcode).toHaveBeenCalledWith(barcode);
@@ -217,14 +218,34 @@ describe('FoodPicker', () => {
 
     const input = await screen.findByRole('searchbox');
     fireEvent.change(input, { target: { value: '5000159484695' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
     await waitFor(() => expect(mockLookupBarcode).toHaveBeenCalledWith('5000159484695'));
     expect(screen.queryByText('Results · Open Food Facts')).not.toBeInTheDocument();
     expect(screen.queryByTestId('food-offline-notice')).not.toBeInTheDocument();
   });
 
-  it('searches OFF by keyword for a submitted non-barcode query', async () => {
+  it('shows a searching state while the database lookup is in flight', async () => {
+    mockSearchFoodOnline.mockReturnValue(new Promise(() => undefined));
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'skyr' } });
+
+    expect(await screen.findByTestId('food-searching')).toHaveTextContent(/searching database/i);
+  });
+
+  it('makes an empty completed search explicit', async () => {
+    mockSearchFoodLocal.mockResolvedValue([]);
+    mockSearchFoodOnline.mockResolvedValue({ drafts: [], hidden: 0 });
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'zzzzzz' } });
+
+    expect(await screen.findByTestId('food-no-results')).toHaveTextContent(/no matching foods found/i);
+  });
+
+  it('searches OFF by keyword automatically for a non-barcode query', async () => {
     mockSearchFoodOnline.mockResolvedValue({
       drafts: [offDraft()],
       hidden: 0,
@@ -233,7 +254,6 @@ describe('FoodPicker', () => {
 
     const input = await screen.findByRole('searchbox');
     fireEvent.change(input, { target: { value: 'skyr' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
     expect(await screen.findByText('Skyr Plain')).toBeInTheDocument();
     expect(mockSearchFoodOnline).toHaveBeenCalledWith('skyr');
