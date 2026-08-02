@@ -26,6 +26,9 @@ import {
   recentlyShownClaimIds,
   shownInWorkout,
 } from '../../db/advice-events';
+import { loadAdviceSnapshot } from '../../advice/load-snapshot';
+import { EMPTY_SNAPSHOT } from '../../advice/engine';
+import type { BuiltSnapshot } from '../../advice/snapshot';
 
 vi.mock('../../db/user', async () => {
   const actual = await vi.importActual<typeof import('../../db/user')>('../../db/user');
@@ -72,6 +75,8 @@ vi.mock('../../db/advice-events', async () => {
   };
 });
 
+vi.mock('../../advice/load-snapshot', () => ({ loadAdviceSnapshot: vi.fn() }));
+
 const mockGetUser = vi.mocked(getUser);
 const mockFindOpenWorkout = vi.mocked(findOpenWorkout);
 const mockStartWorkout = vi.mocked(startWorkout);
@@ -91,6 +96,62 @@ const mockSuppressClaim = vi.mocked(suppressClaim);
 const mockSuppressedClaimIds = vi.mocked(suppressedClaimIds);
 const mockRecentlyShownClaimIds = vi.mocked(recentlyShownClaimIds);
 const mockShownInWorkout = vi.mocked(shownInWorkout);
+const mockLoadAdviceSnapshot = vi.mocked(loadAdviceSnapshot);
+const BENCH_ID = 'barbell-bench-press';
+
+const emptyBuiltSnapshot: BuiltSnapshot = {
+  snapshot: EMPTY_SNAPSHOT,
+  primaryExerciseId: null,
+  latestWeightKg: null,
+  reconciliation: {
+    verdict: 'unresolved',
+    confidence: 'low',
+    weightTrend: 'unknown',
+    e1rmTrend: 'insufficient_data',
+    deficitWeeks: 0,
+    unresolved: ['weight', 'strength'],
+    observed: {
+      weightKgPerWeek: null,
+      e1rmPctPerWeek: null,
+      e1rmCi95: null,
+      e1rmWithinNoise: null,
+      windowDays: 0,
+      weighIns: 0,
+      e1rmSessions: 0,
+    },
+  },
+};
+
+const strengthHoldingSnapshot: BuiltSnapshot = {
+  ...emptyBuiltSnapshot,
+  primaryExerciseId: BENCH_ID,
+  latestWeightKg: 78,
+  snapshot: {
+    ...EMPTY_SNAPSHOT,
+    goal: 'cut',
+    deficitWeeks: 8,
+    weightTrend: 'down',
+    e1rmTrend: 'holding',
+  },
+  reconciliation: {
+    ...emptyBuiltSnapshot.reconciliation,
+    verdict: 'on_track',
+    confidence: 'high',
+    weightTrend: 'down',
+    e1rmTrend: 'holding',
+    deficitWeeks: 8,
+    unresolved: [],
+    observed: {
+      weightKgPerWeek: -0.35,
+      e1rmPctPerWeek: 0.05,
+      e1rmCi95: [-0.2, 0.3],
+      e1rmWithinNoise: true,
+      windowDays: 56,
+      weighIns: 20,
+      e1rmSessions: 16,
+    },
+  },
+};
 
 const consentedUser: User = {
   id: 'local-user',
@@ -106,8 +167,6 @@ const consentedUser: User = {
   consentedAt: '2026-07-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
-
-const BENCH_ID = 'barbell-bench-press';
 
 function makeWorkout(overrides: Partial<Workout> = {}): Workout {
   return {
@@ -158,6 +217,7 @@ function resetMocks() {
   mockSuppressedClaimIds.mockReset();
   mockRecentlyShownClaimIds.mockReset();
   mockShownInWorkout.mockReset();
+  mockLoadAdviceSnapshot.mockReset();
 
   mockGetUser.mockResolvedValue(consentedUser);
   mockFindOpenWorkout.mockResolvedValue(undefined);
@@ -176,6 +236,7 @@ function resetMocks() {
   mockSuppressedClaimIds.mockResolvedValue([]);
   mockRecentlyShownClaimIds.mockResolvedValue([]);
   mockShownInWorkout.mockResolvedValue(false);
+  mockLoadAdviceSnapshot.mockResolvedValue(emptyBuiltSnapshot);
 }
 
 describe('LogWorkout — GR-5: unreachable without consent', () => {
@@ -186,6 +247,7 @@ describe('LogWorkout — GR-5: unreachable without consent', () => {
     render(<LogWorkout />);
     await screen.findByTestId('consent-gate');
     expect(screen.queryByTestId('start-workout-button')).not.toBeInTheDocument();
+    expect(mockLoadAdviceSnapshot).not.toHaveBeenCalled();
   });
 
   it('renders the screen once consent is already recorded', async () => {
@@ -265,6 +327,30 @@ describe('LogWorkout — State B: an open session', () => {
     resetMocks();
     mockFindOpenWorkout.mockResolvedValue(makeWorkout());
     mockGetOpenSessionSets.mockResolvedValue([makeSet()]);
+  });
+
+  it('shows a data-earned claim from the loaded session snapshot once, without re-evaluating after a set', async () => {
+    mockLoadAdviceSnapshot.mockResolvedValue(strengthHoldingSnapshot);
+    mockSuppressedClaimIds.mockResolvedValue([
+      'c-deficit-beyond-500-blocks-lean-mass',
+      'c-deficit-impairs-lean-mass',
+    ]);
+    mockLogSet.mockResolvedValue(makeSet({ id: 'set-2' }));
+
+    render(<LogWorkout />);
+
+    const peek = await screen.findByTestId('advice-peek');
+    expect(peek).toHaveTextContent(/strength appears to hold up better/i);
+    expect(peek).toHaveTextContent(/barbell bench press e1rm held over 8 weeks/i);
+    expect(mockRecordAdviceShown).toHaveBeenCalledWith(
+      'c-strength-holds-through-a-deficit',
+      'data-earned',
+      'workout-1',
+    );
+
+    fireEvent.click(await screen.findByTestId('tick-button'));
+    await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
+    expect(mockLoadAdviceSnapshot).toHaveBeenCalledTimes(1);
   });
 
   it('ticking a row calls logSet with the right weight/reps and rir: null when RIR was left empty', async () => {

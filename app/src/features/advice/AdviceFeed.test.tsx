@@ -1,9 +1,74 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { AdviceFeed } from './AdviceFeed';
 import { CLAIMS } from '../../generated/claims';
+import { EMPTY_SNAPSHOT } from '../../advice/engine';
+import { loadAdviceSnapshot } from '../../advice/load-snapshot';
+import type { BuiltSnapshot } from '../../advice/snapshot';
+
+vi.mock('../../advice/load-snapshot', () => ({ loadAdviceSnapshot: vi.fn() }));
+
+const mockLoadAdviceSnapshot = vi.mocked(loadAdviceSnapshot);
+
+const emptyBuiltSnapshot: BuiltSnapshot = {
+  snapshot: EMPTY_SNAPSHOT,
+  primaryExerciseId: null,
+  latestWeightKg: null,
+  reconciliation: {
+    verdict: 'unresolved',
+    confidence: 'low',
+    weightTrend: 'unknown',
+    e1rmTrend: 'insufficient_data',
+    deficitWeeks: 0,
+    unresolved: ['weight', 'strength'],
+    observed: {
+      weightKgPerWeek: null,
+      e1rmPctPerWeek: null,
+      e1rmCi95: null,
+      e1rmWithinNoise: null,
+      windowDays: 0,
+      weighIns: 0,
+      e1rmSessions: 0,
+    },
+  },
+};
+
+const strengthHoldingSnapshot: BuiltSnapshot = {
+  ...emptyBuiltSnapshot,
+  primaryExerciseId: 'barbell-bench-press',
+  latestWeightKg: 78,
+  snapshot: {
+    ...EMPTY_SNAPSHOT,
+    goal: 'cut',
+    deficitWeeks: 8,
+    weightTrend: 'down',
+    e1rmTrend: 'holding',
+  },
+  reconciliation: {
+    ...emptyBuiltSnapshot.reconciliation,
+    verdict: 'on_track',
+    confidence: 'high',
+    weightTrend: 'down',
+    e1rmTrend: 'holding',
+    deficitWeeks: 8,
+    unresolved: [],
+    observed: {
+      weightKgPerWeek: -0.35,
+      e1rmPctPerWeek: 0.05,
+      e1rmCi95: [-0.2, 0.3],
+      e1rmWithinNoise: true,
+      windowDays: 56,
+      weighIns: 20,
+      e1rmSessions: 16,
+    },
+  },
+};
 
 describe('AdviceFeed', () => {
+  beforeEach(() => {
+    mockLoadAdviceSnapshot.mockReset().mockResolvedValue(emptyBuiltSnapshot);
+  });
+
   it('carries a non-empty data-claim-id on every element that represents a claim', () => {
     const { container } = render(<AdviceFeed />);
     const idEls = [...container.querySelectorAll('[data-claim-id]')];
@@ -40,11 +105,35 @@ describe('AdviceFeed', () => {
     }
   });
 
-  it("states plainly that nothing here is earned by the user's own data yet", () => {
+  it("states plainly that nothing here is earned by the user's own data yet", async () => {
     render(<AdviceFeed />);
-    const empty = screen.getByTestId('no-user-data');
+    const empty = await screen.findByTestId('no-user-data');
     expect(empty).toBeVisible();
     expect(empty).toHaveTextContent(/nothing here/i);
+  });
+
+  it('renders the matching data-earned claim from the loaded snapshot', async () => {
+    mockLoadAdviceSnapshot.mockResolvedValue(strengthHoldingSnapshot);
+
+    const { container } = render(<AdviceFeed />);
+
+    const forYou = container.querySelector('[aria-label="for you"]');
+    expect(await screen.findByText(/strength appears to hold up better/i)).toBeInTheDocument();
+    expect(forYou?.querySelector('[data-claim-id="c-strength-holds-through-a-deficit"]')).not.toBeNull();
+    expect(screen.queryByTestId('no-user-data')).not.toBeInTheDocument();
+  });
+
+  it('does not expose intake or bodyweight-triggered claims when numbers are hidden', async () => {
+    mockLoadAdviceSnapshot.mockResolvedValue({
+      ...strengthHoldingSnapshot,
+      snapshot: { ...strengthHoldingSnapshot.snapshot, numbersHidden: true },
+    });
+
+    const { container } = render(<AdviceFeed />);
+
+    await screen.findByTestId('no-user-data');
+    const forYou = container.querySelector('[aria-label="for you"]');
+    expect(forYou?.querySelector('[data-claim-id="c-strength-holds-through-a-deficit"]')).toBeNull();
   });
 
   it('invents no number about the user — no data-testid begins with "user-"', () => {

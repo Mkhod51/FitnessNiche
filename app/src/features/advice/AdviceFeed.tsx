@@ -1,8 +1,10 @@
-import { useMemo, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { ClaimCard } from '../../components/ClaimCard';
 import { CLAIMS } from '../../generated/claims';
-import { evaluateClaims, EMPTY_SNAPSHOT } from '../../advice/engine';
+import { evaluateClaims } from '../../advice/engine';
 import type { Claim } from '../../advice/types';
+import { loadAdviceSnapshot } from '../../advice/load-snapshot';
+import { filterNumbersHiddenAdvice } from '../../advice/session-advice';
 
 const DOMAIN_LABEL_CLASS = 'px-4 pt-4 pb-2 font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 
@@ -47,28 +49,44 @@ export function collapseClusters(claims: Claim[]): Claim[][] {
  */
 export function AdviceFeed(): ReactElement {
   const domainGroups = useMemo(() => groupByDomain(CLAIMS), []);
-  const ruleTriggered = useMemo(() => evaluateClaims(EMPTY_SNAPSHOT, CLAIMS), []);
+  const [ruleTriggered, setRuleTriggered] = useState<Claim[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadAdviceSnapshot()
+      .then(({ snapshot }) => {
+        if (cancelled) return;
+        setRuleTriggered(
+          filterNumbersHiddenAdvice(snapshot, CLAIMS, evaluateClaims(snapshot, CLAIMS))
+            .map((item) => CLAIMS.find((claim) => claim.id === item.claimId))
+            .filter((claim): claim is Claim => claim !== undefined),
+        );
+      })
+      // The evidence base remains browsable when storage is unavailable, but
+      // the personalised section makes no claim about whether data exists.
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="mx-auto max-w-[480px]">
       <section className="border-b border-rule px-4 py-4" aria-label="for you">
-        {ruleTriggered.length === 0 ? (
+        {ruleTriggered === null ? null : ruleTriggered.length === 0 ? (
           // Honest, but it must not cost a third of the first screen every visit —
           // the scene is a glance between sets. Same admission, fewer words, set as
           // a note rather than as the headline.
           <p data-testid="no-user-data" className="font-serif text-[13px] leading-[1.45] text-ink-soft">
-            Nothing here is earned by your own data yet. Logging ships next. Below is
-            the evidence base itself, exactly as strong or as weak as the studies
-            behind it.
+            Nothing here is earned by your own data yet. Below is the evidence base
+            itself, exactly as strong or as weak as the studies behind it.
           </p>
         ) : (
           // The engine pulls both sides of a contested cluster in (FR-ADV-6), so this
           // path has to collapse them exactly as the browse path does — otherwise the
           // two sides render as separate unlabelled cards that happen to disagree.
           collapseClusters(
-            ruleTriggered
-              .map((item) => CLAIMS.find((c) => c.id === item.claimId))
-              .filter((c): c is Claim => c !== undefined),
+            ruleTriggered,
           ).map((group) => (
             <ClaimCard key={group[0].id} claim={group[0]} cluster={group.length > 1 ? group : undefined} />
           ))

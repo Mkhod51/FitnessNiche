@@ -16,14 +16,9 @@ import {
   type LoggedSet,
 } from '../../db/workouts';
 import { setE1rm } from '../../domain/e1rm';
-import { getSetsSince } from '../../db/workouts';
-import { getWeightHistory } from '../../db/weights';
-import { getEntriesSince } from '../../db/nutrition';
-import { buildSnapshot } from '../../advice/snapshot';
-import type { Reconciliation } from '../../domain/reconcile';
-import { getUser } from '../../db/user';
 import { CLAIMS } from '../../generated/claims';
-import { selectSessionAdvice } from '../../advice/session-advice';
+import { selectSessionAdvice, whyNow } from '../../advice/session-advice';
+import { loadAdviceSnapshot } from '../../advice/load-snapshot';
 import {
   recordAdviceShown,
   suppressClaim,
@@ -48,54 +43,6 @@ const CELL =
 
 function exerciseName(exerciseId: string): string {
   return SEED_EXERCISES.find((e) => e.id === exerciseId)?.name ?? exerciseId;
-}
-
-/**
- * How far back the reconciliation reads.
- *
- * Deliberately not the 7-day volume window. A bodyweight trend needs 2-4 weeks
- * of smoothed readings before it means anything (FR-SIG-4) and the e1RM
- * regression wants eight sessions, so reconciling over one week would return
- * `insufficient_data` forever and no data-earned claim could ever fire.
- */
-const RECONCILE_WINDOW_DAYS = 84;
-
-/**
- * The "why now" line under a data-earned claim (FR-ADV-4).
- *
- * Facts about the lifter's own logged data and nothing else — no verb, no
- * recommendation, no interpretation. GR-4/T1: the claim record supplies what
- * the evidence says; this supplies only what the user's own numbers are, so the
- * two can never be confused for one another. Falls back to the volume fact when
- * neither trend is resolvable, because a peek with no grounding at all is worse
- * than one grounded in the week just logged.
- */
-function whyNow(
-  r: Reconciliation,
-  primaryExerciseId: string | null,
-  byMuscle: Record<string, number>,
-): string {
-  const parts: string[] = [];
-
-  const { weightKgPerWeek, e1rmPctPerWeek, windowDays } = r.observed;
-  if (weightKgPerWeek !== null) {
-    const dir = weightKgPerWeek < 0 ? 'down' : 'up';
-    parts.push(`${Math.abs(weightKgPerWeek).toFixed(2)} kg/week ${dir}`);
-  }
-  if (e1rmPctPerWeek !== null && primaryExerciseId) {
-    // A trend inside the noise floor is reported as "held", never as a slope:
-    // printing "+0.1%/week" off an interval that spans zero is exactly the
-    // precision FR-SIG-2 says the data does not carry. Only a trend whose
-    // interval excludes zero gets a number.
-    const strength = r.e1rmTrend === 'holding' ? 'held' : `${e1rmPctPerWeek >= 0 ? '+' : ''}${e1rmPctPerWeek.toFixed(1)}%/week`;
-    parts.push(`${exerciseName(primaryExerciseId)} e1RM ${strength}`);
-  }
-  if (parts.length > 0 && windowDays >= 7) parts.push(`over ${Math.round(windowDays / 7)} weeks`);
-
-  if (parts.length > 0) return parts.join(' · ');
-
-  const lowest = Object.entries(byMuscle).sort((a, b) => a[1] - b[1])[0];
-  return lowest ? `${lowest[0].replace(/_/g, ' ')} · ${Math.round(lowest[1] * 10) / 10} sets in 7 days` : '';
 }
 
 function sinceLabel(iso: string, now: number): string {
@@ -317,26 +264,11 @@ function LoggingSurface(): ReactElement {
    * stay free of computation.
    */
   async function pickSessionAdvice(workoutId: string) {
-    const user = await getUser();
     if (await shownInWorkout(workoutId)) return;
-
-    // FR-ADV-4/AC-3: the reconciliation window, not the volume window. Volume
-    // is a 7-day question; a bodyweight trend needs 2-4 weeks before it means
-    // anything (FR-SIG-4) and the e1RM regression wants more sessions still, so
-    // reading both from one week would guarantee "insufficient_data" forever.
-    const windowStart = new Date(Date.now() - RECONCILE_WINDOW_DAYS * 86_400_000).toISOString();
-    const { snapshot, reconciliation, primaryExerciseId } = buildSnapshot({
-      goal: user.goal,
-      numbersHidden: user.numbersHidden,
-      goalStartedAt: user.goalStartedAt,
-      weights: await getWeightHistory(),
-      sets: await getSetsSince(windowStart),
-      food: (await getEntriesSince(windowStart)).map((e) => ({ loggedAt: e.loggedAt, proteinG: e.proteinG })),
-      exercises: SEED_EXERCISES,
-    });
+    const built = await loadAdviceSnapshot();
 
     const item = selectSessionAdvice(
-      snapshot,
+      built.snapshot,
       CLAIMS,
       {
         suppressedClaimIds: await suppressedClaimIds(),
@@ -350,7 +282,8 @@ function LoggingSurface(): ReactElement {
     if (!claim) return;
 
     await recordAdviceShown(claim.id, item.trigger, workoutId);
-    setPeek({ claim, why: whyNow(reconciliation, primaryExerciseId, snapshot.weeklySetsByMuscle) });
+    const primaryExerciseName = built.primaryExerciseId ? exerciseName(built.primaryExerciseId) : null;
+    setPeek({ claim, why: whyNow(claim, built, primaryExerciseName) });
   }
 
   async function handleFinish() {
