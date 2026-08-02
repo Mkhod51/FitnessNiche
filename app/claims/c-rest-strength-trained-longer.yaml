@@ -1,0 +1,36 @@
+id: c-rest-strength-trained-longer
+statement: >-
+  In resistance-trained individuals, rests longer than two minutes appear necessary to
+  maximize strength gains
+peekStatement: >-
+  For trained lifters, rests longer than two minutes appear to favour maximum strength gains.
+grade: B
+status: settled
+domain: rest-intervals
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: rest-strength-trained-longer
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-rest-strength-grgic
+    claimId: c-rest-strength-trained-longer
+    doi: 10.1007/s40279-017-0788-x
+    authors: Grgic J, Schoenfeld BJ, Skrepnik M, Davies TB, Mikulic P
+    year: 2018
+    journal: Sports Medicine
+    n: 491
+    population: mixed
+    effectSize: null
+    ci: null
+    figures:
+      - label: studies reviewed
+        value: 23
+      - label: participants reviewed
+        value: 491
+      - label: rest duration above which strength gains appeared maximized in trained individuals
+        value: 2
+        unit: min
+    quote: >-
+      However, it seems that longer duration RIs (> 2 min) are required to maximize strength gains in resistance-trained individuals.

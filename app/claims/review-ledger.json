@@ -671,6 +671,84 @@
         ]
       },
       "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-rest-strength-trained-longer",
+      "citationId": "cit-rest-strength-grgic",
+      "doi": "10.1007/s40279-017-0788-x",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "PubMed author abstract for PMID 28933024; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PubMed PMID 28933024, Results: 23 studies and 491 participants met inclusion criteria.",
+        "PubMed PMID 28933024, Conclusion: longer rests (>2 min) appear required to maximize strength gains in resistance-trained individuals; 60-120 s appears sufficient for untrained individuals."
+      ],
+      "nullRationales": [
+        "The directly read abstract provides no pooled effect size or confidence interval, so effectSize and ci remain null.",
+        "No publisher figure is stored; only source-read study, participant, and duration bounds are retained."
+      ],
+      "populationRationale": "The review's conclusion explicitly distinguishes resistance-trained from untrained individuals, so mixed is directly supported while the claim remains restricted to the trained subgroup.",
+      "gradeRationale": "A systematic review directly synthesizes 23 studies but provides no quantitative pooled estimate in the read abstract. Grade B is restricted to its trained-lifter strength conclusion.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement is limited to trained lifters and strength, not hypertrophy.",
+          "The >2-minute conclusion and 23-study/491-participant counts match the directly read abstract.",
+          "No claim treats short rests as ineffective or supplies a personal prescription."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved",
+        "checks": [
+          "PubMed directly reports 23 included studies and 491 participants (413 men and 78 women), with good-to-moderate study quality.",
+          "Its conclusion says rests longer than two minutes seem required to maximize strength in resistance-trained individuals, while robust gains can still occur with shorter rests.",
+          "Claim is limited to trained individuals and strength, retains qualified wording and justified nulls, and Grade B fits a non-quantitative systematic review."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-rest-hypertrophy-trained-anterior-thigh",
+      "citationId": "cit-rest-hypertrophy-schoenfeld",
+      "doi": "10.1519/JSC.0000000000001272",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "PubMed author abstract for PMID 26605807; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PubMed PMID 26605807, Methods: 21 young resistance-trained men randomized to one- or three-minute rests for eight weeks.",
+        "PubMed PMID 26605807, Results: anterior-thigh muscle thickness was significantly greater with three-minute than one-minute rests; triceps change showed a p = 0.06 trend."
+      ],
+      "nullRationales": [
+        "The directly read abstract provides no confidence interval or numeric effect-size estimate, so ci and effectSize remain null.",
+        "No publisher figure is stored; only source-read duration and participant values are retained."
+      ],
+      "populationRationale": "The abstract explicitly identifies young, resistance-trained men; the claim retains that population and the anterior-thigh outcome rather than generalizing to all muscle groups.",
+      "gradeRationale": "One eight-week randomized trial directly reports the anterior-thigh outcome in trained men. Grade B remains narrow and does not promote the non-significant triceps trend to a result.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement will retain young resistance-trained men, eight weeks, and anterior-thigh specificity.",
+          "The one- versus three-minute setup and significant anterior-thigh result match the directly read abstract.",
+          "No claim turns the triceps p = 0.06 trend into evidence of a difference."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved",
+        "checks": [
+          "PubMed directly reports 21 young resistance-trained men randomized to one- or three-minute rests for eight weeks with other training variables held constant.",
+          "The abstract reports significantly greater anterior-thigh muscle thickness with three-minute rests; the triceps p = 0.06 trend is not promoted to a finding.",
+          "Claim retains the young trained-male, anterior-thigh, and eight-week scope; null effectSize and CI are justified and Grade B fits one controlled trial."
+        ]
+      },
+      "nextReview": "2027-08-02"
     }
   ]
 }

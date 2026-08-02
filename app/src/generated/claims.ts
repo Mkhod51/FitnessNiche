@@ -949,6 +949,100 @@ export const CLAIMS: Claim[] = [
     ]
   },
   {
+    "id": "c-rest-hypertrophy-trained-anterior-thigh",
+    "statement": "In young resistance-trained men, three-minute versus one-minute rests produced greater anterior-thigh muscle thickness after eight weeks",
+    "peekStatement": "In one trial, three-minute rests produced greater anterior-thigh growth in trained men.",
+    "grade": "B",
+    "status": "settled",
+    "domain": "rest-intervals",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "rest-hypertrophy-trained-anterior-thigh",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-rest-hypertrophy-schoenfeld",
+        "claimId": "c-rest-hypertrophy-trained-anterior-thigh",
+        "doi": "10.1519/JSC.0000000000001272",
+        "authors": "Schoenfeld BJ, Pope ZK, Benik FM, Hester GM, Sellers J, Nooner JL, Schnaiter JA, Bond-Williams KE, Carter AS, Ross CL, Just BL, Henselmans M, Krieger JW",
+        "year": 2016,
+        "journal": "Journal of Strength and Conditioning Research",
+        "n": 21,
+        "population": "trained",
+        "effectSize": null,
+        "ci": null,
+        "figures": [
+          {
+            "label": "participants",
+            "value": 21
+          },
+          {
+            "label": "shorter inter-set rest duration",
+            "value": 1,
+            "unit": "min"
+          },
+          {
+            "label": "longer inter-set rest duration",
+            "value": 3,
+            "unit": "min"
+          },
+          {
+            "label": "training duration",
+            "value": 8,
+            "unit": "weeks"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-rest-strength-trained-longer",
+    "statement": "In resistance-trained individuals, rests longer than two minutes appear necessary to maximize strength gains",
+    "peekStatement": "For trained lifters, rests longer than two minutes appear to favour maximum strength gains.",
+    "grade": "B",
+    "status": "settled",
+    "domain": "rest-intervals",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "rest-strength-trained-longer",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-rest-strength-grgic",
+        "claimId": "c-rest-strength-trained-longer",
+        "doi": "10.1007/s40279-017-0788-x",
+        "authors": "Grgic J, Schoenfeld BJ, Skrepnik M, Davies TB, Mikulic P",
+        "year": 2018,
+        "journal": "Sports Medicine",
+        "n": 491,
+        "population": "mixed",
+        "effectSize": null,
+        "ci": null,
+        "figures": [
+          {
+            "label": "studies reviewed",
+            "value": 23
+          },
+          {
+            "label": "participants reviewed",
+            "value": 491
+          },
+          {
+            "label": "rest duration above which strength gains appeared maximized in trained individuals",
+            "value": 2,
+            "unit": "min"
+          }
+        ],
+        "quote": "However, it seems that longer duration RIs (> 2 min) are required to maximize strength gains in resistance-trained individuals."
+      }
+    ]
+  },
+  {
     "id": "c-rom-full-lower-limb-hypertrophy",
     "statement": "In the cited meta-analysis, full range-of-motion training produced greater lower-limb hypertrophy than partial range-of-motion training",
     "peekStatement": "The pooled evidence favoured full range of motion for lower-limb growth.",

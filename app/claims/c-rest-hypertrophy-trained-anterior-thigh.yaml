@@ -1,0 +1,39 @@
+id: c-rest-hypertrophy-trained-anterior-thigh
+statement: >-
+  In young resistance-trained men, three-minute versus one-minute rests produced greater
+  anterior-thigh muscle thickness after eight weeks
+peekStatement: >-
+  In one trial, three-minute rests produced greater anterior-thigh growth in trained men.
+grade: B
+status: settled
+domain: rest-intervals
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: rest-hypertrophy-trained-anterior-thigh
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-rest-hypertrophy-schoenfeld
+    claimId: c-rest-hypertrophy-trained-anterior-thigh
+    doi: 10.1519/JSC.0000000000001272
+    authors: Schoenfeld BJ, Pope ZK, Benik FM, Hester GM, Sellers J, Nooner JL, Schnaiter JA, Bond-Williams KE, Carter AS, Ross CL, Just BL, Henselmans M, Krieger JW
+    year: 2016
+    journal: Journal of Strength and Conditioning Research
+    n: 21
+    population: trained
+    effectSize: null
+    ci: null
+    figures:
+      - label: participants
+        value: 21
+      - label: shorter inter-set rest duration
+        value: 1
+        unit: min
+      - label: longer inter-set rest duration
+        value: 3
+        unit: min
+      - label: training duration
+        value: 8
+        unit: weeks
+    quote: null
