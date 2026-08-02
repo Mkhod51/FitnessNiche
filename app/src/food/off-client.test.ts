@@ -87,10 +87,10 @@ describe('searchFoodOnline', () => {
 });
 
 describe('lookupBarcode', () => {
-  it('returns a draft for a current v3 string-status success response', async () => {
+  it('returns a draft for a current OFF barcode success response', async () => {
     mockFetch({
-      status: 'success',
-      result: { id: 'product_found' },
+      status: 1,
+      status_verbose: 'product found',
       product: {
         code: '1',
         product_name: 'Skyr',
@@ -101,10 +101,16 @@ describe('lookupBarcode', () => {
     expect((await lookupBarcode('1'))?.name).toBe('Skyr');
   });
 
-  it('returns null for a current v3 404 product-not-found response', async () => {
+  it('returns null for a legacy 404 product-not-found response', async () => {
     mockFetch({ status: 'failure', result: { id: 'product_not_found' } }, false, 404);
 
     expect(await lookupBarcode('nope')).toBeNull();
+  });
+
+  it('returns null for a current OFF barcode not-found response', async () => {
+    mockFetch({ status: 0, status_verbose: 'product not found' });
+
+    expect(await lookupBarcode('0000000000000')).toBeNull();
   });
 
   it('throws on a non-ok response', async () => {
@@ -113,13 +119,13 @@ describe('lookupBarcode', () => {
     await expect(lookupBarcode('1')).rejects.toBeDefined();
   });
 
-  it('uses OFF v3.6 barcode lookup and encodes the barcode', async () => {
-    mockFetch({ status: 'failure', result: { id: 'product_not_found' } }, false, 404);
+  it('uses OFF v2 barcode lookup and encodes the barcode', async () => {
+    mockFetch({ status: 0, status_verbose: 'product not found' });
 
     await lookupBarcode('abc/123');
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://world.openfoodfacts.org/api/v3.6/product/abc%2F123.json?fields=code,product_name,product_name_en,brands,nutriments',
+      'https://world.openfoodfacts.org/api/v2/product/abc%2F123.json?fields=code,product_name,product_name_en,brands,nutriments',
     );
   });
 });

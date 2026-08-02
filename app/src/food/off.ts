@@ -90,7 +90,7 @@ export async function searchFoodOnline(q: string): Promise<{ drafts: FoodItemDra
 
 /** Live OFF barcode lookup, or null when OFF has no matching product. */
 export async function lookupBarcode(barcode: string): Promise<FoodItemDraft | null> {
-  const url = `${OFF_ORIGIN}/api/v3.6/product/${encodeURIComponent(barcode)}.json?fields=${OFF_FIELDS}`;
+  const url = `${OFF_ORIGIN}/api/v2/product/${encodeURIComponent(barcode)}.json?fields=${OFF_FIELDS}`;
   const res = await fetch(url);
   if (res.status === 404) {
     const json = await res.json() as { result?: { id?: string } };
@@ -98,6 +98,6 @@ export async function lookupBarcode(barcode: string): Promise<FoodItemDraft | nu
   }
   if (!res.ok) throw new Error(`OFF lookup failed (${res.status})`);
 
-  const json = await res.json() as { status?: string; product?: unknown };
-  return json.status === 'success' && json.product ? parseOffProduct(json.product) : null;
+  const json = await res.json() as { status?: string | number; product?: unknown };
+  return (json.status === 'success' || json.status === 1) && json.product ? parseOffProduct(json.product) : null;
 }

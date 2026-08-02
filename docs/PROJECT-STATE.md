@@ -152,8 +152,9 @@ Honest gaps:
 - **OFF keyword search is proxied through `/api/food/search`.** Vite dev/preview and the Cloudflare
   Worker both forward POST requests to Search-a-licious so the browser does not depend on
   cross-origin search CORS. Static production deployments must build with `VITE_FOOD_SEARCH_URL`
-  pointed at the Worker unless app and Worker share an origin. Barcode lookup still calls the OFF
-  product endpoint directly.
+  pointed at the Worker unless app and Worker share an origin. Barcode lookup calls the OFF v2
+  product endpoint directly because it currently returns complete nutriments for barcodes that v3.6
+  reports with empty nutrition fields.
 
 ## What does not exist
 
