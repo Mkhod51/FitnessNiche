@@ -30,6 +30,10 @@ null — do not fill the blank with a plausible-sounding guess.
 - **`statement`** — the claim in plain English, one sentence, no hedging
   baked into the wording (grade and citations carry the confidence; the
   statement just says what's claimed).
+- **`peekStatement`** — required curated short form for the advice peek. It
+  must be a complete sentence (maximum 100 characters), not a UI truncation,
+  and must retain the qualification that stops the full statement being
+  overstated.
 - **`grade`** — `A` | `B` | `C` | `D`. The evidence-quality grade. This is
   what the UI's calibrated-language layer (`language.ts`, a later task)
   uses to pick a verb — a `C` claim can never render as "proven". Grade the
@@ -67,6 +71,25 @@ null — do not fill the blank with a plausible-sounding guess.
 - **`citations`** — array of `Citation`, **minimum one**. A claim with zero
   citations fails validation outright: **FR-ADV-1, a claim with no citation
   is not a claim.**
+
+## Curation ledger and review state
+
+The claim YAML is the app bundle; [`review-ledger.json`](review-ledger.json) is
+the curation record and is never read at runtime. It has one entry per claim /
+citation pair and records DOI resolution, source-read mode, exact evidence
+locations, null rationales, population and grade rationale, two hostile reviews,
+and the next review date.
+
+Run `npm run claims:audit-dois` manually for a Crossref DOI-resolution batch.
+It emits JSON for the ledger and is deliberately excluded from normal claim
+generation, tests, builds, and runtime. A resolved DOI proves only that the DOI
+resolves; it does not prove the stored claim facts.
+
+Before a new claim merges, two independent readers review the direct source and
+record their checks in the ledger. They must challenge statement scope, grade,
+population applicability, every stored value and quote, `peekStatement`, and
+any predicate. Historical M1 entries without a recorded source location or
+review must stay `pending-M6-review`; never fabricate a locator or sign-off.
 
 ## `Citation` fields
 
@@ -125,3 +148,7 @@ from a source I actually read."** It is never a placeholder for "I'll fill
 this in later" and never a slot to paper over with a default or a
 best-guess number. The schema will happily accept `null` in every one of
 these spots — that's deliberate, not a gap you should route around.
+
+Record the source-specific reason for each null or `unstated` population value
+in the review ledger. The field remains null when no direct-source fact exists;
+the rationale makes that absence auditable rather than silently ambiguous.

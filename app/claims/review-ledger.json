@@ -1,0 +1,363 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "claimId": "c-deficit-beyond-500-blocks-lean-mass",
+      "citationId": "cit-deficit-500-murphy",
+      "doi": "10.1111/sms.14075",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-deficit-impairs-lean-mass",
+      "citationId": "cit-deficit-lean-murphy",
+      "doi": "10.1111/sms.14075",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-deloads-not-evidence-backed",
+      "citationId": "cit-deload-coleman",
+      "doi": "10.7717/peerj.16777",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-failure-not-required",
+      "citationId": "cit-failure-grgic",
+      "doi": "10.1016/j.jshs.2021.01.007",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-failure-proximity-dose-response",
+      "citationId": "cit-failure-dose-robinson",
+      "doi": "10.1007/s40279-024-02069-2",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-failure-small-hypertrophy-edge-when-trained",
+      "citationId": "cit-failure-trained-grgic",
+      "doi": "10.1016/j.jshs.2021.01.007",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-frequency-helps-strength",
+      "citationId": "cit-frequency-strength-pelland",
+      "doi": "10.1007/s40279-025-02344-w",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-frequency-irrelevant-when-volume-equated",
+      "citationId": "cit-frequency-schoenfeld",
+      "doi": "10.1080/02640414.2018.1555906",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-frequency-irrelevant-when-volume-equated",
+      "citationId": "cit-frequency-pelland",
+      "doi": "10.1007/s40279-025-02344-w",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-protein-dose-plateau",
+      "citationId": "cit-protein-plateau-morton",
+      "doi": "10.1136/bjsports-2017-097608",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-protein-helps-trained-more",
+      "citationId": "cit-protein-trained-morton",
+      "doi": "10.1136/bjsports-2017-097608",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-protein-supplementation-works",
+      "citationId": "cit-protein-supp-morton",
+      "doi": "10.1136/bjsports-2017-097608",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-protein-timing-distribution-matters",
+      "citationId": "cit-timing-distribution-issn",
+      "doi": "10.1186/s12970-017-0189-4",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-protein-timing-distribution-matters",
+      "citationId": "cit-timing-distribution-pooled",
+      "doi": "10.1186/1550-2783-10-53",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-protein-timing-total-intake-dominates",
+      "citationId": "cit-timing-total-schoenfeld",
+      "doi": "10.1186/1550-2783-10-53",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-rest-at-least-60-seconds",
+      "citationId": "cit-rest-singer",
+      "doi": "10.3389/fspor.2024.1429789",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-rest-at-least-60-seconds",
+      "citationId": "cit-rest-grgic",
+      "doi": "10.1080/17461391.2017.1340524",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-strength-holds-through-a-deficit",
+      "citationId": "cit-strength-deficit-murphy",
+      "doi": "10.1111/sms.14075",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-volume-dose-response",
+      "citationId": "cit-volume-dose-pelland",
+      "doi": "10.1007/s40279-025-02344-w",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-volume-dose-response",
+      "citationId": "cit-volume-dose-schoenfeld",
+      "doi": "10.1080/02640414.2016.1210197",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    },
+    {
+      "claimId": "c-volume-strength-diminishing-returns",
+      "citationId": "cit-volume-strength-pelland",
+      "doi": "10.1007/s40279-025-02344-w",
+      "resolvedOn": null,
+      "resolution": "pending-M6-review",
+      "sourceRead": "unknown",
+      "evidenceLocations": [],
+      "nullRationales": [
+        "M1 did not record source locations or field-level null rationales; complete direct-source review in M6."
+      ],
+      "populationRationale": "M1 population value is preserved; its direct-source applicability has not yet been independently reviewed.",
+      "gradeRationale": "M1 grade is preserved pending two hostile direct-source reviews.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "M6 final hostile audit"
+    }
+  ]
+}
+

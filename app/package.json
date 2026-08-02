@@ -10,7 +10,8 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
     "e2e": "playwright test",
-    "claims": "node scripts/build-claims.ts"
+    "claims": "node scripts/build-claims.ts",
+    "claims:audit-dois": "node scripts/audit-claim-dois.ts"
   },
   "dependencies": {
     "@sqlite.org/sqlite-wasm": "^3.53.0-build1",

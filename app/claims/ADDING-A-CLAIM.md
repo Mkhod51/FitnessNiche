@@ -9,9 +9,9 @@ claim takes five minutes you have almost certainly skipped a step below.
 
 ---
 
-## The chain, and why it has four links
+## The chain, and why it has six links
 
-**discover → resolve the DOI → read the source → extract**
+**discover → resolve the DOI → read the source → extract → ledger → two hostile reviews**
 
 Skipping the middle two is how a product whose entire premise is "structurally
 incapable of fabricating a citation" ships a fabricated citation. No test in this
@@ -80,7 +80,26 @@ a figure from another paper's description of this one.
 missing confidence interval is honest; an invented one is fraud.** The UI renders
 absence explicitly — it does not show a blank.
 
-## 5. Grade it
+## 5. Record the curation evidence before drafting
+
+Add one entry per citation to [`review-ledger.json`](review-ledger.json) before
+the claim can merge. Run `npm run claims:audit-dois` manually when checking a
+batch of DOIs; it queries Crossref only and prints JSON for review. It is never
+part of `npm run claims`, tests, builds, or the app runtime.
+
+For each entry record the exact source location for every stored fact (for
+example, abstract, Results paragraph, table, or supplement page), the way the
+source was read, and a rationale for every `null` or `unstated` value. Record
+why the source population applies (or does not apply) and why the claim's grade
+matches the evidence. Do not invent a page number, source-reading mode, or
+review date for historical records: leave it visibly pending until it is read.
+
+Two independent readers must each perform a hostile review against the direct
+source. They check statement scope, grade, population, extracted values,
+`peekStatement`, and predicates. Record both reviews and a next-review date in
+the ledger. A successful DOI resolution is not a source review.
+
+## 6. Grade it
 
 Against `../../docs/00-meta/evidence-standards.md`, not against how convincing
 the paper felt.
@@ -120,6 +139,8 @@ id: c-<domain>-<slug>
 statement: >-
   One sentence, plain English, no hedging words. The grade supplies the hedging —
   never write "may possibly" into a statement, or the app hedges twice.
+peekStatement: >-
+  A complete, curated short sentence that preserves the statement's qualification.
 grade: A            # A | B | C | D
 status: settled     # settled | contested
 domain: volume
@@ -144,8 +165,12 @@ citations:
 ```
 
 **Predicates** are [json-logic](https://jsonlogic.com) evaluated against the
-user's state. `null` means the claim is only reachable through search, which is
-a perfectly good answer for a claim that does not depend on what someone logged.
+user's state. `null` means the claim is search-only: it is only reachable by
+search, which is a perfectly good answer for a claim that does not depend on
+what someone logged. A non-null predicate is a generic `rule` unless reliable
+logged data itself establishes the claim's context; only that latter, explicitly
+declared case may be `data-earned`. Never use `data-earned` for configured
+targets, incomplete protein logs, or personalised MEV/MRV claims.
 
 ```yaml
 predicates:                    # fires when any muscle is under 10 weekly sets
