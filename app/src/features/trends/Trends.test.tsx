@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Trends } from './Trends';
 import { getUser, type User } from '../../db/user';
 import { getWeightHistory, type WeightReading } from '../../db/weights';
@@ -86,10 +86,16 @@ describe('Trends — GR-5: unreachable without consent', () => {
 
 describe('Trends — bodyweight and volume, once consented', () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
     mockGetUser.mockReset();
     mockGetWeightHistory.mockReset();
     mockGetSetsSince.mockReset();
     mockGetUser.mockResolvedValue(consentedUser);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('shows the honest empty state when no weight has been logged', async () => {
