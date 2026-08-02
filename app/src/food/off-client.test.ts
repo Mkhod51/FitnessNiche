@@ -10,6 +10,7 @@ function mockFetch(payload: unknown, ok = true, status = ok ? 200 : 500) {
 }
 
 beforeEach(() => {
+  vi.unstubAllEnvs();
   Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
 });
 
@@ -33,18 +34,52 @@ describe('searchFoodOnline', () => {
     expect(hidden).toBe(1);
   });
 
-  it('uses OFF legacy keyword search', async () => {
+  it('uses the OFF keyword search endpoint', async () => {
     mockFetch({ products: [] });
 
     await searchFoodOnline('skyr & oats');
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://world.openfoodfacts.org/cgi/search.pl?search_terms=skyr+%26+oats&search_simple=1&action=process&json=1&page_size=20&fields=code%2Cproduct_name%2Cproduct_name_en%2Cbrands%2Cnutriments',
-      { headers: { Accept: 'application/json' } },
+      '/api/food/search',
+      {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: 'skyr & oats', pageSize: 20 }),
+      },
     );
   });
 
-  it('throws on a non-ok response so the caller can show the wifi notice', async () => {
+  it('can target a configured food search proxy origin', async () => {
+    vi.stubEnv('VITE_FOOD_SEARCH_URL', 'https://myostat-sync.example.workers.dev/');
+    mockFetch({ hits: [] });
+
+    await searchFoodOnline('granola');
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://myostat-sync.example.workers.dev/api/food/search',
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+
+  it('parses Search-a-licious hits', async () => {
+    mockFetch({
+      hits: [
+        {
+          code: '1',
+          product_name: 'Granola',
+          brands: ['Granola'],
+          nutriments: { 'energy-kcal_100g': 390, proteins_100g: 10, carbohydrates_100g: 66.7, fat_100g: 9 },
+        },
+      ],
+    });
+
+    const { drafts, hidden } = await searchFoodOnline('granola');
+
+    expect(drafts[0]).toMatchObject({ name: 'Granola', brand: 'Granola', barcode: '1' });
+    expect(hidden).toBe(0);
+  });
+
+  it('throws on a non-ok response', async () => {
     mockFetch({}, false);
 
     await expect(searchFoodOnline('x')).rejects.toBeDefined();
@@ -72,7 +107,7 @@ describe('lookupBarcode', () => {
     expect(await lookupBarcode('nope')).toBeNull();
   });
 
-  it('throws on a non-ok response so the caller can show the wifi notice', async () => {
+  it('throws on a non-ok response', async () => {
     mockFetch({}, false);
 
     await expect(lookupBarcode('1')).rejects.toBeDefined();

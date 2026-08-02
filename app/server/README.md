@@ -5,6 +5,12 @@ against the `PushPullRequest` / `PushPullResponse` contract in
 `../src/sync/protocol.ts`. See that file for the wire contract and merge
 semantics (last-write-wins on `updated_at`, tie-break on `id`).
 
+It also exposes `POST /api/food/search`, a small Open Food Facts
+Search-a-licious proxy for keyword food search. The client uses a same-origin
+path in Vite dev/preview; static production deployments should set
+`VITE_FOOD_SEARCH_URL` to this Worker's origin unless the app is served from the
+same origin as the Worker.
+
 ## Setup
 
 Install dependencies:
@@ -87,3 +93,20 @@ Deploys to the account tied to your `wrangler login` / `CLOUDFLARE_API_TOKEN`.
 Confirm `wrangler.toml`'s `database_id` points at the database you applied
 `schema.sql` to remotely, and that `SYNC_TOKEN` is already set as a secret
 (`wrangler secret put SYNC_TOKEN`) before the client tries to talk to it.
+
+For static app hosting on another origin, build the client with:
+
+```
+VITE_FOOD_SEARCH_URL=https://your-worker.workers.dev npm run build
+```
+
+Also set the Worker allowlist to the app origin, either in `wrangler.toml` or
+your deployment environment:
+
+```
+FOOD_SEARCH_ALLOWED_ORIGINS=https://your-app.example
+```
+
+The food-search endpoint answers CORS preflight only for same-origin or
+allowlisted app origins, and rate-limits each client IP before forwarding to
+Open Food Facts.

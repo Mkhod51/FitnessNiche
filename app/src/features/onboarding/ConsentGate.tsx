@@ -66,7 +66,7 @@ export function ConsentGate({ children }: { children: ReactNode }): ReactElement
         Logging a workout, bodyweight entry, or meal stores health data on this device.
         Under UK GDPR, that is special-category health data, so we ask separately and
         plainly before recording it. Logs stay on this device unless you configure sync.
-        Food searches and barcodes are sent to Open Food Facts only when you submit them.
+        Food search text is sent through the food-search proxy to Open Food Facts as you type. Barcodes are sent when you scan or enter one.
       </p>
       <div className="mt-4 flex gap-3">
         <button

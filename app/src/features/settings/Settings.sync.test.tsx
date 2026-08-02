@@ -66,8 +66,9 @@ describe('Settings sync section', () => {
     expect(screen.getByTestId('sync-status')).toHaveTextContent(/off.*this device/i);
     expect(screen.getByTestId('privacy-notice')).toHaveTextContent(/logs stay on this device unless you configure sync/i);
     expect(screen.getByTestId('privacy-notice')).toHaveTextContent(
-      /food searches and barcodes are sent to Open Food Facts only when you submit them/i,
+      /food search text is sent through the food-search proxy to Open Food Facts as you type/i,
     );
+    expect(screen.getByTestId('privacy-notice')).toHaveTextContent(/barcodes are sent when you scan or enter one/i);
     expect(screen.queryByTestId('sync-now-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('sync-disconnect-button')).not.toBeInTheDocument();
   });
@@ -117,8 +118,9 @@ describe('Settings sync section', () => {
     expect(screen.getByTestId('privacy-notice')).toHaveTextContent('https://sync.example.workers.dev');
     expect(screen.getByTestId('privacy-notice')).toHaveTextContent(/device only/i);
     expect(screen.getByTestId('privacy-notice')).toHaveTextContent(
-      /food searches and barcodes are sent to Open Food Facts only when you submit them/i,
+      /food search text is sent through the food-search proxy to Open Food Facts as you type/i,
     );
+    expect(screen.getByTestId('privacy-notice')).toHaveTextContent(/barcodes are sent when you scan or enter one/i);
     // Sync-now becomes available once configured.
     expect(screen.getByTestId('sync-now-button')).toBeInTheDocument();
   });

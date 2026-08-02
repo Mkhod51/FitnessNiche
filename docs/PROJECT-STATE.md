@@ -132,8 +132,8 @@ Two things M5 does **not** close, both disclosed in the UI rather than hidden:
 
 FR-LOG-6 is feature-complete on current `main`: FoodPicker opens from each meal on the Eat day,
 loads recents and a curated CoFID common-food seed, filters local foods while typing, searches
-Open Food Facts only on Enter/Search, routes 8-14 digit barcode submissions through OFF product
-lookup, caches selected OFF items into `food_items`, and logs grams-first quantities into
+Open Food Facts automatically as search text changes, routes 8-14 digit barcode submissions and
+camera scans through OFF product lookup, caches selected OFF items into `food_items`, and logs grams-first quantities into
 `food_log_entries`. The picker keeps source labels visible (`CoFID` / `OFF`), drops OFF rows
 missing energy or protein rather than zero-filling them, and keeps quick-add as the offline
 fallback.
@@ -149,11 +149,11 @@ Honest gaps:
   to invent values.
 - **Cross-device recents are not synced.** `food_log_entries` sync, but `food_items` remain local
   reference/cache data, so selected OFF cache rows and recents are device-local in v1.
-- **OFF is called directly from the browser.** This works for v1 and degrades to the existing wifi
-  notice on failure, but a deployed app should move OFF calls behind a small proxy that identifies
-  the app and enforces OFF rate limits.
-- **Barcode camera scan is not built.** Manual barcode entry in the search box is wired; camera
-  scanning with `@zxing/browser` remains a separate UI slice.
+- **OFF keyword search is proxied through `/api/food/search`.** Vite dev/preview and the Cloudflare
+  Worker both forward POST requests to Search-a-licious so the browser does not depend on
+  cross-origin search CORS. Static production deployments must build with `VITE_FOOD_SEARCH_URL`
+  pointed at the Worker unless app and Worker share an origin. Barcode lookup still calls the OFF
+  product endpoint directly.
 
 ## What does not exist
 

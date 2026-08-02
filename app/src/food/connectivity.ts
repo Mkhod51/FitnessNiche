@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 
 /**
  * The cheapest honest signal that the network is reachable.
- * Optimistic on purpose: navigator.onLine can be wrong (captive portals), so
- * the OFF fetch itself is the real probe — any failure renders the same
- * "you'll need wifi" notice. One message, two causes.
+ * Optimistic on purpose: navigator.onLine can be wrong (captive portals), but
+ * this gate is only for the explicit offline copy. Provider failures are handled
+ * separately at the call site so we do not mislabel them as missing wifi.
  */
 export function isOnline(): boolean {
   return typeof navigator === 'undefined' ? true : navigator.onLine;

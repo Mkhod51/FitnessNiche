@@ -339,7 +339,7 @@ export function Settings(): ReactElement {
           </>
         )}
         <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
-          Food searches and barcodes are sent to Open Food Facts only when you submit them.
+          Food search text is sent through the food-search proxy to Open Food Facts as you type. Barcodes are sent when you scan or enter one.
         </p>
       </section>
 

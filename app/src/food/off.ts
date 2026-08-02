@@ -69,23 +69,23 @@ export function parseOffSearch(products: unknown[]): { drafts: FoodItemDraft[]; 
 const OFF_ORIGIN = 'https://world.openfoodfacts.org';
 const OFF_FIELDS = 'code,product_name,product_name_en,brands,nutriments';
 
-/** Live OFF text search. Throws on failure so the caller can render the wifi notice. */
+function foodSearchEndpoint(): string {
+  const configured = import.meta.env.VITE_FOOD_SEARCH_URL as string | undefined;
+  if (!configured) return '/api/food/search';
+  return `${configured.replace(/\/$/, '')}/api/food/search`;
+}
+
+/** Live OFF text search. Throws on provider/network failure so the caller can offer a retry. */
 export async function searchFoodOnline(q: string): Promise<{ drafts: FoodItemDraft[]; hidden: number }> {
-  const params = new URLSearchParams({
-    search_terms: q,
-    search_simple: '1',
-    action: 'process',
-    json: '1',
-    page_size: '20',
-    fields: OFF_FIELDS,
-  });
-  const res = await fetch(`${OFF_ORIGIN}/cgi/search.pl?${params.toString()}`, {
-    headers: { Accept: 'application/json' },
+  const res = await fetch(foodSearchEndpoint(), {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q, pageSize: 20 }),
   });
   if (!res.ok) throw new Error(`OFF search failed (${res.status})`);
 
-  const json = await res.json() as { products?: unknown[] };
-  return parseOffSearch(json.products ?? []);
+  const json = await res.json() as { hits?: unknown[]; products?: unknown[] };
+  return parseOffSearch(json.hits ?? json.products ?? []);
 }
 
 /** Live OFF barcode lookup, or null when OFF has no matching product. */

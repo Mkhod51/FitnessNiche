@@ -1,9 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import app from './index';
 import type { D1Database, D1PreparedStatement } from './d1';
 import { incomingWins, type PushPullResponse, type SyncErrorResponse, type SyncRow } from '../../src/sync/protocol';
 
 const TOKEN = 'test-secret-token';
+const realFetch = globalThis.fetch;
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  globalThis.fetch = realFetch;
+});
 
 /**
  * In-memory stand-in for the D1 binding.
@@ -24,6 +30,7 @@ interface FakeRow {
 
 function createFakeD1(): D1Database {
   const tables = new Map<string, Map<string, FakeRow>>();
+  const foodSearchLimits = new Map<string, { client_id: string; window_start: number; count: number }>();
   // Stands in for the single-row sync_state table that owns the sequence.
   let seq = 0;
 
@@ -43,6 +50,39 @@ function createFakeD1(): D1Database {
         return [];
       }
       return [{ seq }];
+    }
+
+    if (/food_search_limits/i.test(sql)) {
+      if (/^\s*SELECT/i.test(sql)) {
+        const [clientId] = params as [string];
+        const row = foodSearchLimits.get(clientId);
+        return row ? [row] : [];
+      }
+      if (/^\s*INSERT/i.test(sql)) {
+        const [clientId, windowStart] = params as [string, number];
+        if (!foodSearchLimits.has(clientId)) {
+          foodSearchLimits.set(clientId, { client_id: clientId, window_start: windowStart, count: 0 });
+        }
+        return [];
+      }
+      if (/^\s*UPDATE/i.test(sql)) {
+        if (/RETURNING count/i.test(sql)) {
+          const [clientId, windowStart, limit] = params as [string, number, number];
+          const row = foodSearchLimits.get(clientId);
+          if (row && row.window_start === windowStart && row.count < limit) {
+            row.count += 1;
+            return [row];
+          }
+          return [];
+        }
+        const [windowStart, clientId] = params as [number, string, number];
+        const row = foodSearchLimits.get(clientId);
+        if (row && row.window_start !== windowStart) {
+          row.window_start = windowStart;
+          row.count = 0;
+        }
+        return [];
+      }
     }
 
     const table = /(?:FROM|INTO)\s+(\w+)/i.exec(sql)?.[1];
@@ -98,8 +138,8 @@ function createFakeD1(): D1Database {
   };
 }
 
-function env() {
-  return { DB: createFakeD1(), SYNC_TOKEN: TOKEN };
+function env(overrides: Partial<{ FOOD_SEARCH_ALLOWED_ORIGINS: string }> = {}) {
+  return { DB: createFakeD1(), SYNC_TOKEN: TOKEN, ...overrides };
 }
 
 async function sync(body: unknown, token: string | undefined, testEnv: ReturnType<typeof env>) {
@@ -110,6 +150,18 @@ async function sync(body: unknown, token: string | undefined, testEnv: ReturnTyp
     init.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
   return app.request('/sync', init, testEnv);
+}
+
+async function foodSearch(
+  body: unknown = { q: 'granola', pageSize: 99 },
+  headers: Record<string, string> = {},
+  testEnv: ReturnType<typeof env> = env(),
+) {
+  return app.request(
+    '/api/food/search',
+    { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body) },
+    testEnv,
+  );
 }
 
 function row(overrides: Partial<SyncRow> = {}): SyncRow {
@@ -134,6 +186,113 @@ describe('POST /sync auth', () => {
   it('401s on a wrong token', async () => {
     const res = await sync({ since: null, changes: [] }, 'not-the-token', env());
     expect(res.status).toBe(401);
+  });
+});
+
+describe('POST /api/food/search', () => {
+  it('proxies keyword searches through Search-a-licious without putting the query in the URL', async () => {
+    globalThis.fetch = vi.fn(async () => new Response(
+      JSON.stringify({ hits: [{ code: '1', product_name: 'Granola' }] }),
+      { headers: { 'Content-Type': 'application/json' } },
+    )) as typeof fetch;
+
+    const testEnv = env({ FOOD_SEARCH_ALLOWED_ORIGINS: 'https://app.example' });
+    const res = await foodSearch({ q: 'granola', pageSize: 3 }, { Origin: 'https://app.example' }, testEnv);
+    const body = (await res.json()) as { hits: unknown[] };
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://app.example');
+    expect(body.hits).toHaveLength(1);
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://search.openfoodfacts.org/search',
+      {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          q: 'granola',
+          page_size: 3,
+          fields: ['code', 'product_name', 'product_name_en', 'brands', 'nutriments'],
+        }),
+      },
+    );
+  });
+
+  it('returns an empty search payload without calling OFF for blank queries', async () => {
+    globalThis.fetch = vi.fn() as typeof fetch;
+
+    const res = await foodSearch({ q: '  ' });
+    const body = (await res.json()) as { hits: unknown[] };
+
+    expect(res.status).toBe(200);
+    expect(body.hits).toEqual([]);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('caps page size and reports provider failures as a bad gateway', async () => {
+    globalThis.fetch = vi.fn(async () => new Response('{}', { status: 503 })) as typeof fetch;
+
+    const res = await foodSearch();
+    const body = (await res.json()) as { error?: string };
+
+    expect(res.status).toBe(502);
+    expect(body.error).toBe('food search failed');
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://search.openfoodfacts.org/search',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          q: 'granola',
+          page_size: 20,
+          fields: ['code', 'product_name', 'product_name_en', 'brands', 'nutriments'],
+        }),
+      }),
+    );
+  });
+
+  it('answers CORS preflight for configured static app origins', async () => {
+    const res = await app.request(
+      '/api/food/search',
+      { method: 'OPTIONS', headers: { Origin: 'https://app.example' } },
+      env({ FOOD_SEARCH_ALLOWED_ORIGINS: 'https://app.example' }),
+    );
+
+    expect(res.status).toBe(204);
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://app.example');
+    expect(res.headers.get('Access-Control-Allow-Methods')).toContain('POST');
+  });
+
+  it('blocks unconfigured browser origins before forwarding upstream', async () => {
+    globalThis.fetch = vi.fn() as typeof fetch;
+
+    const res = await foodSearch({ q: 'granola' }, { Origin: 'https://random.example' });
+    const body = (await res.json()) as { error?: string };
+
+    expect(res.status).toBe(403);
+    expect(body.error).toBe('origin not allowed');
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('rejects malformed search request bodies', async () => {
+    const res = await app.request(
+      '/api/food/search',
+      { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{nope' },
+      env(),
+    );
+
+    expect(res.status).toBe(400);
+  });
+
+  it('rate limits repeated searches from one client before forwarding upstream', async () => {
+    globalThis.fetch = vi.fn(async () => new Response(JSON.stringify({ hits: [] }))) as typeof fetch;
+    const testEnv = env();
+
+    for (let i = 0; i < 10; i += 1) {
+      expect((await foodSearch({ q: `granola ${i}` }, { 'CF-Connecting-IP': '203.0.113.10' }, testEnv)).status).toBe(200);
+    }
+    const limited = await foodSearch({ q: 'granola again' }, { 'CF-Connecting-IP': '203.0.113.10' }, testEnv);
+
+    expect(limited.status).toBe(429);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(10);
   });
 });
 

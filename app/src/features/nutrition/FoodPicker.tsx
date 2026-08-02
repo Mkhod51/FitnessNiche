@@ -140,6 +140,16 @@ function NoResults({ online }: { online: boolean }): ReactElement {
   );
 }
 
+function SearchFailed(): ReactElement {
+  return (
+    <div data-testid="food-search-failed" className="mx-4 mb-2 mt-2 bg-paper-sunk px-3.5 py-3">
+      <p className="font-serif text-[13.5px] leading-[1.45] text-ink-soft">
+        Food database did not respond. Search again, try a simpler name, or quick add it.
+      </p>
+    </div>
+  );
+}
+
 export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps): ReactElement {
   const online = useOnline();
   const [hidden, setHidden] = useState<boolean | null>(null);
@@ -151,10 +161,11 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   const [searchNonce, setSearchNonce] = useState(0);
   const [completedSearchQuery, setCompletedSearchQuery] = useState('');
   const [localResults, setLocalResults] = useState<FoodItem[]>([]);
+  const [localResultsQuery, setLocalResultsQuery] = useState('');
   const [onlineResults, setOnlineResults] = useState<FoodItemDraft[]>([]);
   const [onlineResultsQuery, setOnlineResultsQuery] = useState('');
   const [onlineHidden, setOnlineHidden] = useState(0);
-  const [onlineFailed, setOnlineFailed] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
   const [selected, setSelected] = useState<PickedFood | null>(null);
   const [grams, setGrams] = useState('100');
   const [quickAdd, setQuickAdd] = useState(false);
@@ -247,10 +258,11 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
     const term = query.trim();
     queryRef.current = query;
     const request = ++searchRequestRef.current;
+    setLocalResultsQuery('');
     setOnlineResults([]);
     setOnlineResultsQuery('');
     setOnlineHidden(0);
-    setOnlineFailed(false);
+    setSearchFailed(false);
     setCompletedSearchQuery('');
     if (!term) {
       setLocalResults([]);
@@ -271,9 +283,15 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
     };
 
     void searchFoodLocal(term).then((foods) => {
-      if (!cancelled) setLocalResults(foods);
+      if (!cancelled && request === searchRequestRef.current && queryRef.current.trim() === term) {
+        setLocalResults(foods);
+        setLocalResultsQuery(term);
+      }
     }).catch(() => {
-      if (!cancelled) setLocalResults([]);
+      if (!cancelled && request === searchRequestRef.current && queryRef.current.trim() === term) {
+        setLocalResults([]);
+        setLocalResultsQuery(term);
+      }
     }).finally(() => {
       localDone = true;
       finishIfCurrent();
@@ -289,13 +307,13 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
           setOnlineResults(result.drafts);
           setOnlineResultsQuery(term);
           setOnlineHidden(result.hidden);
-          setOnlineFailed(false);
+          setSearchFailed(false);
         } catch {
           if (cancelled || request !== searchRequestRef.current || queryRef.current.trim() !== term || !onlineRef.current) return;
           setOnlineResults([]);
           setOnlineResultsQuery('');
           setOnlineHidden(0);
-          setOnlineFailed(true);
+          setSearchFailed(true);
         } finally {
           onlineDone = true;
           finishIfCurrent();
@@ -523,15 +541,17 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   }
 
   const isSearching = query.trim().length > 0;
-  const showWifiNotice = !online || onlineFailed;
+  const showWifiNotice = !online;
+  const currentLocalResults = localResultsQuery === query.trim() ? localResults : [];
   const showOnlineResults = online && onlineResultsQuery === query.trim();
   const searchComplete = searchPhase === 'done' && completedSearchQuery === query.trim();
+  const showSearchFailure = online && searchComplete && searchFailed;
   const showNoResults =
     searchComplete &&
-    localResults.length === 0 &&
+    currentLocalResults.length === 0 &&
     onlineResults.length === 0 &&
     onlineHidden === 0 &&
-    !onlineFailed;
+    !searchFailed;
 
   return pickerFrame(
     `Add food to ${SLOT_LABEL[mealSlot]}`,
@@ -575,10 +595,10 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
       {isSearching ? (
         <>
           {searchPhase === 'searching' && <SearchProgress />}
-          {localResults.length > 0 && (
+          {currentLocalResults.length > 0 && (
             <section>
               <div className="px-4 pb-1 pt-3"><p className={LABEL}>Local results</p></div>
-              <ul>{localResults.map((food) => <FoodRow key={food.id} food={food} hidden={figuresHidden} onSelect={() => pick(food)} />)}</ul>
+              <ul>{currentLocalResults.map((food) => <FoodRow key={food.id} food={food} hidden={figuresHidden} onSelect={() => pick(food)} />)}</ul>
             </section>
           )}
           {showOnlineResults && onlineResults.length > 0 && (
@@ -596,6 +616,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
               )}
             </p>
           )}
+          {showSearchFailure && <SearchFailed />}
           {showNoResults && <NoResults online={online} />}
         </>
       ) : (

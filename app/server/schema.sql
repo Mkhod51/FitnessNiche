@@ -21,6 +21,15 @@ CREATE TABLE IF NOT EXISTS sync_state (
 );
 INSERT OR IGNORE INTO sync_state (id, seq) VALUES (1, 0);
 
+-- Shared food-search throttle for the Open Food Facts proxy. This is
+-- operational metadata, not user health data, and stores only a coarse client
+-- network identifier plus the current one-minute window.
+CREATE TABLE IF NOT EXISTS food_search_limits (
+  client_id TEXT PRIMARY KEY,
+  window_start INTEGER NOT NULL,
+  count INTEGER NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   updated_at TEXT NOT NULL,

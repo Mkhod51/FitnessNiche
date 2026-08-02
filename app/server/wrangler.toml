@@ -2,6 +2,11 @@ name = "myostat-sync"
 main = "src/index.ts"
 compatibility_date = "2024-09-23"
 
+# For static app hosting on another origin, set this to that origin so the
+# browser can call POST /api/food/search on this Worker.
+# [vars]
+# FOOD_SEARCH_ALLOWED_ORIGINS = "https://app.example.com"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "myostat-sync-db"

@@ -432,6 +432,30 @@ describe('FoodPicker', () => {
     expect(screen.queryByText('Skyr Plain')).not.toBeInTheDocument();
   });
 
+  it('does not show stale local results while the next typed search is pending', async () => {
+    let resolveLocal: (value: FoodItem[]) => void;
+    const pendingLocal = new Promise<FoodItem[]>((resolve) => {
+      resolveLocal = resolve;
+    });
+    mockSearchFoodLocal
+      .mockResolvedValueOnce([food({ name: 'Skyr, plain' })])
+      .mockReturnValueOnce(pendingLocal);
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'skyr' } });
+    expect(await screen.findByText('Skyr, plain')).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: 'yogurt' } });
+
+    expect(screen.queryByText('Skyr, plain')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveLocal!([food({ name: 'Greek yogurt' })]);
+    });
+    expect(await screen.findByText('Greek yogurt')).toBeInTheDocument();
+  });
+
   it('keeps hidden-mode quantity editable and logs it without rendering nutrition figures', async () => {
     mockGetUser.mockResolvedValue({ ...user, numbersHidden: true });
     mockGetCommonFoods.mockResolvedValue([food({ id: 'cofid-chicken' })]);
@@ -473,7 +497,7 @@ describe('FoodPicker', () => {
     expect(mockSaveFoodItem.mock.invocationCallOrder[0]).toBeLessThan(mockLogFood.mock.invocationCallOrder[0]);
   });
 
-  it('shows the wifi notice when the submitted OFF search fails', async () => {
+  it('shows a database retry note instead of the wifi notice when an online search fails', async () => {
     mockSearchFoodOnline.mockRejectedValueOnce(new Error('network failed'));
     renderPicker();
 
@@ -481,7 +505,9 @@ describe('FoodPicker', () => {
     fireEvent.change(input, { target: { value: 'skyr' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
-    expect(await screen.findByTestId('food-offline-notice')).toBeInTheDocument();
+    expect(await screen.findByTestId('food-search-failed')).toHaveTextContent(/food database did not respond/i);
+    expect(screen.queryByTestId('food-offline-notice')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('food-no-results')).not.toBeInTheDocument();
   });
 
   it('timestamps a historical selected-food entry at local noon', async () => {

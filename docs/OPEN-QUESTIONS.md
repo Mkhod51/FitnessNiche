@@ -58,12 +58,12 @@ count — so *adding* an exercise propagates, but *editing* one never reaches th
 **Status: superseded 2026-07-31 by FR-LOG-6.**
 
 FR-LOG-6 now ships with a smaller honest open-data stack: a curated CoFID seed for common
-foods, Open Food Facts keyword search on submit, manual barcode lookup, and selected-item
+foods, Open Food Facts keyword search as the user types, barcode lookup/scanning, and selected-item
 caching in `food_items`. USDA FDC is deferred as a later backend/proxy fallback, not a direct
 browser dependency.
 
-**Current follow-ups:** CoFID seed expansion, Worker-side OFF proxy/rate limiting,
-USDA/FatSecret-style provider adapter, barcode camera scanning, and a cross-device recents
+**Current follow-ups:** CoFID seed expansion, richer OFF proxy/rate limiting,
+USDA/FatSecret-style provider adapter, and a cross-device recents
 decision. See `docs/agent-handoff/REMAINING-WORK.md`.
 
 ## Q5 — Maintenance calories before the calculator exists
