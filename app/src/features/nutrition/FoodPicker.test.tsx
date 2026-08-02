@@ -260,6 +260,64 @@ describe('FoodPicker', () => {
     expect(mockLookupBarcode).not.toHaveBeenCalled();
   });
 
+  it('rounds search preview and selected-food macros to stable display precision', async () => {
+    mockSearchFoodOnline.mockResolvedValue({
+      drafts: [
+        offDraft({
+          name: 'Precise Granola',
+          kcalPer100g: 280.742459396752,
+          proteinGPer100g: 2.78422273781903,
+          carbsGPer100g: 34.8027842227378,
+          fatGPer100g: 14.6171693735499,
+        }),
+      ],
+      hidden: 0,
+    });
+    mockMacrosForQuantity.mockReturnValue({
+      kcal: 280.742459396752,
+      proteinG: 2.78422273781903,
+      carbsG: 34.8027842227378,
+      fatG: 14.6171693735499,
+    });
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'granola' } });
+
+    expect(await screen.findByText(/281 kcal · 2\.8 P \/100g/i)).toBeInTheDocument();
+    expect(screen.queryByText(/2\.78422273781903/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /precise granola/i }));
+
+    expect(screen.getByText(/281 kcal · 2\.8 g protein · 34\.8 g carbs · 14\.6 g fat - per 100 g/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/2\.8 g protein · 34\.8 g carbs · 14\.6 g fat/i)).toHaveLength(2);
+    expect(screen.queryByText(/34\.8027842227378/i)).not.toBeInTheDocument();
+  });
+
+  it('offers an explicit clear button for the search field', async () => {
+    mockSearchFoodOnline.mockResolvedValue({
+      drafts: [offDraft({ name: 'Skyr Plain OFF' })],
+      hidden: 0,
+    });
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'skyr' } });
+
+    expect(await screen.findByText('Skyr Plain OFF')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /clear search/i }));
+
+    expect(input.value).toBe('');
+    expect(screen.queryByText('Skyr Plain OFF')).not.toBeInTheDocument();
+  });
+
+  it('keeps the search input at a Safari-safe text size', async () => {
+    renderPicker();
+
+    expect(await screen.findByRole('searchbox')).toHaveClass('text-[16px]');
+  });
+
   it('renders CoFID and OFF provenance labels on food rows', async () => {
     mockGetRecentFoods.mockResolvedValue([food({ source: 'off', name: 'Whey isolate' })]);
     mockGetCommonFoods.mockResolvedValue([food()]);

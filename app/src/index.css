@@ -50,6 +50,16 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 
+html {
+  touch-action: manipulation;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  appearance: none;
+  -webkit-appearance: none;
+  display: none;
+}
+
 /* Pane transition between tabs. Direction is set per-navigation via --pane-from,
    so moving right brings the incoming pane in from the right — the movement
    says where you went, which is the only reason it exists.

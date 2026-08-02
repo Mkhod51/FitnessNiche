@@ -34,6 +34,15 @@ function sourceLabel(source: string): string {
   return source === 'cofid' ? 'CoFID' : source === 'off' ? 'OFF' : source.toUpperCase();
 }
 
+function formatKcal(value: number): string {
+  return String(Math.round(value));
+}
+
+function formatMacro(value: number): string {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
 function isStoredFood(food: PickedFood): food is FoodItem {
   return 'id' in food;
 }
@@ -77,7 +86,7 @@ function FoodRow({ food, hidden, onSelect }: { food: PickedFood; hidden: boolean
           {!hidden && (
             <span className={`${FIGURE} mt-1 block text-[11px] text-ink-faint`}>
               {'brand' in food && food.brand ? `${food.brand} · ` : ''}
-              {Math.round(food.kcalPer100g)} kcal · {food.proteinGPer100g} P /100g ·{' '}
+              {formatKcal(food.kcalPer100g)} kcal · {formatMacro(food.proteinGPer100g)} P /100g ·{' '}
               <span className={`${LABEL} text-[8.5px] ${food.source === 'cofid' ? 'text-ink-soft' : ''}`}>
                 {sourceLabel(food.source)}
               </span>
@@ -176,6 +185,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
   const onlineRef = useRef(online);
   const searchRequestRef = useRef(0);
   const closeTimerRef = useRef<number | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   function closeWithMotion() {
     if (closing) return;
@@ -346,6 +356,13 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
     if (queryRef.current.trim()) setSearchNonce((value) => value + 1);
   }
 
+  function clearSearch() {
+    queryRef.current = '';
+    setQuery('');
+    setSearchNonce((value) => value + 1);
+    searchInputRef.current?.focus();
+  }
+
   // A scanned code takes the same path as a typed barcode: drop it into the
   // search field, so scan and manual entry share one OFF resolution route and
   // one result UI through the automatic query effect.
@@ -481,8 +498,8 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
         <PickerHeader title={selected.name} subtitle={sourceLabel(selected.source)} onBack={() => setSelected(null)} />
         {!figuresHidden && (
           <p className={`${FIGURE} px-4 py-3 text-[12.5px] text-ink-faint`}>
-            {Math.round(selected.kcalPer100g)} kcal · {selected.proteinGPer100g} g protein · {selected.carbsGPer100g} g carbs ·{' '}
-            {selected.fatGPer100g} g fat - per 100 g
+            {formatKcal(selected.kcalPer100g)} kcal · {formatMacro(selected.proteinGPer100g)} g protein ·{' '}
+            {formatMacro(selected.carbsGPer100g)} g carbs · {formatMacro(selected.fatGPer100g)} g fat - per 100 g
           </p>
         )}
         <div className="px-4 pt-2">
@@ -516,10 +533,10 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
         {!figuresHidden && macros && (
           <div className="mx-4 mt-3 bg-paper-sunk px-4 py-3.5">
             <p className={`${FIGURE} text-[26px] leading-none text-ink`}>
-              {macros.kcal} <span className={`${LABEL} align-middle`}>kcal</span>
+              {formatKcal(macros.kcal)} <span className={`${LABEL} align-middle`}>kcal</span>
             </p>
             <p className={`${FIGURE} mt-2 text-[13px] text-ink-soft`}>
-              {macros.proteinG} g protein · {macros.carbsG} g carbs · {macros.fatG} g fat
+              {formatMacro(macros.proteinG)} g protein · {formatMacro(macros.carbsG)} g carbs · {formatMacro(macros.fatG)} g fat
             </p>
           </div>
         )}
@@ -576,6 +593,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
           </svg>
         </button>
         <input
+          ref={searchInputRef}
           type="search"
           role="searchbox"
           value={query}
@@ -583,10 +601,22 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
             queryRef.current = event.target.value;
             setQuery(event.target.value);
           }}
-          className="min-w-0 flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-faint"
+          className="min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none placeholder:text-ink-faint"
           placeholder="Search foods, brands or barcode"
           autoComplete="off"
         />
+        {query.length > 0 && (
+          <button
+            type="button"
+            onClick={clearSearch}
+            aria-label="Clear search"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center text-ink-faint transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)] active:bg-paper-sunk"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        )}
         <button type="submit" disabled={!online || !query.trim() || searchPhase === 'searching'} className={`${LABEL} min-h-[44px] pl-3 text-ink disabled:text-ink-faint`}>
           {searchPhase === 'searching' ? 'Searching' : 'Search'}
         </button>
