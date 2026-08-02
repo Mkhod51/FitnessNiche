@@ -78,6 +78,18 @@ export const adviceEvents = sqliteTable('advice_events', {
   claimId: text('claim_id').notNull(),
   trigger: text('trigger').notNull(),
   workoutId: text('workout_id'), // nullable: not every claim fires from within a workout
+  surface: text('surface', {
+    enum: [
+      'hub-empty',
+      'exercise-selection',
+      'goal-draft',
+      'hub',
+      'weekly-review',
+      'search',
+      'workout-start',
+      'unknown',
+    ],
+  }).notNull().default('unknown'),
   shownAt: text('shown_at').notNull(),
   dismissedAt: text('dismissed_at'),
   suppressedAt: text('suppressed_at'),

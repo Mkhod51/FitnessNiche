@@ -4,6 +4,7 @@ import { adviceEvents } from './schema';
 import { LOCAL_USER_ID } from './user';
 import { newId } from './id';
 import { markPending } from '../sync/queue';
+import type { AdviceTrigger, RecordableAdviceSurface } from '../advice/types';
 
 export type AdviceEvent = typeof adviceEvents.$inferSelect;
 
@@ -17,13 +18,27 @@ export type AdviceEvent = typeof adviceEvents.$inferSelect;
  */
 export const COOLDOWN_DAYS = 7;
 
+const RECORDABLE_SURFACES = new Set<RecordableAdviceSurface>([
+  'hub-empty',
+  'exercise-selection',
+  'goal-draft',
+  'hub',
+  'weekly-review',
+  'search',
+  'workout-start',
+]);
+
 /** DM-ADVICE-EVENT: every shown advice traces to a claim. */
 export async function recordAdviceShown(
   claimId: string,
-  trigger: 'rule' | 'query' | 'data-earned',
+  trigger: AdviceTrigger,
   workoutId: string | null,
+  surface: RecordableAdviceSurface,
   now: Date = new Date(),
 ): Promise<AdviceEvent> {
+  if (!RECORDABLE_SURFACES.has(surface)) {
+    throw new Error(`surface "${surface}" cannot be recorded for a new advice event`);
+  }
   const db = getDrizzle();
   const id = newId();
   const nowIso = now.toISOString();
@@ -35,6 +50,7 @@ export async function recordAdviceShown(
       claimId,
       trigger,
       workoutId,
+      surface,
       shownAt: nowIso,
       updatedAt: nowIso,
     })

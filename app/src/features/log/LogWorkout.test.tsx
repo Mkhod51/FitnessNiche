@@ -347,6 +347,7 @@ describe('LogWorkout — State B: an open session', () => {
       'c-strength-holds-through-a-deficit',
       'data-earned',
       'workout-1',
+      'workout-start',
     );
 
     fireEvent.click(await screen.findByTestId('tick-button'));

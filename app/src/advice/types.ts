@@ -11,11 +11,35 @@ export type Grade = 'A' | 'B' | 'C' | 'D';
 export type Population = 'trained' | 'untrained' | 'mixed' | 'unstated';
 
 export type AdviceSurface = 'hub-empty' | 'exercise-selection' | 'goal-draft';
+export type AdviceEventSurface =
+  | AdviceSurface
+  | 'hub'
+  | 'weekly-review'
+  | 'search'
+  | 'workout-start'
+  | 'unknown';
+export type RecordableAdviceSurface = Exclude<AdviceEventSurface, 'unknown'>;
+export type AdviceTrigger = 'rule' | 'query' | 'data-earned' | 'surface-context';
 export type TrainingExperience = 'new' | 'returning' | 'experienced';
 export type SurfaceContext =
   | { surface: 'hub-empty' }
   | { surface: 'exercise-selection'; exerciseIds?: string[]; populations?: Population[] }
   | { surface: 'goal-draft'; goals: Array<'cut' | 'bulk' | 'maintain'> };
+
+export type SurfaceAdviceContext =
+  | { surface: 'hub-empty' }
+  | { surface: 'exercise-selection'; exerciseId: string; experience: TrainingExperience | null }
+  | {
+    surface: 'goal-draft';
+    goal: 'cut' | 'bulk' | 'maintain';
+    hasEstimate: boolean;
+    deficitKcal: number | null;
+  };
+
+export interface SurfaceAdviceFilters {
+  suppressedClaimIds: string[];
+  recentlyShownClaimIds: string[];
+}
 
 /** A single extracted number, re-plotted in our own chart style (GR-3). */
 export interface Figure {
@@ -79,7 +103,7 @@ export interface UserStateSnapshot {
 
 export interface AdviceItem {
   claimId: string;
-  trigger: 'rule' | 'query' | 'data-earned';
+  trigger: AdviceTrigger;
   /** Calibrated-language rendering, grade-derived. Never free text. */
   headline: string;
   snapshot: UserStateSnapshot;

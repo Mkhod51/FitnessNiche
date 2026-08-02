@@ -282,7 +282,7 @@ function LoggingSurface(): ReactElement {
     const claim = CLAIMS.find((c) => c.id === item.claimId);
     if (!claim) return;
 
-    await recordAdviceShown(claim.id, item.trigger, workoutId);
+    await recordAdviceShown(claim.id, item.trigger, workoutId, 'workout-start');
     const primaryExerciseName = built.primaryExerciseId ? exerciseName(built.primaryExerciseId) : null;
     setPeek({ claim, why: whyNow(claim, built, primaryExerciseName) });
   }

@@ -43,11 +43,13 @@ describe('runMigrations', () => {
       '0003_nutrition',
       '0004_goal_clock',
       '0005_training_experience',
+      '0006_advice_surface',
     ]);
     expect(f.statements.some((s) => s.includes('alter table sets add column set_type'))).toBe(true);
     expect(f.statements.some((s) => s.includes('create table if not exists advice_events'))).toBe(true);
     expect(f.statements.some((s) => s.includes('alter table users add column goal_started_at'))).toBe(true);
     expect(f.statements.some((s) => s.includes('alter table users add column training_experience'))).toBe(true);
+    expect(f.statements.some((s) => s.includes('alter table advice_events add column surface'))).toBe(true);
     // 0001's body must not be replayed over a populated database.
     expect(f.statements.some((s) => s.includes('create table if not exists exercises'))).toBe(false);
   });

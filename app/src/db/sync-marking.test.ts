@@ -83,7 +83,7 @@ describe('every sync\'d write marks itself pending', () => {
   });
 
   it('a shown advice event is queued', async () => {
-    const ev = await recordAdviceShown('c-volume-dose-response', 'rule', null, NOW);
+    const ev = await recordAdviceShown('c-volume-dose-response', 'rule', null, 'hub', NOW);
     expect(await isPending('advice_events', ev.id)).toBe(true);
   });
 
@@ -113,7 +113,7 @@ describe('every sync\'d write marks itself pending', () => {
   });
 
   it('suppressing a claim re-marks every event carrying it', async () => {
-    const ev = await recordAdviceShown('c-protein-timing-distribution-matters', 'rule', null, NOW);
+    const ev = await recordAdviceShown('c-protein-timing-distribution-matters', 'rule', null, 'hub', NOW);
     await clearPending('advice_events', ev.id, NOW);
     await suppressClaim('c-protein-timing-distribution-matters', NOW);
     expect(await isPending('advice_events', ev.id)).toBe(true);
