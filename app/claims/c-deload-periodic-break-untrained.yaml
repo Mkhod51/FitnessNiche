@@ -1,0 +1,40 @@
+id: c-deload-periodic-break-untrained
+statement: >-
+  In healthy untrained adults, 10 weeks of detraining reduced strength and muscle size,
+  but 10 weeks of retraining produced final adaptations similar to a matched 20-week continuous-training block
+peekStatement: >-
+  In untrained adults, a 10-week break reduced gains that retraining later regained.
+grade: B
+status: settled
+domain: deloads
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: deload-periodic-break-untrained
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-deload-periodic-halonen
+    claimId: c-deload-periodic-break-untrained
+    doi: 10.1111/sms.14739
+    authors: Halonen EJ, Gabriel I, Kelahaara MM, Ahtiainen JP, Hulmi JJ
+    year: 2024
+    journal: Scandinavian Journal of Medicine & Science in Sports
+    n: 55
+    population: untrained
+    effectSize: null
+    ci: null
+    figures:
+      - label: periodic training block before detraining
+        value: 10
+        unit: weeks
+      - label: detraining duration
+        value: 10
+        unit: weeks
+      - label: retraining duration
+        value: 10
+        unit: weeks
+      - label: matched continuous-training block
+        value: 20
+        unit: weeks
+    quote: null

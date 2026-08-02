@@ -292,6 +292,98 @@ export const CLAIMS: Claim[] = [
     ]
   },
   {
+    "id": "c-deload-periodic-break-untrained",
+    "statement": "In healthy untrained adults, 10 weeks of detraining reduced strength and muscle size, but 10 weeks of retraining produced final adaptations similar to a matched 20-week continuous-training block",
+    "peekStatement": "In untrained adults, a 10-week break reduced gains that retraining later regained.",
+    "grade": "B",
+    "status": "settled",
+    "domain": "deloads",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "deload-periodic-break-untrained",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-deload-periodic-halonen",
+        "claimId": "c-deload-periodic-break-untrained",
+        "doi": "10.1111/sms.14739",
+        "authors": "Halonen EJ, Gabriel I, Kelahaara MM, Ahtiainen JP, Hulmi JJ",
+        "year": 2024,
+        "journal": "Scandinavian Journal of Medicine & Science in Sports",
+        "n": 55,
+        "population": "untrained",
+        "effectSize": null,
+        "ci": null,
+        "figures": [
+          {
+            "label": "periodic training block before detraining",
+            "value": 10,
+            "unit": "weeks"
+          },
+          {
+            "label": "detraining duration",
+            "value": 10,
+            "unit": "weeks"
+          },
+          {
+            "label": "retraining duration",
+            "value": 10,
+            "unit": "weeks"
+          },
+          {
+            "label": "matched continuous-training block",
+            "value": 20,
+            "unit": "weeks"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
+    "id": "c-deload-reduced-dose-young-adults",
+    "statement": "After a 16-week resistance-training block, one-third and one-ninth maintenance doses preserved hypertrophy in young adults during 32 weeks",
+    "peekStatement": "In young adults, reduced training doses preserved hypertrophy after a training block.",
+    "grade": "B",
+    "status": "settled",
+    "domain": "deloads",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "deload-reduced-dose-young-adults",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-deload-reduced-dose-bickel",
+        "claimId": "c-deload-reduced-dose-young-adults",
+        "doi": "10.1249/MSS.0b013e318207c15d",
+        "authors": "Bickel CS, Cross JM, Bamman MM",
+        "year": 2011,
+        "journal": "Medicine & Science in Sports & Exercise",
+        "n": 70,
+        "population": "mixed",
+        "effectSize": null,
+        "ci": null,
+        "figures": [
+          {
+            "label": "initial training duration",
+            "value": 16,
+            "unit": "weeks"
+          },
+          {
+            "label": "maintenance phase duration",
+            "value": 32,
+            "unit": "weeks"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
     "id": "c-deloads-not-evidence-backed",
     "statement": "Planned deload weeks are widely prescribed but barely studied, and the one controlled trial in trained lifters found they cost strength without helping muscle growth",
     "peekStatement": "Planned deloads are barely studied, and one trial found they cost strength",

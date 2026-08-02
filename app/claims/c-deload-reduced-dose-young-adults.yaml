@@ -1,0 +1,34 @@
+id: c-deload-reduced-dose-young-adults
+statement: >-
+  After a 16-week resistance-training block, one-third and one-ninth maintenance doses
+  preserved hypertrophy in young adults during 32 weeks
+peekStatement: >-
+  In young adults, reduced training doses preserved hypertrophy after a training block.
+grade: B
+status: settled
+domain: deloads
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: deload-reduced-dose-young-adults
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-deload-reduced-dose-bickel
+    claimId: c-deload-reduced-dose-young-adults
+    doi: 10.1249/MSS.0b013e318207c15d
+    authors: Bickel CS, Cross JM, Bamman MM
+    year: 2011
+    journal: Medicine & Science in Sports & Exercise
+    n: 70
+    population: mixed
+    effectSize: null
+    ci: null
+    figures:
+      - label: initial training duration
+        value: 16
+        unit: weeks
+      - label: maintenance phase duration
+        value: 32
+        unit: weeks
+    quote: null

@@ -749,6 +749,84 @@
         ]
       },
       "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-deload-reduced-dose-young-adults",
+      "citationId": "cit-deload-reduced-dose-bickel",
+      "doi": "10.1249/MSS.0b013e318207c15d",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "PubMed author abstract for PMID 21131862; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PubMed PMID 21131862, Methods: 70 adults completed 16 weeks of three-day-per-week resistance training then 32 weeks of detraining or one-third/one-ninth maintenance doses.",
+        "PubMed PMID 21131862, Results: both maintenance prescriptions preserved phase-one muscle hypertrophy in young adults; one-third dose added myofiber hypertrophy in young adults."
+      ],
+      "nullRationales": [
+        "The directly read abstract provides no subgroup sample sizes, confidence intervals, or numeric hypertrophy effect size, so those fields remain null.",
+        "No publisher figure is stored; the source-read programme durations and dose fractions are retained."
+      ],
+      "populationRationale": "The source compares young adults (20-35 years) and older adults (60-75 years); this claim explicitly applies only to the young-adult result and does not extend it to trained lifters or older adults.",
+      "gradeRationale": "One randomized maintenance-dose trial directly reports this young-adult result after a 16-week training block. Grade B remains specific to its population and programme.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement will retain young-adult, post-training-block, and maintenance-dose scope.",
+          "The one-third and one-ninth doses, 16-week block, 32-week maintenance phase, and young-adult hypertrophy result match the abstract.",
+          "No inference is made about a short deload or an individual maintenance prescription."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved",
+        "checks": [
+          "PubMed directly reports 70 adults, 16 weeks of three-times-weekly resistance training, then 32 weeks randomized to detraining, one-third, or one-ninth maintenance doses.",
+          "Both maintenance doses preserved phase-one muscle hypertrophy in young adults but not older adults.",
+          "Claim remains confined to young adults after a substantial training block and long maintenance period; the abstract supports null subgroup n, CI, and numerical effect size. Grade B fits this narrow randomized-trial finding."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-deload-periodic-break-untrained",
+      "citationId": "cit-deload-periodic-halonen",
+      "doi": "10.1111/sms.14739",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "PubMed author abstract for PMID 39364857; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PubMed PMID 39364857, Methods: periodic training was 10 weeks resistance training, 10 weeks detraining, then 10 weeks retraining; the comparator had 10 non-training weeks then 20 weeks continuous resistance training.",
+        "PubMed PMID 39364857, Results/Conclusion: strength and muscle size declined during detraining but regained rapidly; periodic and comparator groups ended with similar adaptations."
+      ],
+      "nullRationales": [
+        "The directly read abstract does not give confidence intervals or numeric group effect sizes for the final comparison, so ci and effectSize remain null.",
+        "No publisher figure is stored; only source-read programme durations and participant count are retained."
+      ],
+      "populationRationale": "The source explicitly identifies healthy, untrained participants; the claim retains that status and does not generalize to trained lifters or a one-week deload.",
+      "gradeRationale": "One randomized comparison directly reports detraining and retraining in untrained adults. Grade B reflects the controlled design but its narrow population and long break.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement will preserve the untrained population, 10-week break, retraining context, and matched 20-week continuous-training comparator.",
+          "It reports decline and regain rather than calling the break harmless.",
+          "No claim equates a 10-week detraining phase to a short scheduled deload."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved after comparator-scope correction",
+        "checks": [
+          "PubMed directly reports healthy untrained participants randomized to periodic training (20 completers) or the comparator (22 completers), with 45% female in each group.",
+          "The periodic arm was 10 weeks training, 10 weeks detraining, then 10 weeks training; strength and VL/BB CSA declined during detraining and were rapidly regained.",
+          "The statement specifies the comparator's matched 20-week continuous-training block after 10 non-training weeks and does not equate the break with a standard deload. Grade B and null CI/effectSize are appropriate."
+        ]
+      },
+      "nextReview": "2027-08-02"
     }
   ]
 }
