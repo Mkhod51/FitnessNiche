@@ -5,6 +5,7 @@ import { evaluateClaims } from '../../advice/engine';
 import type { Claim } from '../../advice/types';
 import { loadAdviceSnapshot } from '../../advice/load-snapshot';
 import { filterNumbersHiddenAdvice } from '../../advice/session-advice';
+import { recentlyShownClaimIds, suppressedClaimIds } from '../../db/advice-events';
 
 const DOMAIN_LABEL_CLASS = 'px-4 pt-4 pb-2 font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 
@@ -54,10 +55,18 @@ export function AdviceFeed(): ReactElement {
   useEffect(() => {
     let cancelled = false;
     loadAdviceSnapshot()
-      .then(({ snapshot }) => {
+      .then(async (built) => {
+        if (cancelled || built === null) return;
+        const [suppressed, recent] = await Promise.all([
+          suppressedClaimIds(),
+          recentlyShownClaimIds(),
+        ]);
         if (cancelled) return;
+        const blocked = new Set([...suppressed, ...recent]);
+        const { snapshot } = built;
         setRuleTriggered(
           filterNumbersHiddenAdvice(snapshot, CLAIMS, evaluateClaims(snapshot, CLAIMS))
+            .filter((item) => !blocked.has(item.claimId))
             .map((item) => CLAIMS.find((claim) => claim.id === item.claimId))
             .filter((claim): claim is Claim => claim !== undefined),
         );

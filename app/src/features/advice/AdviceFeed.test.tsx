@@ -5,10 +5,17 @@ import { CLAIMS } from '../../generated/claims';
 import { EMPTY_SNAPSHOT } from '../../advice/engine';
 import { loadAdviceSnapshot } from '../../advice/load-snapshot';
 import type { BuiltSnapshot } from '../../advice/snapshot';
+import { recentlyShownClaimIds, suppressedClaimIds } from '../../db/advice-events';
 
 vi.mock('../../advice/load-snapshot', () => ({ loadAdviceSnapshot: vi.fn() }));
+vi.mock('../../db/advice-events', () => ({
+  recentlyShownClaimIds: vi.fn(),
+  suppressedClaimIds: vi.fn(),
+}));
 
 const mockLoadAdviceSnapshot = vi.mocked(loadAdviceSnapshot);
+const mockRecentlyShownClaimIds = vi.mocked(recentlyShownClaimIds);
+const mockSuppressedClaimIds = vi.mocked(suppressedClaimIds);
 
 const emptyBuiltSnapshot: BuiltSnapshot = {
   snapshot: EMPTY_SNAPSHOT,
@@ -64,9 +71,19 @@ const strengthHoldingSnapshot: BuiltSnapshot = {
   },
 };
 
+const lowVolumeSnapshot: BuiltSnapshot = {
+  ...emptyBuiltSnapshot,
+  snapshot: {
+    ...EMPTY_SNAPSHOT,
+    weeklySetsByMuscle: { chest: 8 },
+  },
+};
+
 describe('AdviceFeed', () => {
   beforeEach(() => {
     mockLoadAdviceSnapshot.mockReset().mockResolvedValue(emptyBuiltSnapshot);
+    mockRecentlyShownClaimIds.mockReset().mockResolvedValue([]);
+    mockSuppressedClaimIds.mockReset().mockResolvedValue([]);
   });
 
   it('carries a non-empty data-claim-id on every element that represents a claim', () => {
@@ -134,6 +151,30 @@ describe('AdviceFeed', () => {
     await screen.findByTestId('no-user-data');
     const forYou = container.querySelector('[aria-label="for you"]');
     expect(forYou?.querySelector('[data-claim-id="c-strength-holds-through-a-deficit"]')).toBeNull();
+  });
+
+  it.each([
+    ['suppressed', mockSuppressedClaimIds],
+    ['inside its cooldown', mockRecentlyShownClaimIds],
+  ])('does not render a personalised Hub claim when it is %s', async (_state, blockedIds) => {
+    mockLoadAdviceSnapshot.mockResolvedValue(lowVolumeSnapshot);
+    blockedIds.mockResolvedValue(['c-volume-dose-response']);
+
+    const { container } = render(<AdviceFeed />);
+
+    await screen.findByTestId('no-user-data');
+    const forYou = container.querySelector('[aria-label="for you"]');
+    expect(forYou?.querySelector('[data-claim-id="c-volume-dose-response"]')).toBeNull();
+  });
+
+  it('renders no personalised advice when the consent-aware loader declines a snapshot', async () => {
+    mockLoadAdviceSnapshot.mockResolvedValue(null);
+
+    const { container } = render(<AdviceFeed />);
+
+    expect(container.querySelector('[aria-label="for you"] [data-claim-id]')).toBeNull();
+    expect(await screen.findByText(/more weekly sets per muscle/i)).toBeInTheDocument();
+    expect(container.querySelector('[aria-label="for you"] [data-claim-id]')).toBeNull();
   });
 
   it('invents no number about the user — no data-testid begins with "user-"', () => {

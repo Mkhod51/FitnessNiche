@@ -1,6 +1,6 @@
 import { SEED_EXERCISES } from '../db/seed-exercises';
 import { getEntriesSince } from '../db/nutrition';
-import { getUser } from '../db/user';
+import { getUser, hasConsented } from '../db/user';
 import { getWeightHistory } from '../db/weights';
 import { getSetsSince } from '../db/workouts';
 import { buildSnapshot, type BuiltSnapshot } from './snapshot';
@@ -14,8 +14,10 @@ const MS_PER_DAY = 86_400_000;
  * `getUser` runs first because it owns database initialisation. The remaining
  * reads can then happen together without racing an uninitialised local store.
  */
-export async function loadAdviceSnapshot(now: Date = new Date()): Promise<BuiltSnapshot> {
+export async function loadAdviceSnapshot(now: Date = new Date()): Promise<BuiltSnapshot | null> {
   const user = await getUser();
+  if (!hasConsented(user)) return null;
+
   const windowStart = new Date(now.getTime() - RECONCILE_WINDOW_DAYS * MS_PER_DAY).toISOString();
   const [weights, sets, food] = await Promise.all([
     getWeightHistory(),

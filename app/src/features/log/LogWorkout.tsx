@@ -266,6 +266,7 @@ function LoggingSurface(): ReactElement {
   async function pickSessionAdvice(workoutId: string) {
     if (await shownInWorkout(workoutId)) return;
     const built = await loadAdviceSnapshot();
+    if (built === null) return;
 
     const item = selectSessionAdvice(
       built.snapshot,

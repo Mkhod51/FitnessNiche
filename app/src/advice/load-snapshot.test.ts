@@ -100,6 +100,7 @@ describe('loadAdviceSnapshot', () => {
 
   it('builds advice state from the user and their logged rows, not a placeholder snapshot', async () => {
     const built = await loadAdviceSnapshot(NOW);
+    if (built === null) throw new Error('expected a consented snapshot');
 
     expect(built.snapshot).toMatchObject({
       goal: 'bulk',
@@ -112,9 +113,19 @@ describe('loadAdviceSnapshot', () => {
 
   it('uses one exact 84-day reconciliation window for weights, sets, and food', async () => {
     const built = await loadAdviceSnapshot(NOW);
+    if (built === null) throw new Error('expected a consented snapshot');
 
     expect(mockGetSetsSince).toHaveBeenCalledWith(WINDOW_START);
     expect(mockGetEntriesSince).toHaveBeenCalledWith(WINDOW_START);
     expect(built.reconciliation.observed.weighIns).toBe(1);
+  });
+
+  it('returns no snapshot and reads no health rows before explicit consent', async () => {
+    mockGetUser.mockResolvedValue({ ...user, consentedAt: null });
+
+    expect(await loadAdviceSnapshot(NOW)).toBeNull();
+    expect(mockGetWeightHistory).not.toHaveBeenCalled();
+    expect(mockGetSetsSince).not.toHaveBeenCalled();
+    expect(mockGetEntriesSince).not.toHaveBeenCalled();
   });
 });
