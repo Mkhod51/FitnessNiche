@@ -52,6 +52,7 @@ const user: User = {
   birthYear: null,
   goal: 'maintain',
   goalStartedAt: null,
+  trainingExperience: null,
   calorieTargetKcal: null,
   proteinTargetG: null,
   deficitKcal: 0,

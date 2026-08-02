@@ -65,7 +65,7 @@ export async function recordConsent(): Promise<User> {
  * to go through `src/domain/guards.ts`.
  */
 export async function updateProfile(
-  patch: Partial<Pick<User, 'sex' | 'heightCm' | 'birthYear' | 'goal' | 'numbersHidden'>>,
+  patch: Partial<Pick<User, 'sex' | 'heightCm' | 'birthYear' | 'goal' | 'numbersHidden' | 'trainingExperience'>>,
   now: Date = new Date(),
 ): Promise<User> {
   const db = getDrizzle();

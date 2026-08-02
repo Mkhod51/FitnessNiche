@@ -24,6 +24,7 @@ const user: User = {
   id: 'local-user', goal: 'maintain', sex: 'male', heightCm: 178, numbersHidden: false,
   calorieTargetKcal: null, proteinTargetG: null, deficitKcal: 0, birthYear: 1999,
   goalStartedAt: null,
+  trainingExperience: null,
   consentedAt: '2026-07-01T00:00:00.000Z', updatedAt: '2026-07-01T00:00:00.000Z',
 };
 
@@ -102,6 +103,31 @@ describe('GoalSetup — the estimate is told honestly', () => {
     renderGoalSetup();
     await waitFor(() => expect(screen.getByTestId('goal-maintain')).toHaveAttribute('aria-pressed', 'true'));
     expect(screen.getByText(/maintenance is the default/i)).toBeInTheDocument();
+  });
+
+  it('offers optional training experience choices with an explicit skip state', async () => {
+    renderGoalSetup();
+
+    expect(await screen.findByTestId('experience-skip')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('experience-new')).toBeInTheDocument();
+    expect(screen.getByTestId('experience-returning')).toBeInTheDocument();
+    expect(screen.getByTestId('experience-experienced')).toBeInTheDocument();
+    expect(screen.getByText(/training experience \(optional\)/i)).toBeInTheDocument();
+  });
+
+  it('allows clearing training experience and saving without a choice', async () => {
+    renderGoalSetup();
+    await waitFor(() => expect(screen.getByTestId('maintenance-estimate')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('experience-experienced'));
+    expect(screen.getByTestId('experience-experienced')).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByTestId('experience-skip'));
+    fireEvent.click(screen.getByTestId('save-goal-button'));
+
+    expect(await screen.findByTestId('goal-saved')).toBeVisible();
+    expect(mockUpdateProfile).toHaveBeenCalledWith(
+      expect.objectContaining({ trainingExperience: null }),
+    );
   });
 });
 

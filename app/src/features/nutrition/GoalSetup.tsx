@@ -13,6 +13,7 @@ import {
   type Sex,
 } from '../../domain/energy';
 import { targetForDeficit, maxAllowedDeficit, MAX_DAILY_DEFICIT_KCAL } from '../../domain/guards';
+import type { TrainingExperience } from '../../advice/types';
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 const FIGURE = 'font-figure tabular-nums';
@@ -37,6 +38,7 @@ const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
 };
 
 type Goal = 'cut' | 'maintain' | 'bulk';
+type ExperienceSelection = TrainingExperience | 'skip';
 
 function Segmented<T extends string>({
   value,
@@ -78,6 +80,7 @@ function GoalForm(): ReactElement {
   const [weightKg, setWeightKg] = useState('');
   const [activity, setActivity] = useState<ActivityLevel>('light');
   const [goal, setGoal] = useState<Goal>('maintain');
+  const [trainingExperience, setTrainingExperience] = useState<TrainingExperience | null>(null);
   const [deficit, setDeficit] = useState(0);
   const [saved, setSaved] = useState(false);
 
@@ -90,6 +93,7 @@ function GoalForm(): ReactElement {
       setUser(u);
       setSex(u.sex);
       setGoal(u.goal);
+      setTrainingExperience(u.trainingExperience);
       setDeficit(u.deficitKcal);
       if (u.heightCm) setHeightCm(String(u.heightCm));
       if (u.birthYear) setBirthYear(String(u.birthYear));
@@ -138,6 +142,7 @@ function GoalForm(): ReactElement {
       heightCm: Number(heightCm) || null,
       birthYear: Number(birthYear) || null,
       goal,
+      trainingExperience,
     });
     const protein = proteinTargetG(Number(weightKg));
     setUser(
@@ -183,6 +188,24 @@ function GoalForm(): ReactElement {
         />
         <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
           Maintenance is the default. Nothing here is set up to push you off it.
+        </p>
+      </section>
+
+      <section className="mt-6 border-t border-rule pt-4">
+        <p className={LABEL}>Training experience (optional)</p>
+        <Segmented<ExperienceSelection>
+          testId="experience"
+          value={trainingExperience ?? 'skip'}
+          onChange={(value) => setTrainingExperience(value === 'skip' ? null : value)}
+          options={[
+            { id: 'new', label: 'New' },
+            { id: 'returning', label: 'Returning' },
+            { id: 'experienced', label: 'Experienced' },
+            { id: 'skip', label: 'Skip' },
+          ]}
+        />
+        <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
+          You can skip this question or clear your answer at any time.
         </p>
       </section>
 

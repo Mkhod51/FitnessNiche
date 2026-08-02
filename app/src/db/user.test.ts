@@ -34,7 +34,7 @@ async function makeTestDb() {
 }
 
 // Imported after the mock above is set up (vi.mock is hoisted by vitest).
-import { getUser, recordConsent, hasConsented, LOCAL_USER_ID, type User } from './user';
+import { getUser, recordConsent, hasConsented, updateProfile, LOCAL_USER_ID, type User } from './user';
 
 const baseUser: User = {
   id: 'someone',
@@ -47,6 +47,7 @@ const baseUser: User = {
   deficitKcal: 0,
   birthYear: null,
   goalStartedAt: null,
+  trainingExperience: null,
   consentedAt: null,
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
@@ -70,6 +71,7 @@ describe('getUser / recordConsent against a real db', () => {
     const user = await getUser();
     expect(user.id).toBe(LOCAL_USER_ID);
     expect(user.consentedAt).toBeNull();
+    expect(user.trainingExperience).toBeNull();
   });
 
   it('does not create a second row on a later call — same fixed id, one row', async () => {
@@ -113,5 +115,22 @@ describe('getUser / recordConsent against a real db', () => {
 
     const rows = await testDz.select().from(schema.users);
     expect(rows).toHaveLength(1);
+  });
+
+  it('round-trips a supported optional training experience value', async () => {
+    await updateProfile({ trainingExperience: 'experienced' });
+
+    expect((await getUser()).trainingExperience).toBe('experienced');
+  });
+
+  it('rejects unsupported training experience values at the database boundary', async () => {
+    await getUser();
+
+    await expect(
+      testDz
+        .update(schema.users)
+        .set({ trainingExperience: 'expert' as 'experienced' })
+        .run(),
+    ).rejects.toThrow();
   });
 });

@@ -36,6 +36,7 @@ const user: User = {
   deficitKcal: 0,
   birthYear: null,
   goalStartedAt: new Date(T0).toISOString(),
+  trainingExperience: null,
   consentedAt: '2026-05-01T00:00:00.000Z',
   updatedAt: '2026-05-01T00:00:00.000Z',
 };

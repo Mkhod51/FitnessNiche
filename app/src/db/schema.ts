@@ -20,6 +20,11 @@ export const users = sqliteTable('users', {
   // When the current goal was set. Null means unknown — see 0004_goal_clock.sql
   // for why that is not backfilled to "now".
   goalStartedAt: text('goal_started_at'),
+  // Optional and explicit: absence means the person skipped the question. It is
+  // never inferred from their first workout or used as an access gate.
+  trainingExperience: text('training_experience', {
+    enum: ['new', 'returning', 'experienced'],
+  }),
   consentedAt: text('consented_at'), // GR-5: no logging before this is set
   updatedAt: text('updated_at').notNull(),
 });

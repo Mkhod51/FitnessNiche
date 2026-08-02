@@ -44,6 +44,7 @@ const user: User = {
   deficitKcal: 0,
   birthYear: null,
   goalStartedAt: '2026-07-01T12:00:00.000Z',
+  trainingExperience: null,
   consentedAt: '2026-07-01T12:00:00.000Z',
   updatedAt: '2026-07-01T12:00:00.000Z',
 };

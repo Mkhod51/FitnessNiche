@@ -2,6 +2,7 @@ import initSql from './migrations/0001_init.sql?raw';
 import trackersSql from './migrations/0002_trackers.sql?raw';
 import nutritionSql from './migrations/0003_nutrition.sql?raw';
 import goalClockSql from './migrations/0004_goal_clock.sql?raw';
+import trainingExperienceSql from './migrations/0005_training_experience.sql?raw';
 import type { SqlMethod } from './protocol';
 
 export type Exec = (sql: string, params?: unknown[], method?: SqlMethod) => Promise<unknown[][]>;
@@ -11,6 +12,7 @@ const MIGRATIONS: { name: string; sql: string }[] = [
   { name: '0002_trackers', sql: trackersSql },
   { name: '0003_nutrition', sql: nutritionSql },
   { name: '0004_goal_clock', sql: goalClockSql },
+  { name: '0005_training_experience', sql: trainingExperienceSql },
 ];
 
 // Execution order is array order — a migration appended out of sequence, or
