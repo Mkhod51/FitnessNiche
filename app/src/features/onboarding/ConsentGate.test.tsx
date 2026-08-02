@@ -17,6 +17,10 @@ const baseUser: User = {
   sex: 'unspecified',
   heightCm: null,
   numbersHidden: false,
+  calorieTargetKcal: null,
+  proteinTargetG: null,
+  deficitKcal: 0,
+  birthYear: null,
   consentedAt: null,
   updatedAt: '2026-01-01T00:00:00.000Z',
 };

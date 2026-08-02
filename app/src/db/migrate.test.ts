@@ -38,7 +38,7 @@ describe('runMigrations', () => {
     const f = fakeExec(['0001_init']);
     const done = await runMigrations(f.exec);
 
-    expect(done).toEqual(['0002_trackers']);
+    expect(done).toEqual(['0002_trackers', '0003_nutrition']);
     expect(f.statements.some((s) => s.includes('alter table sets add column set_type'))).toBe(true);
     expect(f.statements.some((s) => s.includes('create table if not exists advice_events'))).toBe(true);
     // 0001's body must not be replayed over a populated database.

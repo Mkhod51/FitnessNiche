@@ -35,7 +35,7 @@ test('migrations create the expected tables', async ({ page }) => {
     const rows = await execSql("select name from sqlite_master where type='table' order by name", [], 'all');
     return rows.map((r: unknown[]) => String(r[0]));
   });
-  expect(tables).toEqual(expect.arrayContaining(['_migrations', 'advice_events', 'exercises', 'sets', 'users', 'weights', 'workouts', 'sync_meta']));
+  expect(tables).toEqual(expect.arrayContaining(['_migrations', 'advice_events', 'exercises', 'food_items', 'food_log_entries', 'sets', 'users', 'weights', 'workouts', 'sync_meta']));
 });
 
 test('migrations add the expected columns to workouts and sets', async ({ page }) => {
@@ -53,4 +53,12 @@ test('migrations add the expected columns to workouts and sets', async ({ page }
   });
   expect(workoutCols).toEqual(expect.arrayContaining(['name', 'finished_at']));
   expect(setCols).toEqual(expect.arrayContaining(['set_type']));
+
+  const userCols = await page.evaluate(async () => {
+    const { execSql } = (window as unknown as { __db: { execSql: (sql: string, params?: unknown[], method?: string) => Promise<unknown[][]> } }).__db;
+    return (await execSql('pragma table_info(users)', [], 'all')).map((r: unknown[]) => String(r[1]));
+  });
+  expect(userCols).toEqual(
+    expect.arrayContaining(['calorie_target_kcal', 'protein_target_g', 'deficit_kcal', 'birth_year']),
+  );
 });
