@@ -9,4 +9,4 @@
 .playwright-mcp/
 .claude/
 graphify-out/
-
+.worktrees/
