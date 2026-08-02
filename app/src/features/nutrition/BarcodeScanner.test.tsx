@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
+import { StrictMode } from 'react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { BarcodeScanner } from './BarcodeScanner';
 
@@ -232,5 +233,20 @@ describe('BarcodeScanner', () => {
     // scanner to re-subscribe and re-request the camera mid-scan.
     rerender(<BarcodeScanner onDetected={vi.fn()} onClose={vi.fn()} />);
     expect(mockState.decodeCalls).toBe(1);
+  });
+
+  it('fires onDetected under React StrictMode, which double-invokes effects in dev', async () => {
+    render(
+      <StrictMode>
+        <BarcodeScanner onDetected={onDetected} onClose={onClose} />
+      </StrictMode>,
+    );
+    await vi.waitFor(() => expect(mockState.storedCallback).not.toBeNull());
+
+    await act(async () => {
+      mockState.storedCallback!({ getText: () => '5000159484695' }, undefined, { stop: mockState.mockStop });
+    });
+
+    expect(onDetected).toHaveBeenCalledWith('5000159484695');
   });
 });

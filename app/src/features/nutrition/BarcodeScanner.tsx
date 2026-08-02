@@ -19,7 +19,6 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
   const controlsRef = useRef<{ stop: () => void } | null>(null);
   const resolvedRef = useRef(false);
   const closeTimerRef = useRef<number | null>(null);
-  const mountedRef = useRef(true);
   // Latest-callback refs: the scanner subscribes once on mount (effect deps []),
   // so a parent passing a fresh onDetected/onClose each render cannot re-trigger
   // the camera. Re-subscribing here would re-acquire the camera mid-scan.
@@ -44,7 +43,6 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
   useEffect(() => {
     return () => {
       if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
-      mountedRef.current = false;
       if (controlsRef.current) {
         controlsRef.current.stop();
       }
@@ -56,7 +54,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
     if (!video) return;
 
     if (!navigator.mediaDevices?.getUserMedia) {
-      if (mountedRef.current) setError({ type: 'unavailable' });
+      setError({ type: 'unavailable' });
       return;
     }
 
@@ -84,18 +82,18 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
             resolvedRef.current = true;
             controlsRef.current = ctrl ?? controlsRef.current;
             ctrl?.stop();
-            if (mountedRef.current) onDetectedRef.current(code);
+            if (!cancelled) onDetectedRef.current(code);
             closeWithMotion();
           },
         );
 
-        if (cancelled || !mountedRef.current) {
+        if (cancelled) {
           controls.stop();
           return;
         }
         controlsRef.current = controls;
       } catch (err) {
-        if (cancelled || !mountedRef.current) return;
+        if (cancelled) return;
         const caught = err as { name?: string };
         setError(
           caught?.name === 'NotAllowedError' || caught?.name === 'SecurityError'
