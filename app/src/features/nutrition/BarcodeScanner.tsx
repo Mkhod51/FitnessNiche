@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { createPortal } from 'react-dom';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { BarcodeFormat, DecodeHintType } from '@zxing/library';
 import { isPlausibleBarcode } from '../../food/barcode';
@@ -111,8 +112,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
     };
   }, []);
 
-  if (error) {
-    return (
+  const surface = error ? (
       <div
         className={`fixed inset-0 z-50 bg-ink ${closing ? 'scanner-exit' : 'scanner-enter'}`}
         role="dialog"
@@ -142,10 +142,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
           </button>
         </div>
       </div>
-    );
-  }
-
-  return (
+    ) : (
     <div
       className={`fixed inset-0 z-50 bg-ink ${closing ? 'scanner-exit' : 'scanner-enter'}`}
       role="dialog"
@@ -163,12 +160,15 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
       <button
         type="button"
         onClick={closeWithMotion}
-        className="absolute right-4 top-4 min-h-[44px] font-sans text-[11px] text-paper"
+        className="absolute right-4 top-4 z-10 min-h-[44px] min-w-[44px] font-sans text-[11px] text-paper"
         aria-label="Close scanner"
       >
         ✕
       </button>
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div
+        data-testid="scanner-viewfinder-layer"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center"
+      >
         <div className="relative h-48 w-64">
           <div className="absolute inset-0 border-2 border-paper opacity-50" />
           <div className="absolute bottom-4 left-0 right-0 text-center">
@@ -178,4 +178,6 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
       </div>
     </div>
   );
+
+  return createPortal(surface, document.body);
 }

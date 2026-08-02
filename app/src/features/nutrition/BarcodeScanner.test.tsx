@@ -73,6 +73,33 @@ describe('BarcodeScanner', () => {
     expect(video).toBeInTheDocument();
   });
 
+  it('renders the scanner dialog at document body level so fixed sizing is viewport-based', () => {
+    const { container } = render(
+      <div data-testid="animated-picker-shell" style={{ transform: 'translate3d(0, 0, 0)', overflow: 'hidden' }}>
+        <BarcodeScanner onDetected={onDetected} onClose={onClose} />
+      </div>,
+    );
+
+    const dialog = screen.getByRole('dialog', { name: /barcode scanner/i });
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(dialog.parentElement).toBe(document.body);
+  });
+
+  it('keeps the decorative viewfinder from intercepting the close button tap', () => {
+    render(<BarcodeScanner onDetected={onDetected} onClose={onClose} />);
+
+    const viewfinderLayer = screen.getByTestId('scanner-viewfinder-layer');
+    expect(viewfinderLayer).toHaveClass('pointer-events-none');
+  });
+
+  it('keeps the close control thumb-sized in both dimensions', () => {
+    render(<BarcodeScanner onDetected={onDetected} onClose={onClose} />);
+
+    const closeButton = screen.getByRole('button', { name: /close scanner/i });
+    expect(closeButton).toHaveClass('min-h-[44px]');
+    expect(closeButton).toHaveClass('min-w-[44px]');
+  });
+
   it('should call onDetected once and stop controls on plausible barcode', async () => {
     vi.useFakeTimers();
     render(<BarcodeScanner onDetected={onDetected} onClose={onClose} />);
