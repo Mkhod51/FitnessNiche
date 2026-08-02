@@ -5,6 +5,7 @@ import type { StorageMode } from './db/protocol';
 import { Hub } from './features/hub/Hub';
 import { LogWorkout } from './features/log/LogWorkout';
 import { LogWeight } from './features/log/LogWeight';
+import { EatDay } from './features/nutrition/EatDay';
 
 type BootState = StorageMode | 'booting' | `error: ${string}`;
 
@@ -53,21 +54,6 @@ function AnimatedPane({ children }: { children: ReactNode }) {
       style={{ ['--pane-from' as string]: from }}
     >
       {children}
-    </div>
-  );
-}
-
-function EatPlaceholder() {
-  return (
-    <div className="mx-auto max-w-[480px] px-4 pt-6">
-      <h1 className="font-serif text-[20px] text-ink">Eat</h1>
-      <p className="mt-2 font-serif text-[15px] leading-[1.45] text-ink-soft">
-        Not built yet. Food logging, the day view and goal setting arrive with the nutrition
-        milestone.
-      </p>
-      <p className="mt-3 font-serif text-[12.5px] italic leading-[1.45] text-ink-faint">
-        Deliberately empty rather than mocked up — there is no data here to stand in for.
-      </p>
     </div>
   );
 }
@@ -122,7 +108,7 @@ function Shell() {
           <Routes>
             <Route path="/" element={<Hub />} />
             <Route path="/train" element={<LogWorkout />} />
-            <Route path="/eat" element={<EatPlaceholder />} />
+            <Route path="/eat" element={<EatDay />} />
             <Route path="/weight" element={<LogWeight />} />
             <Route path="/settings" element={<SettingsPlaceholder />} />
           </Routes>
