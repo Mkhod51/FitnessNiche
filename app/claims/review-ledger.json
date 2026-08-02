@@ -907,6 +907,137 @@
         ]
       },
       "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "candidate-advice-surface-exercise-selection-kompf",
+      "citationId": "candidate-cit-advice-surface-exercise-selection-kompf",
+      "doi": "10.1177/15598276221115662",
+      "resolvedOn": "2026-08-02",
+      "resolution": "direct-read-candidate; not eligible for YAML",
+      "sourceRead": "Direct full-text read via PMC11873903 and Firecrawl scrape; DOI displayed on the PMC article.",
+      "evidenceLocations": [
+        "PMC11873903, Abstract/Methods: a three-round Delphi-type process had 17 experts rate technical complexity and eight later-round experts assess novice appropriateness, with 70% agreement required.",
+        "PMC11873903, Methods/Procedures: novice means no resistance-training experience or no training for several years, and raters were instructed to assess technical components rather than load.",
+        "PMC11873903, Conclusion/Limitations: the authors frame the list as guidance rather than doctrine; some exercises and regressions were absent, and the list was not directed at adults with chronic conditions or functional limitations."
+      ],
+      "nullRationales": [
+        "This is a candidate-source record, not a drafted claim, so no source values, quote, effect size, CI, or population field is stored in a YAML record.",
+        "The study is expert consensus rather than an intervention outcome and cannot establish personal suitability, safety, or an individual exercise prescription."
+      ],
+      "populationRationale": "Any later claim must retain the paper's defined novice population and label its expert-consensus origin. Optional experience may rank this context but must not infer novice status from first use or hide the labelled source from another user.",
+      "gradeRationale": "No claim grade is assigned at intake. A future atomic claim must grade expert consensus independently of the source's exercise examples and preserve its stated limitations.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "Requires claim-specific direct-source hostile reviews before any YAML drafting."
+    },
+    {
+      "claimId": "candidate-advice-surface-mechanism-open-review",
+      "citationId": "candidate-cit-advice-surface-mechanism-krzysztofik",
+      "doi": "10.3390/ijerph16244897",
+      "resolvedOn": "2026-08-02",
+      "resolution": "direct-read-candidate; not eligible for YAML",
+      "sourceRead": "Direct full-text read via PMC6950543 and Firecrawl scrape; DOI displayed on the PMC article.",
+      "evidenceLocations": [
+        "PMC6950543, Abstract: the systematic review included 30 articles on advanced resistance-training methods and techniques.",
+        "PMC6950543, Discussion 3.1: the review describes mechanical tension as one factor in the conventional hypertrophy model and notes that high-load work emphasises mechanical tension and neural recruitment.",
+        "PMC6950543, Discussion 3.1: the review also reports that its summarized load comparisons have important volume and fatigue qualifications."
+      ],
+      "nullRationales": [
+        "The source is queued only for a non-prescriptive explanation; no load, volume, rest, or failure rule is extracted into a claim because those require separate direct support and scope review.",
+        "The source uses neural recruitment language but does not by itself establish a precise motor-unit-recruitment explanation suitable for a standalone claim."
+      ],
+      "populationRationale": "The review spans its included studies rather than one product-relevant population. Any future claim must expose the underlying applicability rather than relabel the mechanism as universal or personal.",
+      "gradeRationale": "No claim grade is assigned at intake. A future mechanism claim must distinguish an explanatory model from an intervention effect and grade the direct evidence for its exact wording.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "Requires claim-specific direct-source hostile reviews before any YAML drafting."
+    },
+    {
+      "claimId": "candidate-advice-surface-motor-unit-neural-review",
+      "citationId": "candidate-cit-advice-surface-motor-unit-neural",
+      "doi": "10.1007/s00421-022-04906-6",
+      "resolvedOn": "2026-08-02",
+      "resolution": "abstract-only candidate; blocked from YAML",
+      "sourceRead": "Direct publisher landing-page/abstract read via Firecrawl scrape; the full text was subscription-only at the checked route.",
+      "evidenceLocations": [
+        "Publisher abstract: the invited review describes motor-unit recruitment and mechanical tension as key roles in muscle-growth stimulus and discusses neural behaviour during resistance training.",
+        "Publisher access notice: full text requires institutional login or purchase at the checked route."
+      ],
+      "nullRationales": [
+        "The abstract is a discovery lead only under the project evidence rule; no source-derived claim field, quote, population, or grade can be authored from it.",
+        "No alternative direct full-text source has yet been read for a standalone motor-unit-recruitment explanation."
+      ],
+      "populationRationale": "No product claim can be scoped from this abstract-only record.",
+      "gradeRationale": "No grade is assigned because abstract-only access is insufficient for claim curation.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "Obtain and directly read full text or reject the candidate before any YAML drafting."
+    },
+    {
+      "claimId": "candidate-advice-surface-cut-murphy",
+      "citationId": "candidate-cit-advice-surface-cut-murphy",
+      "doi": "10.1111/sms.14075",
+      "resolvedOn": "2026-08-02",
+      "resolution": "direct-read-candidate; not eligible for YAML",
+      "sourceRead": "Direct full-text read from the Wiley article via Firecrawl scrape; DOI page was accessible at the checked route.",
+      "evidenceLocations": [
+        "Murphy and Koehler, Abstract/Methods: the synthesis examined randomized resistance-training interventions lasting at least three weeks and compared energy-deficit with non-deficit contexts; its primary paired analysis had a limited literature pool.",
+        "Murphy and Koehler, Results 3.5: the meta-regression estimates an approximately 500-kcal/day deficit at zero predicted lean-mass change.",
+        "Murphy and Koehler, Discussion 4: matched comparisons across separate studies, population differences, and DXA protocol differences limit interpretation."
+      ],
+      "nullRationales": [
+        "No goal-rate, intake target, or user-specific loss calculation is extracted: the source's meta-regression is a population model, not an individual prescription.",
+        "Existing M1 claims citing this DOI remain visibly pending-M6-review and are not silently promoted to a new surface."
+      ],
+      "populationRationale": "A future claim must retain the review's resistance-training and energy-deficiency eligibility limits and must not convert the model into a conclusion about a draft goal or a particular user.",
+      "gradeRationale": "No claim grade is assigned at intake. Any future atomic context claim must separately assess the limited paired literature and the mixed-study meta-regression design.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "Requires claim-specific direct-source hostile reviews before any YAML drafting."
+    },
+    {
+      "claimId": "candidate-advice-surface-bulk-slater",
+      "citationId": "candidate-cit-advice-surface-bulk-slater",
+      "doi": "10.3389/fnut.2019.00131",
+      "resolvedOn": "2026-08-02",
+      "resolution": "direct-read-candidate; map to reviewed evidence-gap record before YAML",
+      "sourceRead": "Direct full-text read via PMC6710320 and Firecrawl scrape; DOI displayed on the PMC article.",
+      "evidenceLocations": [
+        "PMC6710320, Abstract: the review states that the energy surplus needed to facilitate hypertrophy is unknown and that proposed sweet spots have not been validated in a resistance-training population.",
+        "PMC6710320, Energy Balance/Future Directions: it identifies limited direct evidence and individual-response and measurement constraints.",
+        "PMC6710320, Conclusions: the authors include practitioner advice that must not be repurposed as an app-level personal surplus recommendation."
+      ],
+      "nullRationales": [
+        "The candidate is only for an uncertainty statement; it cannot yield a surplus, weekly gain rate, or individual energy target.",
+        "The same DOI already supports the separately reviewed c-bulk-rate-surplus-unknown record; do not duplicate it as a new claim without an atomic, reviewed surface rationale."
+      ],
+      "populationRationale": "Any future context use must identify that the review discusses resistance-training populations and its evidence gaps; it cannot treat a selected bulk goal as proof of applicability.",
+      "gradeRationale": "No new grade is assigned at intake. The existing evidence-gap claim's reviewed C grade cannot be copied to a different statement without its own hostile review.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "Map to an existing reviewed claim or obtain claim-specific hostile reviews before any YAML drafting."
+    },
+    {
+      "claimId": "candidate-advice-surface-maintenance-no-claim",
+      "citationId": "candidate-cit-advice-surface-maintenance-bellicha",
+      "doi": "10.1111/obr.13256",
+      "resolvedOn": "2026-08-02",
+      "resolution": "direct-read-rejected; maintenance surface remains silent",
+      "sourceRead": "Direct full-text read via PMC8365736 and Firecrawl scrape; DOI displayed on the PMC article.",
+      "evidenceLocations": [
+        "PMC8365736, Abstract/Methods: this overview covers adults with overweight or obesity and summarizes exercise after weight loss, not draft maintenance-energy selection in resistance-training users.",
+        "PMC8365736, Results 3.4.4/3.5: the included evidence found no significant exercise effect on weight regain or on body-composition change during the maintenance phase.",
+        "PMC8365736, Discussion/Conclusion: the authors note only limited controlled maintenance evidence and call for more research."
+      ],
+      "nullRationales": [
+        "The evidence concerns a clinically distinct post-weight-loss population and exercise intervention, not a general calorie-maintenance or lifting-goal fact.",
+        "No claim is drafted because converting this result into a maintenance-goal card would change its population, outcome, and wellness scope."
+      ],
+      "populationRationale": "The source applies to adults with overweight or obesity after weight loss; it must not be generalized to MyoStat users selecting maintenance.",
+      "gradeRationale": "No grade is assigned because this candidate is rejected for the intended surface rather than rephrased into an out-of-scope claim.",
+      "firstReview": null,
+      "secondReview": null,
+      "nextReview": "Keep the maintenance surface silent unless a directly supported, scope-matched source is found and reviewed."
     }
   ]
 }
