@@ -24,12 +24,12 @@ describe('AskEvidence', () => {
     expect(screen.queryByTestId('claim-card')).toBeNull();
   });
 
-  it('renders a matching claim as a real ClaimCard carrying its stored claim id', () => {
+  it('renders matching claims as real ClaimCards carrying their stored claim ids', () => {
     render(<AskEvidence />);
     const input = screen.getByLabelText(/what does the evidence say/i);
     fireEvent.change(input, { target: { value: 'deloads' } });
-    const card = screen.getByTestId('claim-card');
-    expect(card).toHaveAttribute('data-claim-id', 'c-deloads-not-evidence-backed');
+    const cards = screen.getAllByTestId('claim-card');
+    expect(cards.some((card) => card.getAttribute('data-claim-id') === 'c-deloads-not-evidence-backed')).toBe(true);
   });
 
   it('renders both sides of a contested cluster in one card, never as two competing cards', () => {
@@ -62,7 +62,7 @@ describe('AskEvidence', () => {
     expect(screen.getByTestId('no-match')).toBeVisible();
     fireEvent.change(input, { target: { value: 'deloads' } });
     expect(screen.queryByTestId('no-match')).toBeNull();
-    expect(screen.getByTestId('claim-card')).toBeVisible();
+    expect(screen.getAllByTestId('claim-card')[0]).toBeVisible();
   });
 
   it('clearing the query back to empty shows neither results nor the no-match state', () => {
