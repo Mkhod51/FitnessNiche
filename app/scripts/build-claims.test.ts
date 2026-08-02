@@ -45,9 +45,9 @@ describe('buildClaims', () => {
       .toThrow(/unknown predicate variable/);
   });
 
-  it('rejects non-finite predicate numbers before generation can turn them into null', () => {
+  it.each(['.nan', '.inf'])('rejects %s predicate literals before generation can turn them into null', (literal) => {
     const bad = goodYaml
-      .replace('predicates: null', 'predicates: { "==": [.nan, .nan] }')
+      .replace('predicates: null', `predicates: { "==": [${literal}, ${literal}] }`)
       .replace('trigger: null', 'trigger: rule');
     expect(() => buildClaims([{ file: 'c-test-volume.yaml', yaml: bad }]))
       .toThrow(/finite numeric literal/);
