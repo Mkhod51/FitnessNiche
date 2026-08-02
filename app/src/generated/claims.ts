@@ -429,6 +429,52 @@ export const CLAIMS: Claim[] = [
     ]
   },
   {
+    "id": "c-diet-breaks-trained-females-body-composition",
+    "statement": "In resistance-trained females, a trial did not detect a body-composition difference between six weeks of continuous 25% energy restriction and an eight-week intermittent programme containing six restricted weeks in two-week blocks separated by two one-week energy-balance breaks",
+    "peekStatement": "A small trial suggests no detectable body-composition advantage from diet breaks.",
+    "grade": "C",
+    "status": "settled",
+    "domain": "energy-balance",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "diet-breaks-trained-females-body-composition",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-diet-breaks-siedler",
+        "claimId": "c-diet-breaks-trained-females-body-composition",
+        "doi": "10.5114/jhk/159960",
+        "authors": "Siedler MR, Lewis MH, Trexler ET, et al.",
+        "year": 2023,
+        "journal": "Journal of Human Kinetics",
+        "n": 38,
+        "population": "trained",
+        "effectSize": null,
+        "ci": null,
+        "figures": [
+          {
+            "label": "prescribed energy restriction",
+            "value": 25,
+            "unit": "%"
+          },
+          {
+            "label": "continuous restriction duration",
+            "value": 6,
+            "unit": "weeks"
+          },
+          {
+            "label": "intermittent energy-balance breaks",
+            "value": 2,
+            "unit": "weeks"
+          }
+        ],
+        "quote": null
+      }
+    ]
+  },
+  {
     "id": "c-failure-not-required",
     "statement": "Taking sets to failure is not required for strength or muscle growth, though in lifters who already train there is a small hypertrophy cost to stopping short",
     "peekStatement": "Taking sets to failure is not required for strength or growth",
@@ -957,6 +1003,57 @@ export const CLAIMS: Claim[] = [
           }
         ],
         "quote": "total protein intake was the strongest predictor of ES magnitude"
+      }
+    ]
+  },
+  {
+    "id": "c-refeed-dry-fat-free-mass-trained-adults",
+    "statement": "In a seven-week trial of resistance-trained adults, two carbohydrate-refeed days per week during energy restriction produced a smaller loss of dry fat-free mass than continuous restriction",
+    "peekStatement": "A small trial suggests less dry fat-free-mass loss with weekly carbohydrate refeeds.",
+    "grade": "C",
+    "status": "settled",
+    "domain": "energy-balance",
+    "predicates": null,
+    "trigger": null,
+    "clusterId": null,
+    "phrasingKey": "refeed-dry-fat-free-mass-trained-adults",
+    "supersededBy": null,
+    "lastReviewed": "2026-08-02",
+    "citations": [
+      {
+        "id": "cit-refeed-dry-fat-free-mass-campbell",
+        "claimId": "c-refeed-dry-fat-free-mass-trained-adults",
+        "doi": "10.3390/jfmk5010019",
+        "authors": "Campbell BI, Aguilar D, Colenso-Semple LM, et al.",
+        "year": 2020,
+        "journal": "Journal of Functional Morphology and Kinesiology",
+        "n": 27,
+        "population": "mixed",
+        "effectSize": "Dry fat-free mass changed by -0.2 kg with refeeding and -1.9 kg with continuous restriction (group-by-time interaction p <= 0.001).",
+        "ci": "Dry fat-free-mass change: refeeding -0.2 kg (95% CI -0.7 to 0.3); continuous restriction -1.9 kg (95% CI -2.7 to -1.2).",
+        "figures": [
+          {
+            "label": "trial duration",
+            "value": 7,
+            "unit": "weeks"
+          },
+          {
+            "label": "weekly carbohydrate-refeed days",
+            "value": 2,
+            "unit": "days"
+          },
+          {
+            "label": "dry fat-free-mass change, refeed",
+            "value": -0.2,
+            "unit": "kg"
+          },
+          {
+            "label": "dry fat-free-mass change, continuous restriction",
+            "value": -1.9,
+            "unit": "kg"
+          }
+        ],
+        "quote": null
       }
     ]
   },

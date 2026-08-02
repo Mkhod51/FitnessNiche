@@ -827,6 +827,86 @@
         ]
       },
       "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-diet-breaks-trained-females-body-composition",
+      "citationId": "cit-diet-breaks-siedler",
+      "doi": "10.5114/jhk/159960",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "Europe PMC full text for PMCID PMC10170537; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PMC10170537, Methods/Participants: 38 resistance-trained females (at least six months of self-attested training) completed the per-protocol analysis; both groups completed six weeks of prescribed 25% restriction, with the intermittent group taking two one-week energy-balance breaks.",
+        "PMC10170537, Results—Laboratory Measures: no significant group-by-time interaction for body weight, percent body fat, fat mass, or fat-free mass (all p >= 0.08); the intent-to-treat body-composition findings were also non-significant (all p >= 0.09).",
+        "PMC10170537, Discussion—Strengths and Limitations: weekly set volume differed between groups even though total prescribed volume was matched, limiting causal interpretation."
+      ],
+      "nullRationales": [
+        "The claim reports that this trial did not detect a body-composition difference; it does not store a comparative effect size or CI because those would not establish equivalence and are not needed for the narrow null-result record.",
+        "No publisher figure is stored; only source-read participant count, restriction amount, and programme durations are retained."
+      ],
+      "populationRationale": "The paper identifies resistance-trained females with at least six months of self-attested continuous training. The claim is confined to that sex and training context; the citation population is therefore trained.",
+      "gradeRationale": "This is one small controlled trial with substantial attrition and unequal weekly set volume between arms. Grade C and an explicit no-detected-difference statement avoid treating non-significance as evidence of equivalence or generalizing beyond resistance-trained females.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement is confined to this trial's resistance-trained female population, six weeks of restriction, and body-composition outcome.",
+          "It reports that the trial did not detect a group difference, not that diet breaks and continuous restriction are equivalent.",
+          "The known weekly-volume imbalance and attrition are reflected in the C grade and must not be hidden by the claim wording."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved after intervention-duration clarification",
+        "checks": [
+          "PMC10170537 directly supports 38 per-protocol resistance-trained females, six weeks of continuous 25% restriction versus six restricted weeks delivered over an eight-week intermittent programme with two one-week energy-balance breaks.",
+          "Laboratory body-composition group-by-time interactions were non-significant (all p >= 0.08); intent-to-treat body-composition findings were also non-significant (all p >= 0.09). The claim says the trial did not detect a difference rather than treating the conditions as equivalent.",
+          "Weekly set volume differed despite matched prescribed total volume and attrition was substantial; Grade C, null comparative effect/CI, trained-female scope, and search-only reachability are appropriate."
+        ]
+      },
+      "nextReview": "2027-08-02"
+    },
+    {
+      "claimId": "c-refeed-dry-fat-free-mass-trained-adults",
+      "citationId": "cit-refeed-dry-fat-free-mass-campbell",
+      "doi": "10.3390/jfmk5010019",
+      "resolvedOn": "2026-08-02",
+      "resolution": "resolved-Crossref",
+      "sourceRead": "Europe PMC full text for PMCID PMC7739314; DOI resolution checked directly with Crossref",
+      "evidenceLocations": [
+        "PMC7739314, Methods—Study Design/Participants: 27 resistance-trained men and women completed seven weeks of supervised resistance training while randomized to continuous restriction or five restricted days plus two carbohydrate-refeed days per week at maintenance intake.",
+        "PMC7739314, Results—Table 3: dry fat-free mass changed by -0.2 kg (95% CI -0.7 to 0.3) with refeeding and -1.9 kg (95% CI -2.7 to -1.2) with continuous restriction; the table marks a group-by-time interaction at p <= 0.001.",
+        "PMC7739314, Participants: 58 healthy resistance-trained adults were recruited, but 27 completed and were included in final analysis; training experience was self-attested."
+      ],
+      "nullRationales": [
+        "No publisher figure is stored; the source-read table values and confidence intervals are retained as extracted text.",
+        "The claim deliberately excludes the paper's broader fat-free-mass and resting-metabolic-rate interpretations because the directly read table identifies the group-by-time interaction only for dry fat-free mass."
+      ],
+      "populationRationale": "The source enrolled resistance-trained males and females and used a mixed-sex final sample; the claim retains that mixed trained-adult scope rather than applying it to a specific sex, competitive bodybuilders, or an individual diet plan.",
+      "gradeRationale": "One small seven-week controlled trial directly reports the dry-fat-free-mass interaction, but high attrition and self-attested training experience constrain confidence. Grade C reflects those limitations and the narrow outcome.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Statement will name the two refeed days, seven-week duration, resistance-trained mixed sample, and dry-fat-free-mass outcome only.",
+          "The stored change values, CIs, and group-by-time significance are read directly from Table 3.",
+          "Broader claims about fat-free mass or resting metabolic rate are excluded because they are not supported by the table's group-by-time results."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-08-02",
+        "verdict": "approved",
+        "checks": [
+          "PMC7739314 directly reports 27 final-analysis resistance-trained adults (13 refeed, 14 continuous; mixed sex) in a seven-week randomized comparison.",
+          "Table 3 supports dry fat-free-mass change of -0.2 kg (95% CI -0.7 to 0.3) versus -1.9 kg (95% CI -2.7 to -1.2), with the table's group-by-time marker p <= 0.001.",
+          "The claim correctly confines itself to dry fat-free mass, calculated as fat-free mass minus total body water; it does not extend to broader fat-free-mass or resting-metabolic-rate conclusions. High attrition and self-attested training justify Grade C and the narrow scope."
+        ]
+      },
+      "nextReview": "2027-08-02"
     }
   ]
 }

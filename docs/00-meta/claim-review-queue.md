@@ -26,3 +26,13 @@ does not replace a source review.
 4. Keep `pending-M6-review` entries unresolved until the M6 audit supplies
    direct-source evidence. The existing M1 citations retain their exact IDs and
    DOIs, but their missing review metadata must remain visibly unknown.
+
+## Deferred M6 scopes
+
+- No reactive-versus-scheduled-deload claim has been added. The direct sources
+  reviewed in this pass address reduced training dose or a long periodic
+  detraining block, not that comparison; neither should be relabelled as it.
+- No new standalone maintenance-energy adaptation claim has been added. The
+  directly read energy-deficit versus non-deficit synthesis is already cited by
+  M1 energy-balance claims that remain `pending-M6-review`; it must be audited
+  as part of the full M1 review rather than duplicated as a new claim.

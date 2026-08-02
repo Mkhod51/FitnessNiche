@@ -1,0 +1,39 @@
+id: c-diet-breaks-trained-females-body-composition
+statement: >-
+  In resistance-trained females, a trial did not detect a body-composition difference
+  between six weeks of continuous 25% energy restriction and an eight-week intermittent
+  programme containing six restricted weeks in two-week blocks separated by two one-week
+  energy-balance breaks
+peekStatement: >-
+  A small trial suggests no detectable body-composition advantage from diet breaks.
+grade: C
+status: settled
+domain: energy-balance
+predicates: null
+trigger: null
+clusterId: null
+phrasingKey: diet-breaks-trained-females-body-composition
+supersededBy: null
+lastReviewed: 2026-08-02
+citations:
+  - id: cit-diet-breaks-siedler
+    claimId: c-diet-breaks-trained-females-body-composition
+    doi: 10.5114/jhk/159960
+    authors: Siedler MR, Lewis MH, Trexler ET, et al.
+    year: 2023
+    journal: Journal of Human Kinetics
+    n: 38
+    population: trained
+    effectSize: null
+    ci: null
+    figures:
+      - label: prescribed energy restriction
+        value: 25
+        unit: "%"
+      - label: continuous restriction duration
+        value: 6
+        unit: weeks
+      - label: intermittent energy-balance breaks
+        value: 2
+        unit: weeks
+    quote: null
