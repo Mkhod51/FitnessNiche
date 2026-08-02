@@ -639,12 +639,12 @@ function LoggingSurface(): ReactElement {
                         {warm ? 'W' : working}
                       </td>
                       <td className={`${FIGURE} border-b border-rule py-2 text-left text-[13px] text-ink-faint`}>
-                        &mdash;
+                        -
                       </td>
                       <td className={`${FIGURE} border-b border-rule py-2 text-center text-[15px]`}>{s.weightKg}</td>
                       <td className={`${FIGURE} border-b border-rule py-2 text-center text-[15px]`}>{s.reps}</td>
                       <td className={`${FIGURE} border-b border-rule py-2 text-center text-[15px]`}>
-                        {warm ? '—' : (s.rir ?? '–')}
+                        {warm ? '-' : (s.rir ?? '–')}
                       </td>
                       <td className="border-b border-rule py-2">
                         <span className="tick-fill mx-auto flex h-[28px] w-[28px] items-center justify-center bg-ink text-paper">
@@ -692,7 +692,7 @@ function LoggingSurface(): ReactElement {
                         </button>
                       </td>
                       <td className={`${FIGURE} border-b border-rule py-1.5 text-left text-[13px] text-ink-faint`}>
-                        &mdash;
+                        -
                       </td>
                       <td className="border-b border-rule px-0.5 py-1.5">
                         <input
@@ -728,7 +728,7 @@ function LoggingSurface(): ReactElement {
                             warm ? 'opacity-40' : row.rir === null ? 'text-ink-faint' : 'text-ink'
                           }`}
                         >
-                          {warm ? '—' : (row.rir ?? '–')}
+                          {warm ? '-' : (row.rir ?? '–')}
                         </button>
                       </td>
                       <td className="border-b border-rule py-1.5">

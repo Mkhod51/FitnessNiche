@@ -44,7 +44,7 @@ export function TrendChart({ points, band, withinNoise, unit }: TrendChartProps)
   if (withinNoise) {
     return (
       <p data-testid="trend-noise-copy" className="font-serif text-[14px] text-ink-soft">
-        The recent change here can&apos;t be told apart from noise yet — not enough of a signal to call it a trend.
+        The recent change here can&apos;t be told apart from noise yet, not enough of a signal to call it a trend.
       </p>
     );
   }

@@ -235,7 +235,7 @@ function GoalForm(): ReactElement {
               options={[
                 { id: 'male', label: 'M' },
                 { id: 'female', label: 'F' },
-                { id: 'unspecified', label: '—' },
+                { id: 'unspecified', label: '-' },
               ]}
             />
           </div>
@@ -273,7 +273,7 @@ function GoalForm(): ReactElement {
             </p>
             <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
               Mifflin–St Jeor with an activity multiplier. These equations sit within about 10% of
-              measured expenditure for most people and further out for some — the range above is
+              measured expenditure for most people and further out for some. The range above is
               that error, not a rounding.
             </p>
             <p className="mt-3 font-serif text-[15px] leading-[1.45] text-ink">
@@ -324,7 +324,7 @@ function GoalForm(): ReactElement {
                 <div className="mt-4 border-t border-rule">
                   <ClaimCard claim={capClaim} />
                   <p className="px-4 pb-4 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-                    A population-level threshold from one meta-regression — not a number
+                    A population-level threshold from one meta-regression, not a number
                     calculated for you.
                   </p>
                 </div>
@@ -339,10 +339,10 @@ function GoalForm(): ReactElement {
               <span className="ml-1 text-[14px] text-ink-faint">kcal / day</span>
             </p>
             <p className={`${FIGURE} mt-1 text-[15px] text-ink-soft`}>
-              Protein {proteinTargetG(Number(weightKg)) ?? '—'} g
+              Protein {proteinTargetG(Number(weightKg)) ?? '-'} g
             </p>
             <p className="mt-1 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-              Protein follows 1.6 g per kg, where the evidence puts the plateau — a
+              Protein follows 1.6 g per kg, where the evidence puts the plateau, a
               population dose-response, not a prescription for you.
             </p>
 

@@ -38,5 +38,5 @@ export const GRADE_LANGUAGE = {
  * about a [C] (FR-ADV-5).
  */
 export function renderHeadline(claim: Claim): string {
-  return `${claim.statement} — ${GRADE_LANGUAGE[claim.grade].verb}.`;
+  return `${claim.statement}: ${GRADE_LANGUAGE[claim.grade].verb}.`;
 }

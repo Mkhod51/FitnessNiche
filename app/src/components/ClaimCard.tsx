@@ -80,7 +80,7 @@ export function ClaimCard({ claim, cluster }: { claim: Claim; cluster?: Claim[] 
       {contested && cluster ? (
         <>
           <p data-testid="contested-marker" className="mb-3 font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
-            contested — both sides shown
+            contested, both sides shown
           </p>
           <div className="flex flex-col gap-4">
             {cluster.map((side) => (

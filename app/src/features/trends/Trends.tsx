@@ -101,7 +101,7 @@ function TrendsSurface(): ReactElement {
             <TrendChart points={smoothed} withinNoise={false} unit="kg" />
             {smoothed.length > 0 && (
               <p className="mt-1 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-                Smoothed over a fortnight. The raw daily figure is never the signal — it moves
+                Smoothed over a fortnight. The raw daily figure is never the signal. It moves
                 with water and food long before it moves with fat.
               </p>
             )}
@@ -114,7 +114,7 @@ function TrendsSurface(): ReactElement {
         {strength.trend === 'insufficient_data' ? (
           <p data-testid="strength-insufficient" className="mt-1 font-serif text-[15px] leading-[1.45] text-ink-soft">
             {strength.qualifying.length === 0
-              ? 'No sets yet that can be used to estimate a 1RM. Only working sets at RIR 3 or closer, and 10 reps or fewer, qualify — and a set logged without an RIR cannot be used at all.'
+              ? 'No sets yet that can be used to estimate a 1RM. Only working sets at RIR 3 or closer, and 10 reps or fewer, qualify, and a set logged without an RIR cannot be used at all.'
               : `${strength.qualifying.length} qualifying set${strength.qualifying.length === 1 ? '' : 's'} so far. A trend needs at least eight before it can say anything a single reading could not.`}
           </p>
         ) : (
@@ -144,7 +144,7 @@ function TrendsSurface(): ReactElement {
         {muscles.length === 0 ? (
           <p data-testid="volume-empty" className="mt-1 font-serif text-[15px] leading-[1.45] text-ink-soft">
             Nothing logged in the last seven days, so there is nothing to count. This fills in as
-            you train — it is not an estimate waiting on more data.
+            you train. It is not an estimate waiting on more data.
           </p>
         ) : (
           <>

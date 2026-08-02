@@ -106,7 +106,7 @@ function DayView(): ReactElement {
               : 'Logged. Figures are hidden, and your training log is unaffected.'}
           </p>
           <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-            Performance framing only — no figures, no target, nothing to fall short of.
+            Performance framing only, no figures, no target, nothing to fall short of.
           </p>
         </section>
       ) : (
@@ -181,7 +181,7 @@ function DayView(): ReactElement {
           </p>
           <p className="mt-1 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
             Over {weekAvg.days} logged {weekAvg.days === 1 ? 'day' : 'days'} in the last seven. The week is
-            the number that means something — a single logged day carries far more error than the
+            the number that means something; a single logged day carries far more error than the
             difference you are looking for.
           </p>
         </section>

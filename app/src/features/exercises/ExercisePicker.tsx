@@ -212,8 +212,8 @@ export function ExercisePicker({
           <div key={matches.length} className="figure-settle">
           {matches.length === 0 ? (
             <p className="px-4 py-5 font-serif text-[15px] leading-[1.45] text-ink-soft">
-              Nothing matches “{query.trim()}”. The catalogue is {SEED_EXERCISES.length} exercises —
-              it does not cover everything, and there is no way to add your own yet.
+              Nothing matches “{query.trim()}”. The catalogue is {SEED_EXERCISES.length} exercises.
+              It does not cover everything, and there is no way to add your own yet.
             </p>
           ) : (
             <ul>{matches.map((e) => row(e.id, e.name, `${e.modality} · ${primaryMuscle(e.id)}`))}</ul>

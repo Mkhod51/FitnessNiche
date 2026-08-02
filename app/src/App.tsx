@@ -109,7 +109,7 @@ function Shell() {
           ? mode
           : isBooting
             ? 'checking storage…'
-            : `data loss risk — storage fell back to ${mode}, nothing you do here is guaranteed to be saved`}
+            : `data loss risk. Storage fell back to ${mode}, nothing you do here is guaranteed to be saved`}
       </p>
 
       <main className="flex-1 overflow-x-hidden">

@@ -73,7 +73,7 @@ describe('renderHeadline', () => {
     // you get if a verb keeps a leading 'is', and it reads as broken English on
     // every card in the feed.
     expect(renderHeadline(claimWith('A'))).toBe(
-      'Training more produces more growth — well-supported.',
+      'Training more produces more growth: well-supported.',
     );
   });
 

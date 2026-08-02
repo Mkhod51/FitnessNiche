@@ -138,7 +138,7 @@ export function parseHevyCsv(csv: string): ParseResult {
     const names = [...missing, ...(iKg === -1 && iLb === -1 ? ['weight_kg or weight_lbs'] : [])];
     return {
       sets,
-      problems: [{ row: 1, reason: `this does not look like a Hevy export — missing ${names.join(', ')}` }],
+      problems: [{ row: 1, reason: `this does not look like a Hevy export, missing ${names.join(', ')}` }],
       unmatchedExercises: [],
       setsWithRir: 0,
     };

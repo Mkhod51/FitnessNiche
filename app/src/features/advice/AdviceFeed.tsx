@@ -57,7 +57,7 @@ export function AdviceFeed(): ReactElement {
           // the scene is a glance between sets. Same admission, fewer words, set as
           // a note rather than as the headline.
           <p data-testid="no-user-data" className="font-serif text-[13px] leading-[1.45] text-ink-soft">
-            Nothing here is earned by your own data yet — logging ships next. Below is
+            Nothing here is earned by your own data yet. Logging ships next. Below is
             the evidence base itself, exactly as strong or as weak as the studies
             behind it.
           </p>

@@ -125,7 +125,7 @@ export function Settings(): ReactElement {
     setSyncMsg(null);
   }
 
-  const lastReviewed = CLAIMS.map((c) => c.lastReviewed).sort().at(-1) ?? '—';
+  const lastReviewed = CLAIMS.map((c) => c.lastReviewed).sort().at(-1) ?? '-';
 
   return (
     <div className="mx-auto max-w-[480px] pb-10">
@@ -136,7 +136,7 @@ export function Settings(): ReactElement {
       <p className={`${LABEL} px-4 pt-2 pb-1`}>You</p>
       <Link to="/goal" data-testid="settings-goal-link" className={`${ROW} ${TAP} active:bg-paper-sunk`}>
         <span className="font-serif text-[15.5px] text-ink">Goal and calorie target</span>
-        <span className={LABEL}>{user?.goal ?? '—'} ›</span>
+        <span className={LABEL}>{user?.goal ?? '-'} ›</span>
       </Link>
       <div className={ROW}>
         <span className="font-serif text-[15.5px] text-ink">Height</span>
@@ -202,7 +202,7 @@ export function Settings(): ReactElement {
           <span className="block font-serif text-[12px] italic leading-[1.4] text-ink-faint">
             {user?.consentedAt
               ? `Consented ${new Date(user.consentedAt).toLocaleDateString()}`
-              : 'No consent recorded — logging is off until you give it.'}
+              : 'No consent recorded. Logging is off until you give it.'}
           </span>
         </span>
       </div>
@@ -232,7 +232,7 @@ export function Settings(): ReactElement {
         <span className="min-w-0">
           <span className="block font-serif text-[15.5px] text-ink">Sync</span>
           <span data-testid="sync-status" className="block font-serif text-[12px] italic leading-[1.4] text-ink-faint">
-            {syncCfg ? `Configured → ${syncCfg.url}` : 'Off — logs stay on this device'}
+            {syncCfg ? `Configured → ${syncCfg.url}` : 'Off. Logs stay on this device.'}
           </span>
         </span>
       </div>
@@ -310,21 +310,21 @@ export function Settings(): ReactElement {
         {syncCfg ? (
           <>
             <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
-              Everything you log — sets, bodyweight, meals — is stored in a database on this
+              Everything you log (sets, bodyweight, meals) is stored in a database on this
               device and replicates to the server at <span className="break-all">{syncCfg.url}</span>.
               The connection uses a bearer token stored only on this device, never sent anywhere
               except to that server to authenticate sync.
             </p>
             <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
               &ldquo;Delete all my data&rdquo; below erases this device only. It does not erase
-              what the server already holds — server-side erasure is not yet wired. Export above
+              what the server already holds. Server-side erasure is not yet wired. Export above
               gives you a copy of everything on this device.
             </p>
           </>
         ) : (
           <>
             <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
-              Everything you log — sets, bodyweight, meals — is stored in a database on this device.
+              Everything you log (sets, bodyweight, meals) is stored in a database on this device.
               Logs stay on this device unless you configure sync. There is no account.
             </p>
             <p className="mt-2 font-serif text-[14px] leading-[1.5] text-ink">
@@ -333,7 +333,7 @@ export function Settings(): ReactElement {
               exist: you can take your data out, and you can erase it, without asking anyone.
             </p>
             <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-              Clearing this site&rsquo;s storage in your browser erases it too — there is no copy
+              Clearing this site&rsquo;s storage in your browser erases it too. There is no copy
               of your logs for us to restore from.
             </p>
           </>
@@ -394,8 +394,8 @@ export function Settings(): ReactElement {
           This app is not a clinical tool and cannot assess anyone. If you want to talk to someone
           who can:
         </p>
-        <p className="mt-2 font-serif text-[15px] text-ink">Beat — beateatingdisorders.org.uk</p>
-        <p className="mt-1 font-serif text-[15px] text-ink">NHS — nhs.uk</p>
+        <p className="mt-2 font-serif text-[15px] text-ink">Beat: beateatingdisorders.org.uk</p>
+        <p className="mt-1 font-serif text-[15px] text-ink">NHS: nhs.uk</p>
       </div>
 
       <p className={`${LABEL} px-4 pt-3 pb-1`}>The evidence base</p>

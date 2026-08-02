@@ -134,7 +134,7 @@ export function Hub(): ReactElement {
           The evidence base
         </h1>
         <p className="mt-1 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-          Every claim graded and cited. None of them is about you yet — that needs logged data.
+          Every claim graded and cited. None of them is about you yet. That needs logged data.
         </p>
       </section>
 

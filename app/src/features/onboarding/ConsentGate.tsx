@@ -75,7 +75,7 @@ export function ConsentGate({ children }: { children: ReactNode }): ReactElement
           onClick={handleAccept}
           className={`${BUTTON_BASE} bg-ink text-paper`}
         >
-          I agree — start logging
+          I agree, start logging
         </button>
         <button
           type="button"

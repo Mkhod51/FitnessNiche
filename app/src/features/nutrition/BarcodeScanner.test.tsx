@@ -198,7 +198,7 @@ describe('BarcodeScanner', () => {
 
     render(<BarcodeScanner onDetected={onDetected} onClose={onClose} />);
 
-    expect(screen.getByText(/Camera unavailable — type the barcode below/i)).toBeInTheDocument();
+    expect(screen.getByText(/Camera unavailable. Type the barcode below/i)).toBeInTheDocument();
   });
 
   it('should stop controls on unmount', async () => {

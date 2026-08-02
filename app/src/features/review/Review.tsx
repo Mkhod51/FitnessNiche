@@ -53,7 +53,7 @@ const VERDICT_COPY: Record<VerdictId, { headline: string; detail: string; claimI
   },
   not_landing: {
     headline: 'The scale has not moved.',
-    detail: 'Whatever the intake target says, the smoothed trend is flat — so the deficit is not landing.',
+    detail: 'Whatever the intake target says, the smoothed trend is flat, so the deficit is not landing.',
     claimId: null,
   },
   strength_falling: {
@@ -76,9 +76,9 @@ const VERDICT_COPY: Record<VerdictId, { headline: string; detail: string; claimI
 /** What each unresolved signal needs before it can be read. */
 const UNRESOLVED_COPY: Record<'weight' | 'strength', string> = {
   weight:
-    'Bodyweight — a smoothed trend needs a fortnight of weigh-ins before it means anything. Daily readings swing more than a real change does.',
+    'Bodyweight: a smoothed trend needs a fortnight of weigh-ins before it means anything. Daily readings swing more than a real change does.',
   strength:
-    'Strength — the e1RM estimate is a regression across sessions, and there are not enough qualifying ones yet. Only sets at RIR 3 or below, at 10 reps or fewer, can be used.',
+    'Strength: the e1RM estimate is a regression across sessions, and there are not enough qualifying ones yet. Only sets at RIR 3 or below, at 10 reps or fewer, can be used.',
 };
 
 /**
@@ -249,7 +249,7 @@ function ReviewSurface(): ReactElement {
             ))}
           </ul>
           <p className="mt-2 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
-            The verdict above is held back rather than guessed. Nothing here is a failure — it is a
+            The verdict above is held back rather than guessed. Nothing here is a failure. It is a
             sample size.
           </p>
         </section>
@@ -303,7 +303,7 @@ function ReviewSurface(): ReactElement {
           </p>
         ) : proteinPerKg7d === null ? (
           <p className="mt-1 font-serif text-[14px] leading-[1.45] text-ink-soft">
-            Nothing to measure yet — this needs food logged on a day you trained.
+            Nothing to measure yet. This needs food logged on a day you trained.
           </p>
         ) : (
           <>

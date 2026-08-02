@@ -142,7 +142,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
           <p className="font-serif text-[16px] leading-[1.5] text-paper">
             {error.type === 'permission'
               ? 'Camera permission was blocked. Enable it in your browser or site settings, or type the barcode below.'
-              : 'Camera unavailable — type the barcode below.'}
+              : 'Camera unavailable. Type the barcode below.'}
           </p>
           <button
             type="button"

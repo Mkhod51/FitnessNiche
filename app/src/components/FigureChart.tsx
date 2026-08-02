@@ -107,7 +107,7 @@ function UnitPlot({ unit, figures }: { unit: string; figures: Figure[] }): React
         return (
           <div key={f.label} className="mt-1.5">
             <span className="block font-figure tabular-nums text-[10px] text-ink">
-              {f.label} — {f.value} {unit}
+              {f.label}: {f.value} {unit}
             </span>
             <svg viewBox="0 0 100 8" preserveAspectRatio="none" className="mt-0.5 h-2 w-full text-ink" role="presentation">
               {/* the zero baseline is always in the domain, so a value sitting on
@@ -135,7 +135,7 @@ function FigureValues({ figures }: { figures: Figure[] }): ReactElement {
     <div data-testid="figure-values" className="flex flex-col gap-1">
       {figures.map((f) => (
         <span key={f.label} className="font-figure tabular-nums text-[10px] text-ink">
-          {f.label} — {f.value}
+          {f.label}: {f.value}
           {f.unit ? ` ${f.unit}` : ''}
         </span>
       ))}

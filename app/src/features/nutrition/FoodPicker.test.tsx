@@ -152,7 +152,7 @@ describe('FoodPicker', () => {
     renderPicker();
 
     expect(await screen.findByText(/You'll need wifi to search for new foods/i)).toHaveTextContent(
-      'Your recent and common foods are still here \u2014 and quick-add works without a connection.',
+      'Your recent and common foods are still here, and quick-add works without a connection.',
     );
     expect(screen.getByText('Chicken breast, grilled')).toBeInTheDocument();
   });
@@ -168,7 +168,7 @@ describe('FoodPicker', () => {
     fireEvent.change(input, { target: { value: 'skyr' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
-    expect(await screen.findByText(/2 results hidden \u2014 missing enough nutrition data/i)).toBeInTheDocument();
+    expect(await screen.findByText(/2 results hidden, missing enough nutrition data/i)).toBeInTheDocument();
   });
 
   it('keeps the incomplete-result warning qualitative when figures are hidden', async () => {

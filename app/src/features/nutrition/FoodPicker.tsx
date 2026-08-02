@@ -109,7 +109,7 @@ function WifiNotice({ quickAddAvailable }: { quickAddAvailable: boolean }): Reac
     <div data-testid="food-offline-notice" className="mx-4 mb-3 mt-1 bg-paper-sunk px-3.5 py-3">
       <p className="font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
         You&apos;ll need wifi to search for new foods. Your recent and common foods are still here
-        {quickAddAvailable ? <> &mdash; and quick-add works without a connection.</> : '.'}
+        {quickAddAvailable ? <>, and quick-add works without a connection.</> : '.'}
       </p>
     </div>
   );
@@ -650,7 +650,7 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
               {figuresHidden ? (
                 'Some results hidden because they did not include enough nutrition data. Not shown rather than guessed.'
               ) : (
-                <>{onlineHidden} {onlineHidden === 1 ? 'result' : 'results'} hidden &mdash; missing enough nutrition data. Not shown rather than guessed.</>
+                <>{onlineHidden} {onlineHidden === 1 ? 'result' : 'results'} hidden, missing enough nutrition data. Not shown rather than guessed.</>
               )}
             </p>
           )}
