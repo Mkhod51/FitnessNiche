@@ -75,7 +75,7 @@ function loggedAtFor(day: Date): Date {
 
 function FoodRow({ food, hidden, onSelect }: { food: PickedFood; hidden: boolean; onSelect: () => void }): ReactElement {
   return (
-    <li className="border-b border-rule last:border-b-0">
+    <li className="food-result-row border-b border-rule last:border-b-0">
       <button
         type="button"
         onClick={onSelect}
@@ -626,13 +626,21 @@ export function FoodPicker({ mealSlot, day, onLogged, onClose }: FoodPickerProps
         <>
           {searchPhase === 'searching' && <SearchProgress />}
           {currentLocalResults.length > 0 && (
-            <section>
+            <section
+              key={`local-${localResultsQuery}-${currentLocalResults.length}`}
+              data-testid="food-local-results"
+              className="food-results-block"
+            >
               <div className="px-4 pb-1 pt-3"><p className={LABEL}>Local results</p></div>
               <ul>{currentLocalResults.map((food) => <FoodRow key={food.id} food={food} hidden={figuresHidden} onSelect={() => pick(food)} />)}</ul>
             </section>
           )}
           {showOnlineResults && onlineResults.length > 0 && (
-            <section>
+            <section
+              key={`online-${onlineResultsQuery}-${onlineResults.length}-${onlineHidden}`}
+              data-testid="food-online-results"
+              className="food-results-block"
+            >
               <div className="px-4 pb-1 pt-3"><p className={LABEL}>Results · Open Food Facts</p></div>
               <ul>{onlineResults.map((food, index) => <FoodRow key={`${food.barcode ?? food.name}-${index}`} food={food} hidden={figuresHidden} onSelect={() => pick(food)} />)}</ul>
             </section>

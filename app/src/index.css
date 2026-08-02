@@ -220,6 +220,46 @@ input[type="search"]::-webkit-search-cancel-button {
   overflow: hidden;
 }
 
+/* When the picker closes, the meal's add control returns to the exact place the
+   expanding sheet came from. The grid track carries that relationship; opacity
+   only softens the first frame. */
+@keyframes food-add-return {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0.2;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+.food-add-return {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: food-add-return var(--motion-move) var(--motion-ease) backwards;
+}
+.food-add-return > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Result groups can arrive, disappear and change count while the user types.
+   Opening the group and each row from its own height keeps the rest of the day
+   from snapping vertically as the database answers. */
+.food-results-block {
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  animation: disclose var(--motion-move) var(--motion-ease) backwards;
+}
+.food-results-block > * {
+  min-height: 0;
+  overflow: hidden;
+}
+.food-result-row {
+  animation: row-open var(--motion-move) var(--motion-ease) backwards;
+}
+
 /* The camera scanner arrives as a full-screen sheet rising from the bottom
    edge, and leaves the same way — same grammar as the food picker, so the two
    never disagree about how a surface enters. */

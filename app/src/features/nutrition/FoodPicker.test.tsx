@@ -198,6 +198,20 @@ describe('FoodPicker', () => {
     expect(mockLookupBarcode).not.toHaveBeenCalled();
   });
 
+  it('animates result groups and rows so search result height changes settle smoothly', async () => {
+    mockSearchFoodLocal.mockResolvedValue([food({ name: 'Skyr, plain' })]);
+    mockSearchFoodOnline.mockResolvedValue({ drafts: [offDraft({ name: 'Skyr Plain OFF' })], hidden: 0 });
+    renderPicker();
+
+    const input = await screen.findByRole('searchbox');
+    fireEvent.change(input, { target: { value: 'skyr' } });
+
+    expect(await screen.findByTestId('food-local-results')).toHaveClass('food-results-block');
+    expect(await screen.findByTestId('food-online-results')).toHaveClass('food-results-block');
+    expect(screen.getByText('Skyr, plain').closest('li')).toHaveClass('food-result-row');
+    expect(screen.getByText('Skyr Plain OFF').closest('li')).toHaveClass('food-result-row');
+  });
+
   it('looks up a plausible barcode automatically and renders the matching OFF food', async () => {
     const barcode = '5000159484695';
     const draft = offDraft({ name: 'Heinz Baked Beans', barcode, kcalPer100g: 78, proteinGPer100g: 4.7, carbsGPer100g: 12.5, fatGPer100g: 0.2 });

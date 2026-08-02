@@ -223,6 +223,25 @@ describe('EatDay — logging', () => {
     await waitFor(() => expect(screen.getByText(/no target set/i)).toBeInTheDocument());
   });
 
+  it('renders the empty meal state as supporting copy close to the meal label', async () => {
+    render(<EatDay />);
+
+    const breakfast = await screen.findByTestId('meal-breakfast');
+    const empty = screen.getAllByText('Nothing added')[0];
+
+    expect(breakfast).toContainElement(empty);
+    expect(empty).toHaveClass('mt-1.5');
+    expect(empty).toHaveClass('font-serif');
+    expect(empty).not.toHaveClass('uppercase');
+  });
+
+  it('renders the add-food control inside its return animation shell', async () => {
+    render(<EatDay />);
+
+    expect(await screen.findByTestId('add-food-lunch')).toBeInTheDocument();
+    expect(screen.getByTestId('add-food-lunch-shell')).toHaveClass('food-add-return');
+  });
+
   it('reports the weekly average over days actually logged, and says so', async () => {
     mockGetEntriesSince.mockResolvedValue([
       entry({ id: 'a', kcal: 2000, loggedAt: '2026-07-26T08:00:00.000Z' }),

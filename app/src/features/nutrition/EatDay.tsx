@@ -199,7 +199,11 @@ function DayView(): ReactElement {
               )}
             </div>
 
-            {rows.length === 0 && <p className={`${LABEL} mt-1`}>Nothing logged</p>}
+            {rows.length === 0 && (
+              <p className="mt-1.5 font-serif text-[13px] italic leading-[1.35] text-ink-soft">
+                Nothing added
+              </p>
+            )}
 
             <ul>
               {rows.map((e) => (
@@ -233,14 +237,16 @@ function DayView(): ReactElement {
                 onClose={() => setAdding(null)}
               />
             ) : (
-              <button
-                type="button"
-                data-testid={`add-food-${slot}`}
-                onClick={() => setAdding(slot)}
-                className={`${LABEL} mt-2 min-h-[44px] text-ink ${TAP}`}
-              >
-                + Add food
-              </button>
+              <div data-testid={`add-food-${slot}-shell`} className="food-add-return">
+                <button
+                  type="button"
+                  data-testid={`add-food-${slot}`}
+                  onClick={() => setAdding(slot)}
+                  className={`${LABEL} mt-2 min-h-[44px] text-ink ${TAP}`}
+                >
+                  + Add food
+                </button>
+              </div>
             )}
           </section>
         );
