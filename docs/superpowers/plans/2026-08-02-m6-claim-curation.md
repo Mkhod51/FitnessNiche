@@ -20,6 +20,29 @@
 
 ---
 
+### Task 0: Make the weekly-volume test independent of wall-clock date
+
+**Files:**
+- Modify: `app/src/features/trends/Trends.test.tsx`
+
+**Interfaces:**
+- The production rolling-seven-day calculation remains unchanged.
+- The weekly-volume fixture must be inside the test's controlled current week.
+
+- [ ] **Step 1: Confirm the existing test fails because its 2026-07-25 fixture is outside today’s rolling week.**
+
+Run: `npm test -- --run src/features/trends/Trends.test.tsx`
+
+- [ ] **Step 2: Make the test own time explicitly.**
+
+Use Vitest fake timers and `vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'))` in the relevant suite, then restore real timers in `afterEach`. Keep the fixture unchanged so the test proves a set on 25 July is included in that controlled week.
+
+- [ ] **Step 3: Run the focused test and commit.**
+
+Run: `npm test -- --run src/features/trends/Trends.test.tsx`
+
+Commit: `stabilize weekly volume test date`
+
 ### Task 1: Make curation records and authoring controls auditable
 
 **Files:**
