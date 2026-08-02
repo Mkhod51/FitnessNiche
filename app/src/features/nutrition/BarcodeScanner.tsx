@@ -18,6 +18,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
   const [closing, setClosing] = useState(false);
   const [error, setError] = useState<{ type: 'permission' | 'unavailable' } | null>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const resolvedRef = useRef(false);
   const closeTimerRef = useRef<number | null>(null);
   // Latest-callback refs: the scanner subscribes once on mount (effect deps []),
@@ -41,12 +42,18 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
     }, SCANNER_MOTION_MS);
   }
 
+  function stopScanner() {
+    controlsRef.current?.stop();
+    controlsRef.current = null;
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }
+
   useEffect(() => {
     return () => {
       if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
-      if (controlsRef.current) {
-        controlsRef.current.stop();
-      }
+      stopScanner();
     };
   }, []);
 
@@ -72,9 +79,20 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
 
         // ponytail: seam — a Capacitor native barcode plugin replaces this decode block; onDetected/onClose stay unchanged
         const reader = new BrowserMultiFormatReader(hints);
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+        });
 
-        const controls = await reader.decodeFromConstraints(
-          { video: { facingMode: 'environment' } },
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
+        streamRef.current = stream;
+        video!.srcObject = stream;
+        await video!.play();
+
+        const controls = await reader.decodeFromVideoElement(
           video!,
           (result, _error, ctrl) => {
             if (!result || resolvedRef.current) return;
@@ -82,7 +100,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
             if (!isPlausibleBarcode(code)) return;
             resolvedRef.current = true;
             controlsRef.current = ctrl ?? controlsRef.current;
-            ctrl?.stop();
+            stopScanner();
             if (!cancelled) onDetectedRef.current(code);
             closeWithMotion();
           },
@@ -95,6 +113,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
         controlsRef.current = controls;
       } catch (err) {
         if (cancelled) return;
+        stopScanner();
         const caught = err as { name?: string };
         setError(
           caught?.name === 'NotAllowedError' || caught?.name === 'SecurityError'
@@ -108,7 +127,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps): Re
 
     return () => {
       cancelled = true;
-      if (controlsRef.current) controlsRef.current.stop();
+      stopScanner();
     };
   }, []);
 

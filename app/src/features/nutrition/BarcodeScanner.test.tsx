@@ -12,7 +12,7 @@ vi.mock('../../motion', () => ({
 
 // Create a mock module that can be configured per test
 const mockState = {
-  decodeImpl: null as any,
+  decodeVideoImpl: null as any,
   storedCallback: null as ((result: any, error?: any, controls?: any) => void) | null,
   mockStop: null as any,
   decodeCalls: 0,
@@ -20,14 +20,13 @@ const mockState = {
 
 vi.mock('@zxing/browser', () => ({
   BrowserMultiFormatReader: class {
-    decodeFromConstraints = async (
-      constraints: any,
+    decodeFromVideoElement = async (
       video: any,
       callback: (result?: any, error?: any, controls?: any) => void
     ) => {
       mockState.decodeCalls += 1;
-      if (mockState.decodeImpl) {
-        return mockState.decodeImpl(constraints, video, callback);
+      if (mockState.decodeVideoImpl) {
+        return mockState.decodeVideoImpl(video, callback);
       }
       mockState.storedCallback = callback;
       const mockControls = { stop: mockState.mockStop };
@@ -40,20 +39,32 @@ vi.mock('@zxing/browser', () => ({
 describe('BarcodeScanner', () => {
   let onDetected: any;
   let onClose: any;
+  let mockTrackStop: any;
+  let mockStream: MediaStream;
 
   beforeEach(() => {
     onDetected = vi.fn();
     onClose = vi.fn();
+    mockTrackStop = vi.fn();
+    mockStream = {
+      getTracks: vi.fn(() => [{ stop: mockTrackStop }]),
+    } as unknown as MediaStream;
 
     // Reset mock state
     mockState.storedCallback = null;
     mockState.mockStop = vi.fn();
-    mockState.decodeImpl = null;
+    mockState.decodeVideoImpl = null;
     mockState.decodeCalls = 0;
+
+    Object.defineProperty(HTMLMediaElement.prototype, 'play', {
+      configurable: true,
+      writable: true,
+      value: vi.fn().mockResolvedValue(undefined),
+    });
 
     // Reset navigator.mediaDevices
     Object.defineProperty(navigator, 'mediaDevices', {
-      value: { getUserMedia: vi.fn() },
+      value: { getUserMedia: vi.fn().mockResolvedValue(mockStream) },
       configurable: true,
       writable: true,
     });
@@ -98,6 +109,21 @@ describe('BarcodeScanner', () => {
     const closeButton = screen.getByRole('button', { name: /close scanner/i });
     expect(closeButton).toHaveClass('min-h-[44px]');
     expect(closeButton).toHaveClass('min-w-[44px]');
+  });
+
+  it('attaches a granted camera stream to the video before starting the decoder', async () => {
+    render(<BarcodeScanner onDetected={onDetected} onClose={onClose} />);
+
+    const video = screen.getByRole('dialog').querySelector('video')!;
+
+    await vi.waitFor(() => {
+      expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
+        video: { facingMode: { ideal: 'environment' } },
+      });
+      expect(video.srcObject).toBe(mockStream);
+      expect(video.play).toHaveBeenCalled();
+      expect(mockState.decodeCalls).toBe(1);
+    });
   });
 
   it('should call onDetected once and stop controls on plausible barcode', async () => {
@@ -151,7 +177,7 @@ describe('BarcodeScanner', () => {
   });
 
   it('should show permission denied message on NotAllowedError', async () => {
-    mockState.decodeImpl = vi.fn().mockRejectedValueOnce({ name: 'NotAllowedError' });
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockRejectedValueOnce({ name: 'NotAllowedError' });
 
     render(<BarcodeScanner onDetected={onDetected} onClose={onClose} />);
 
@@ -186,6 +212,7 @@ describe('BarcodeScanner', () => {
     unmount();
 
     expect(mockState.mockStop).toHaveBeenCalled();
+    expect(mockTrackStop).toHaveBeenCalled();
   });
 
   it('should call onClose when close button is clicked', () => {
@@ -204,7 +231,7 @@ describe('BarcodeScanner', () => {
 
   it('should call onClose when type barcode button is clicked in error state', async () => {
     vi.useFakeTimers();
-    mockState.decodeImpl = vi.fn().mockRejectedValueOnce({ name: 'NotAllowedError' });
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockRejectedValueOnce({ name: 'NotAllowedError' });
 
     render(<BarcodeScanner onDetected={onDetected} onClose={onClose} />);
 
