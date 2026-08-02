@@ -13,6 +13,7 @@ predicates:
     - "<":
         - var: sets
         - 10
+trigger: rule
 clusterId: null
 phrasingKey: volume-dose-response
 supersededBy: null

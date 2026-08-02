@@ -9,6 +9,7 @@ grade: B
 status: settled
 domain: deloads
 predicates: null
+trigger: null
 clusterId: null
 phrasingKey: deloads-unsupported
 supersededBy: null

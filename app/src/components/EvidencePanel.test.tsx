@@ -8,7 +8,7 @@ const claim: Claim = {
   statement: 'More weekly sets produce more growth, with diminishing returns',
   peekStatement: 'Short curated form',
   grade: 'C', status: 'settled', domain: 'volume',
-  predicates: null, clusterId: null, phrasingKey: 'test-volume',
+  predicates: null, trigger: null, clusterId: null, phrasingKey: 'test-volume',
   supersededBy: null, lastReviewed: '2026-06-01',
   citations: [
     {

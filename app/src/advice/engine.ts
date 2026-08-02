@@ -1,6 +1,7 @@
 import jsonLogic from 'json-logic-js';
 import type { AdviceItem, Claim, UserStateSnapshot } from './types.ts';
 import { renderHeadline } from './language.ts';
+import { validatePredicate } from './claim-schema.ts';
 
 /**
  * The state of a user who has logged nothing. M1 has no logging, so this is the
@@ -29,8 +30,9 @@ export function buildPredicateContext(snapshot: UserStateSnapshot): Record<strin
 }
 
 function matches(claim: Claim, context: Record<string, unknown>): boolean {
-  if (claim.predicates === null) return false;
+  if (claim.predicates === null || claim.trigger === null) return false;
   try {
+    validatePredicate(claim.predicates);
     return jsonLogic.apply(claim.predicates, context) === true;
   } catch {
     // A predicate that throws is an authoring bug. Staying silent is the honest
@@ -41,23 +43,26 @@ function matches(claim: Claim, context: Record<string, unknown>): boolean {
 
 export function evaluateClaims(snapshot: UserStateSnapshot, claims: Claim[]): AdviceItem[] {
   const context = buildPredicateContext(snapshot);
-  const selected = new Map<string, Claim>();
+  const selected = new Map<string, { claim: Claim; trigger: 'rule' | 'data-earned' }>();
 
   for (const claim of claims) {
     if (!matches(claim, context)) continue;
-    selected.set(claim.id, claim);
+    const trigger = claim.trigger as 'rule' | 'data-earned';
+    selected.set(claim.id, { claim, trigger });
     // FR-ADV-6: a contested claim never travels alone. Pull in its whole cluster
     // so the UI has both sides available without asking the engine twice.
     if (claim.status === 'contested' && claim.clusterId) {
       for (const sibling of claims) {
-        if (sibling.clusterId === claim.clusterId) selected.set(sibling.id, sibling);
+        if (sibling.clusterId === claim.clusterId && !selected.has(sibling.id)) {
+          selected.set(sibling.id, { claim: sibling, trigger });
+        }
       }
     }
   }
 
-  return [...selected.values()].map((claim) => ({
+  return [...selected.values()].map(({ claim, trigger }) => ({
     claimId: claim.id,
-    trigger: 'rule' as const,
+    trigger,
     headline: renderHeadline(claim),
     snapshot,
   }));

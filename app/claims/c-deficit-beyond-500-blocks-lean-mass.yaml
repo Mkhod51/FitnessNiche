@@ -15,6 +15,7 @@ predicates:
     - ">=":
         - var: deficitWeeks
         - 4
+trigger: rule
 clusterId: null
 phrasingKey: deficit-500-threshold
 supersededBy: null

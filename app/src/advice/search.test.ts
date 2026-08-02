@@ -13,6 +13,7 @@ function claim(over: Partial<Claim> = {}): Claim {
     status: 'settled',
     domain: 'volume',
     predicates: null,
+    trigger: null,
     clusterId: null,
     phrasingKey: 'test-a',
     supersededBy: null,

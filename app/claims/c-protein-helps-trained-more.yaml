@@ -8,6 +8,7 @@ grade: B
 status: settled
 domain: protein-dose
 predicates: null
+trigger: null
 clusterId: null
 phrasingKey: protein-trained-benefit
 supersededBy: null

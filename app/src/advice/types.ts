@@ -47,6 +47,8 @@ export interface Claim {
   domain: string;
   /** null = the claim is only ever surfaced via search, never rule-triggered. */
   predicates: JsonLogicRule | null;
+  /** Declares whether a matching predicate is generic context or earned from logged data. */
+  trigger: 'rule' | 'data-earned' | null;
   /** Contested claims sharing a clusterId are opposing sides of one question. */
   clusterId: string | null;
   phrasingKey: string;

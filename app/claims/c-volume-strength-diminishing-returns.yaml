@@ -13,6 +13,7 @@ predicates:
     - ">":
         - var: sets
         - 20
+trigger: rule
 clusterId: null
 phrasingKey: volume-strength-diminishing
 supersededBy: null

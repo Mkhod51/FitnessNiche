@@ -11,6 +11,7 @@ predicates:
   "!=":
     - var: proteinPerKg7d
     - null
+trigger: rule
 clusterId: protein-timing
 phrasingKey: protein-timing-total-dominates
 supersededBy: null

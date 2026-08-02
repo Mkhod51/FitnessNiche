@@ -9,6 +9,7 @@ grade: A
 status: settled
 domain: volume
 predicates: null
+trigger: null
 clusterId: null
 phrasingKey: test-volume
 supersededBy: null
@@ -34,6 +35,22 @@ describe('buildClaims', () => {
     expect(claims).toHaveLength(1);
     expect(claims[0].id).toBe('c-test-volume');
     expect(claims[0].grade).toBe('A');
+  });
+
+  it('rejects an unknown variable before a predicate reaches the runtime evaluator', () => {
+    const bad = goodYaml
+      .replace('predicates: null', 'predicates: { "==": [{ var: unknown }, 1] }')
+      .replace('trigger: null', 'trigger: rule');
+    expect(() => buildClaims([{ file: 'c-test-volume.yaml', yaml: bad }]))
+      .toThrow(/unknown predicate variable/);
+  });
+
+  it('rejects non-finite predicate numbers before generation can turn them into null', () => {
+    const bad = goodYaml
+      .replace('predicates: null', 'predicates: { "==": [.nan, .nan] }')
+      .replace('trigger: null', 'trigger: rule');
+    expect(() => buildClaims([{ file: 'c-test-volume.yaml', yaml: bad }]))
+      .toThrow(/finite numeric literal/);
   });
 
   it('names the offending file when a claim is malformed', () => {

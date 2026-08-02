@@ -8,6 +8,7 @@ grade: B
 status: settled
 domain: failure-proximity
 predicates: null
+trigger: null
 clusterId: null
 phrasingKey: failure-trained-edge
 supersededBy: null

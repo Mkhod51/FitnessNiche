@@ -9,6 +9,7 @@ grade: C
 status: settled
 domain: rest-intervals
 predicates: null
+trigger: null
 clusterId: null
 phrasingKey: rest-interval-60s
 supersededBy: null

@@ -19,6 +19,10 @@ predicates:
     - "==":
         - var: e1rmTrend
         - holding
+    - "==":
+        - var: weightTrend
+        - down
+trigger: data-earned
 clusterId: null
 phrasingKey: strength-robust-to-deficit
 supersededBy: null

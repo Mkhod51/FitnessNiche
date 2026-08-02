@@ -15,6 +15,7 @@ predicates:
     - "<":
         - var: proteinPerKg7d
         - 1.6
+trigger: rule
 clusterId: null
 phrasingKey: protein-dose-plateau
 supersededBy: null

@@ -34,6 +34,7 @@ function claimWith(grade: Grade): Claim {
     status: 'settled',
     domain: 'volume',
     predicates: null,
+    trigger: null,
     clusterId: null,
     phrasingKey: 'test-x',
     supersededBy: null,

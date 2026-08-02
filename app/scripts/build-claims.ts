@@ -5,6 +5,8 @@ import { parse } from 'yaml';
 import { claimSchema } from '../src/advice/claim-schema.ts';
 import type { Claim } from '../src/advice/types.ts';
 
+export { validatePredicate } from '../src/advice/claim-schema.ts';
+
 export interface ClaimSource {
   file: string;
   yaml: string;

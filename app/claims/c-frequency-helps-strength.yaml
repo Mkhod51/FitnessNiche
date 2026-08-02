@@ -8,6 +8,7 @@ grade: B
 status: settled
 domain: frequency
 predicates: null
+trigger: null
 clusterId: null
 phrasingKey: frequency-strength
 supersededBy: null

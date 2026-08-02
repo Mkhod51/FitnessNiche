@@ -8,6 +8,7 @@ grade: C
 status: contested
 domain: protein-timing
 predicates: null
+trigger: null
 clusterId: protein-timing
 phrasingKey: protein-timing-distribution
 supersededBy: null

@@ -9,6 +9,7 @@ const valid = {
   status: 'settled',
   domain: 'volume',
   predicates: null,
+  trigger: null,
   clusterId: null,
   phrasingKey: 'test-example',
   supersededBy: null,
@@ -34,6 +35,123 @@ const valid = {
 describe('claimSchema', () => {
   it('accepts a well-formed claim', () => {
     expect(() => claimSchema.parse(valid)).not.toThrow();
+  });
+
+  it('requires every claim to declare how its predicate is triggered', () => {
+    const { trigger: _drop, ...withoutTrigger } = valid;
+    expect(() => claimSchema.parse(withoutTrigger)).toThrow();
+  });
+
+  it.each(['rule', 'data-earned'])('accepts a %s trigger only with a predicate', (trigger) => {
+    const predicates = { '==': [{ var: 'goal' }, 'cut'] };
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger })).not.toThrow();
+    expect(() => claimSchema.parse({ ...valid, trigger })).toThrow(/predicate/i);
+  });
+
+  it('accepts a null trigger only for a search-only claim', () => {
+    const predicates = { '==': [{ var: 'goal' }, 'cut'] };
+    expect(() => claimSchema.parse({ ...valid, predicates })).toThrow(/trigger/i);
+  });
+
+  it('rejects an unknown predicate operator', () => {
+    const predicates = { approximately: [{ var: 'deficitWeeks' }, 4] };
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger: 'rule' }))
+      .toThrow(/unknown predicate operator/);
+  });
+
+  it('rejects an unknown predicate variable at any depth', () => {
+    const predicates = {
+      and: [
+        { '==': [{ var: 'goal' }, 'cut'] },
+        { '>=': [{ var: 'unknown' }, 4] },
+      ],
+    };
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger: 'rule' }))
+      .toThrow(/unknown predicate variable/);
+  });
+
+  it.each([
+    { and: [{ '==': [{ var: 'goal' }, 'cut'] }] },
+    { '!': [{ '==': [{ var: 'goal' }, 'cut'] }, true] },
+    { '==': [{ var: 'goal' }] },
+    { some: [{ var: 'muscleSets' }] },
+  ])('rejects invalid operator arity: %j', (predicates) => {
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger: 'rule' }))
+      .toThrow(/predicate operator.*expects/);
+  });
+
+  it('accepts literal arrays as predicate operands', () => {
+    const predicates = { '==': [[1, 2], [1, 2]] };
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger: 'rule' })).not.toThrow();
+  });
+
+  it('keeps muscle and sets variables inside a muscleSets some scope', () => {
+    const scoped = {
+      some: [
+        { var: 'muscleSets' },
+        {
+          and: [
+            { '==': [{ var: 'muscle' }, 'chest'] },
+            { '<': [{ var: 'sets' }, 10] },
+          ],
+        },
+      ],
+    };
+    expect(() => claimSchema.parse({ ...valid, predicates: scoped, trigger: 'rule' })).not.toThrow();
+    expect(() => claimSchema.parse({
+      ...valid,
+      predicates: { '<': [{ var: 'sets' }, 10] },
+      trigger: 'rule',
+    })).toThrow(/unknown predicate variable.*some/i);
+  });
+
+  it('does not let root snapshot variables masquerade as fields inside some', () => {
+    const predicates = {
+      some: [
+        { var: 'muscleSets' },
+        { '==': [{ var: 'goal' }, 'cut'] },
+      ],
+    };
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger: 'rule' }))
+      .toThrow(/unknown predicate variable.*some/i);
+  });
+
+  it('rejects an ordered protein comparison without a preceding null guard', () => {
+    const predicates = { '<': [{ var: 'proteinPerKg7d' }, 1.6] };
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger: 'rule' }))
+      .toThrow(/proteinPerKg7d.*null guard/);
+  });
+
+  it('requires the protein null guard to precede the comparison in the same and', () => {
+    const predicates = {
+      and: [
+        { '<': [{ var: 'proteinPerKg7d' }, 1.6] },
+        { '!=': [{ var: 'proteinPerKg7d' }, null] },
+      ],
+    };
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger: 'rule' }))
+      .toThrow(/proteinPerKg7d.*null guard/);
+  });
+
+  it('accepts an ordered protein comparison after its null guard', () => {
+    const predicates = {
+      and: [
+        { '!=': [{ var: 'proteinPerKg7d' }, null] },
+        { '<': [{ var: 'proteinPerKg7d' }, 1.6] },
+      ],
+    };
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger: 'rule' })).not.toThrow();
+  });
+
+  it('does not mistake an expression containing protein for a real null guard', () => {
+    const predicates = {
+      and: [
+        { '!=': [{ '==': [{ var: 'proteinPerKg7d' }, 1] }, null] },
+        { '<': [{ var: 'proteinPerKg7d' }, 1.6] },
+      ],
+    };
+    expect(() => claimSchema.parse({ ...valid, predicates, trigger: 'rule' }))
+      .toThrow(/proteinPerKg7d.*null guard/);
   });
 
   it('rejects a claim with no grade', () => {

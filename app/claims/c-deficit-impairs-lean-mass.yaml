@@ -15,6 +15,7 @@ predicates:
     - ">=":
         - var: deficitWeeks
         - 3
+trigger: rule
 clusterId: null
 phrasingKey: deficit-impairs-lean-mass
 supersededBy: null

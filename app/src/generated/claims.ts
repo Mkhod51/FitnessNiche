@@ -31,6 +31,7 @@ export const CLAIMS: Claim[] = [
         }
       ]
     },
+    "trigger": "rule",
     "clusterId": null,
     "phrasingKey": "deficit-500-threshold",
     "supersededBy": null,
@@ -85,6 +86,7 @@ export const CLAIMS: Claim[] = [
         }
       ]
     },
+    "trigger": "rule",
     "clusterId": null,
     "phrasingKey": "deficit-impairs-lean-mass",
     "supersededBy": null,
@@ -124,6 +126,7 @@ export const CLAIMS: Claim[] = [
     "status": "settled",
     "domain": "deloads",
     "predicates": null,
+    "trigger": null,
     "clusterId": null,
     "phrasingKey": "deloads-unsupported",
     "supersededBy": null,
@@ -168,6 +171,7 @@ export const CLAIMS: Claim[] = [
     "status": "settled",
     "domain": "failure-proximity",
     "predicates": null,
+    "trigger": null,
     "clusterId": null,
     "phrasingKey": "failure-not-required",
     "supersededBy": null,
@@ -226,6 +230,7 @@ export const CLAIMS: Claim[] = [
     "status": "settled",
     "domain": "failure-proximity",
     "predicates": null,
+    "trigger": null,
     "clusterId": null,
     "phrasingKey": "failure-proximity-dose",
     "supersededBy": null,
@@ -255,6 +260,7 @@ export const CLAIMS: Claim[] = [
     "status": "settled",
     "domain": "failure-proximity",
     "predicates": null,
+    "trigger": null,
     "clusterId": null,
     "phrasingKey": "failure-trained-edge",
     "supersededBy": null,
@@ -305,6 +311,7 @@ export const CLAIMS: Claim[] = [
     "status": "settled",
     "domain": "frequency",
     "predicates": null,
+    "trigger": null,
     "clusterId": null,
     "phrasingKey": "frequency-strength",
     "supersededBy": null,
@@ -348,6 +355,7 @@ export const CLAIMS: Claim[] = [
     "status": "settled",
     "domain": "frequency",
     "predicates": null,
+    "trigger": null,
     "clusterId": null,
     "phrasingKey": "frequency-volume-equated",
     "supersededBy": null,
@@ -424,6 +432,7 @@ export const CLAIMS: Claim[] = [
         }
       ]
     },
+    "trigger": "rule",
     "clusterId": null,
     "phrasingKey": "protein-dose-plateau",
     "supersededBy": null,
@@ -467,6 +476,7 @@ export const CLAIMS: Claim[] = [
     "status": "settled",
     "domain": "protein-dose",
     "predicates": null,
+    "trigger": null,
     "clusterId": null,
     "phrasingKey": "protein-trained-benefit",
     "supersededBy": null,
@@ -507,6 +517,7 @@ export const CLAIMS: Claim[] = [
     "status": "settled",
     "domain": "protein-dose",
     "predicates": null,
+    "trigger": null,
     "clusterId": null,
     "phrasingKey": "protein-supplementation",
     "supersededBy": null,
@@ -560,6 +571,7 @@ export const CLAIMS: Claim[] = [
     "status": "contested",
     "domain": "protein-timing",
     "predicates": null,
+    "trigger": null,
     "clusterId": "protein-timing",
     "phrasingKey": "protein-timing-distribution",
     "supersededBy": null,
@@ -640,6 +652,7 @@ export const CLAIMS: Claim[] = [
         null
       ]
     },
+    "trigger": "rule",
     "clusterId": "protein-timing",
     "phrasingKey": "protein-timing-total-dominates",
     "supersededBy": null,
@@ -690,6 +703,7 @@ export const CLAIMS: Claim[] = [
     "status": "settled",
     "domain": "rest-intervals",
     "predicates": null,
+    "trigger": null,
     "clusterId": null,
     "phrasingKey": "rest-interval-60s",
     "supersededBy": null,
@@ -793,9 +807,18 @@ export const CLAIMS: Claim[] = [
             },
             "holding"
           ]
+        },
+        {
+          "==": [
+            {
+              "var": "weightTrend"
+            },
+            "down"
+          ]
         }
       ]
     },
+    "trigger": "data-earned",
     "clusterId": null,
     "phrasingKey": "strength-robust-to-deficit",
     "supersededBy": null,
@@ -852,6 +875,7 @@ export const CLAIMS: Claim[] = [
         }
       ]
     },
+    "trigger": "rule",
     "clusterId": null,
     "phrasingKey": "volume-dose-response",
     "supersededBy": null,
@@ -946,6 +970,7 @@ export const CLAIMS: Claim[] = [
         }
       ]
     },
+    "trigger": "rule",
     "clusterId": null,
     "phrasingKey": "volume-strength-diminishing",
     "supersededBy": null,
