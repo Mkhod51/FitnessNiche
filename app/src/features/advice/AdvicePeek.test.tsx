@@ -6,10 +6,22 @@ import { CLAIMS } from '../../generated/claims';
 const claimA = CLAIMS.find((c) => c.id === 'c-volume-dose-response')!;
 const claimC = CLAIMS.find((c) => c.id === 'c-rest-at-least-60-seconds')!;
 
-function open(claim = claimA, why?: string) {
+function open(
+  claim = claimA,
+  why?: string,
+  kind?: 'general-evidence' | 'snapshot',
+) {
   const onDismiss = vi.fn();
   const onSuppress = vi.fn();
-  render(<AdvicePeek claim={claim} why={why} onDismiss={onDismiss} onSuppress={onSuppress} />);
+  render(
+    <AdvicePeek
+      claim={claim}
+      why={why}
+      kind={kind}
+      onDismiss={onDismiss}
+      onSuppress={onSuppress}
+    />,
+  );
   return { onDismiss, onSuppress };
 }
 
@@ -40,8 +52,19 @@ describe('AdvicePeek — principle 7 survives the small surface', () => {
   });
 
   it('states why it fired as a fact about the user, not a recommendation', () => {
-    open(claimA, 'Chest · 8.5 sets in the last 7 days');
+    open(claimA, 'Chest · 8.5 sets in the last 7 days', 'snapshot');
     expect(screen.getByText(/8\.5 sets in the last 7 days/)).toBeInTheDocument();
+  });
+
+  it('labels general evidence and hides an accidental personal why line', () => {
+    open(claimA, 'Chest · 8.5 sets in the last 7 days', 'general-evidence');
+
+    expect(screen.getByText('General evidence')).toBeInTheDocument();
+    expect(screen.queryByText(/8\.5 sets in the last 7 days/)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('advice-expand'));
+    expect(screen.getByText('General evidence')).toBeInTheDocument();
+    expect(screen.queryByTestId('advice-why')).not.toBeInTheDocument();
   });
 });
 

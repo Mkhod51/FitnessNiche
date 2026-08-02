@@ -29,6 +29,9 @@ import {
 import { loadAdviceSnapshot } from '../../advice/load-snapshot';
 import { EMPTY_SNAPSHOT } from '../../advice/engine';
 import type { BuiltSnapshot } from '../../advice/snapshot';
+import { selectSurfaceAdvice } from '../../advice/surface-advice';
+import type { AdviceItem } from '../../advice/types';
+import { CLAIMS } from '../../generated/claims';
 
 vi.mock('../../db/user', async () => {
   const actual = await vi.importActual<typeof import('../../db/user')>('../../db/user');
@@ -76,6 +79,10 @@ vi.mock('../../db/advice-events', async () => {
 });
 
 vi.mock('../../advice/load-snapshot', () => ({ loadAdviceSnapshot: vi.fn() }));
+vi.mock('../../advice/surface-advice', async () => {
+  const actual = await vi.importActual<typeof import('../../advice/surface-advice')>('../../advice/surface-advice');
+  return { ...actual, selectSurfaceAdvice: vi.fn() };
+});
 
 const mockGetUser = vi.mocked(getUser);
 const mockFindOpenWorkout = vi.mocked(findOpenWorkout);
@@ -97,7 +104,16 @@ const mockSuppressedClaimIds = vi.mocked(suppressedClaimIds);
 const mockRecentlyShownClaimIds = vi.mocked(recentlyShownClaimIds);
 const mockShownInWorkout = vi.mocked(shownInWorkout);
 const mockLoadAdviceSnapshot = vi.mocked(loadAdviceSnapshot);
+const mockSelectSurfaceAdvice = vi.mocked(selectSurfaceAdvice);
 const BENCH_ID = 'barbell-bench-press';
+const SQUAT_ID = 'barbell-back-squat';
+
+const exerciseAdviceItem: AdviceItem = {
+  claimId: 'c-rest-at-least-60-seconds',
+  trigger: 'surface-context',
+  headline: 'Rest periods affect training performance',
+  snapshot: EMPTY_SNAPSHOT,
+};
 
 const emptyBuiltSnapshot: BuiltSnapshot = {
   snapshot: EMPTY_SNAPSHOT,
@@ -219,6 +235,7 @@ function resetMocks() {
   mockRecentlyShownClaimIds.mockReset();
   mockShownInWorkout.mockReset();
   mockLoadAdviceSnapshot.mockReset();
+  mockSelectSurfaceAdvice.mockReset();
 
   mockGetUser.mockResolvedValue(consentedUser);
   mockFindOpenWorkout.mockResolvedValue(undefined);
@@ -238,6 +255,16 @@ function resetMocks() {
   mockRecentlyShownClaimIds.mockResolvedValue([]);
   mockShownInWorkout.mockResolvedValue(false);
   mockLoadAdviceSnapshot.mockResolvedValue(emptyBuiltSnapshot);
+  mockSelectSurfaceAdvice.mockReturnValue(null);
+}
+
+async function chooseExercise(exerciseId: string) {
+  fireEvent.click(await screen.findByTestId('add-exercise-button'));
+  fireEvent.click(
+    (await screen.findAllByTestId('exercise-row')).find(
+      (row) => row.getAttribute('data-exercise-id') === exerciseId,
+    )!,
+  );
 }
 
 describe('LogWorkout — GR-5: unreachable without consent', () => {
@@ -353,6 +380,140 @@ describe('LogWorkout — State B: an open session', () => {
     fireEvent.click(await screen.findByTestId('tick-button'));
     await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
     expect(mockLoadAdviceSnapshot).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows one cited General evidence card after the first chosen exercise', async () => {
+    mockGetOpenSessionSets.mockResolvedValue([]);
+    mockLoadAdviceSnapshot.mockResolvedValue(null);
+    mockGetUser.mockResolvedValue({ ...consentedUser, trainingExperience: 'experienced' });
+    mockSelectSurfaceAdvice.mockReturnValue(exerciseAdviceItem);
+
+    render(<LogWorkout />);
+    await chooseExercise(BENCH_ID);
+
+    const peek = await screen.findByTestId('advice-peek');
+    expect(peek).toHaveTextContent('General evidence');
+    fireEvent.click(screen.getByTestId('advice-expand'));
+    const card = screen.getByTestId('claim-card');
+    expect(card).toHaveAttribute(
+      'data-claim-id',
+      exerciseAdviceItem.claimId,
+    );
+    const selectedClaim = CLAIMS.find((claim) => claim.id === exerciseAdviceItem.claimId)!;
+    expect(screen.getByTestId('claim-source')).toHaveTextContent(
+      selectedClaim.citations[0]!.year.toString(),
+    );
+    expect(mockSelectSurfaceAdvice).toHaveBeenCalledWith(
+      {
+        surface: 'exercise-selection',
+        exerciseId: BENCH_ID,
+        experience: 'experienced',
+      },
+      expect.any(Array),
+      { suppressedClaimIds: [], recentlyShownClaimIds: [] },
+    );
+    expect(mockRecordAdviceShown).toHaveBeenCalledWith(
+      exerciseAdviceItem.claimId,
+      'surface-context',
+      'workout-1',
+      'exercise-selection',
+    );
+  });
+
+  it('does not select again after a second exercise or a logged set', async () => {
+    mockGetOpenSessionSets.mockResolvedValue([]);
+    mockLoadAdviceSnapshot.mockResolvedValue(null);
+    mockSelectSurfaceAdvice.mockReturnValue(exerciseAdviceItem);
+    mockLogSet.mockResolvedValue(makeSet());
+
+    render(<LogWorkout />);
+    await chooseExercise(BENCH_ID);
+    await screen.findByTestId('advice-peek');
+    await chooseExercise(SQUAT_ID);
+    fireEvent.click((await screen.findAllByTestId('tick-button'))[0]);
+
+    await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
+    expect(mockSelectSurfaceAdvice).toHaveBeenCalledTimes(1);
+    expect(mockRecordAdviceShown).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the exercise lane silent when the workout already has an advice event', async () => {
+    mockGetOpenSessionSets.mockResolvedValue([]);
+    mockShownInWorkout.mockResolvedValue(true);
+    mockSelectSurfaceAdvice.mockReturnValue(exerciseAdviceItem);
+
+    render(<LogWorkout />);
+    await waitFor(() => expect(mockShownInWorkout).toHaveBeenCalledWith('workout-1'));
+    await chooseExercise(BENCH_ID);
+
+    await waitFor(() => expect(screen.getByText('Barbell Bench Press')).toBeInTheDocument());
+    expect(mockSelectSurfaceAdvice).not.toHaveBeenCalled();
+    expect(mockRecordAdviceShown).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('advice-peek')).not.toBeInTheDocument();
+  });
+
+  it('is silent when no claim supports the selected exercise', async () => {
+    mockGetOpenSessionSets.mockResolvedValue([]);
+    mockLoadAdviceSnapshot.mockResolvedValue(null);
+    mockSelectSurfaceAdvice.mockReturnValue(null);
+
+    render(<LogWorkout />);
+    await chooseExercise(BENCH_ID);
+
+    await waitFor(() => expect(mockSelectSurfaceAdvice).toHaveBeenCalledTimes(1));
+    expect(mockRecordAdviceShown).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('advice-peek')).not.toBeInTheDocument();
+  });
+
+  it('serializes a fast first pick behind opening advice so only one event is written', async () => {
+    mockGetOpenSessionSets.mockResolvedValue([]);
+    let releaseOpening!: (value: BuiltSnapshot | null) => void;
+    mockLoadAdviceSnapshot.mockReturnValue(
+      new Promise((resolve) => {
+        releaseOpening = resolve;
+      }),
+    );
+    mockSuppressedClaimIds.mockResolvedValue([
+      'c-deficit-beyond-500-blocks-lean-mass',
+      'c-deficit-impairs-lean-mass',
+    ]);
+    mockSelectSurfaceAdvice.mockReturnValue(exerciseAdviceItem);
+
+    render(<LogWorkout />);
+    await waitFor(() => expect(mockLoadAdviceSnapshot).toHaveBeenCalledTimes(1));
+    await chooseExercise(BENCH_ID);
+    releaseOpening(strengthHoldingSnapshot);
+
+    await screen.findByTestId('advice-peek');
+    await waitFor(() => expect(mockRecordAdviceShown).toHaveBeenCalledTimes(1));
+    expect(mockRecordAdviceShown).toHaveBeenCalledWith(
+      'c-strength-holds-through-a-deficit',
+      'data-earned',
+      'workout-1',
+      'workout-start',
+    );
+    expect(mockSelectSurfaceAdvice).not.toHaveBeenCalled();
+  });
+
+  it('lets a fast first pick try exercise advice after pending opening advice misses', async () => {
+    mockGetOpenSessionSets.mockResolvedValue([]);
+    let releaseOpening!: (value: BuiltSnapshot | null) => void;
+    mockLoadAdviceSnapshot.mockReturnValue(
+      new Promise((resolve) => {
+        releaseOpening = resolve;
+      }),
+    );
+    mockSelectSurfaceAdvice.mockReturnValue(exerciseAdviceItem);
+
+    render(<LogWorkout />);
+    await waitFor(() => expect(mockLoadAdviceSnapshot).toHaveBeenCalledTimes(1));
+    await chooseExercise(BENCH_ID);
+    expect(mockSelectSurfaceAdvice).not.toHaveBeenCalled();
+    releaseOpening(null);
+
+    expect(await screen.findByTestId('advice-peek')).toHaveTextContent('General evidence');
+    expect(mockSelectSurfaceAdvice).toHaveBeenCalledTimes(1);
+    expect(mockRecordAdviceShown).toHaveBeenCalledTimes(1);
   });
 
   it('ticking a row calls logSet with the right weight/reps and rir: null when RIR was left empty', async () => {

@@ -18,6 +18,7 @@ import {
 import { setE1rm } from '../../domain/e1rm';
 import { CLAIMS } from '../../generated/claims';
 import { selectSessionAdvice, whyNow } from '../../advice/session-advice';
+import { selectSurfaceAdvice } from '../../advice/surface-advice';
 import { loadAdviceSnapshot } from '../../advice/load-snapshot';
 import {
   recordAdviceShown,
@@ -28,6 +29,7 @@ import {
 } from '../../db/advice-events';
 import { AdvicePeek } from '../advice/AdvicePeek';
 import type { Claim } from '../../advice/types';
+import { getUser } from '../../db/user';
 import { ExercisePicker } from '../exercises/ExercisePicker';
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
@@ -72,6 +74,17 @@ type PendingRow = {
 
 type PendingByExercise = Record<string, PendingRow[]>;
 
+type Peek =
+  | { claim: Claim; kind: 'snapshot'; why: string }
+  | { claim: Claim; kind: 'general-evidence' };
+
+type AdviceLane = {
+  workoutId: string;
+  tail: Promise<void>;
+  spent: boolean;
+  exerciseAttempted: boolean;
+};
+
 let rowSeq = 0;
 const newKey = () => `r${++rowSeq}`;
 
@@ -94,12 +107,13 @@ function LoggingSurface(): ReactElement {
   const [picking, setPicking] = useState(false);
   const [justAdded, setJustAdded] = useState<string | null>(null);
   const [recentExercises, setRecentExercises] = useState<string[]>([]);
-  const [peek, setPeek] = useState<{ claim: Claim; why: string } | null>(null);
+  const [peek, setPeek] = useState<Peek | null>(null);
   const [finishing, setFinishing] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const adviceLane = useRef<AdviceLane | null>(null);
 
   // Start (0) → session (1) → finishing (2). Naming the position lets the pane
   // animate on the DIRECTION of travel rather than merely on "something
@@ -125,8 +139,8 @@ function LoggingSurface(): ReactElement {
       if (off) return;
       setWorkout(open ?? null);
       if (open) {
-        setLogged(await getOpenSessionSets());
         void pickSessionAdvice(open.id);
+        setLogged(await getOpenSessionSets());
       }
       else setRecent(await getRecentWorkouts(5));
       setRecentExercises(await getRecentExerciseIds(6));
@@ -263,28 +277,95 @@ function LoggingSurface(): ReactElement {
    * become true because of the set just logged — and the 90 seconds that matter
    * stay free of computation.
    */
-  async function pickSessionAdvice(workoutId: string) {
-    if (await shownInWorkout(workoutId)) return;
-    const built = await loadAdviceSnapshot();
-    if (built === null) return;
+  function laneFor(workoutId: string): AdviceLane {
+    if (adviceLane.current?.workoutId !== workoutId) {
+      adviceLane.current = {
+        workoutId,
+        tail: Promise.resolve(),
+        spent: false,
+        exerciseAttempted: false,
+      };
+    }
+    return adviceLane.current;
+  }
 
-    const item = selectSessionAdvice(
-      built.snapshot,
-      CLAIMS,
-      {
-        suppressedClaimIds: await suppressedClaimIds(),
-        recentlyShownClaimIds: await recentlyShownClaimIds(),
-        alreadyShownThisSession: false,
-      },
+  function queueAdviceAttempt(
+    workoutId: string,
+    attempt: () => Promise<boolean>,
+  ): Promise<void> {
+    const lane = laneFor(workoutId);
+    const next = lane.tail.then(async () => {
+      if (lane.spent) return;
+      if (await shownInWorkout(workoutId)) {
+        lane.spent = true;
+        return;
+      }
+      if (await attempt()) lane.spent = true;
+    });
+    // Keep later attempts ordered even if a storage call fails. Attaching the
+    // rejection handler here also prevents a fire-and-forget attempt becoming
+    // an unhandled promise rejection.
+    lane.tail = next.then(
+      () => undefined,
+      () => undefined,
     );
-    if (!item) return;
+    return next;
+  }
 
-    const claim = CLAIMS.find((c) => c.id === item.claimId);
-    if (!claim) return;
+  function pickSessionAdvice(workoutId: string): Promise<void> {
+    return queueAdviceAttempt(workoutId, async () => {
+      const built = await loadAdviceSnapshot();
+      if (built === null) return false;
 
-    await recordAdviceShown(claim.id, item.trigger, workoutId, 'workout-start');
-    const primaryExerciseName = built.primaryExerciseId ? exerciseName(built.primaryExerciseId) : null;
-    setPeek({ claim, why: whyNow(claim, built, primaryExerciseName) });
+      const item = selectSessionAdvice(
+        built.snapshot,
+        CLAIMS,
+        {
+          suppressedClaimIds: await suppressedClaimIds(),
+          recentlyShownClaimIds: await recentlyShownClaimIds(),
+          alreadyShownThisSession: false,
+        },
+      );
+      if (!item) return false;
+
+      const claim = CLAIMS.find((c) => c.id === item.claimId);
+      if (!claim) return false;
+
+      await recordAdviceShown(claim.id, item.trigger, workoutId, 'workout-start');
+      const primaryExerciseName = built.primaryExerciseId ? exerciseName(built.primaryExerciseId) : null;
+      setPeek({ claim, kind: 'snapshot', why: whyNow(claim, built, primaryExerciseName) });
+      return true;
+    });
+  }
+
+  function tryExerciseSelectionAdvice(workoutId: string, exerciseId: string): Promise<void> {
+    const lane = laneFor(workoutId);
+    if (lane.exerciseAttempted) return lane.tail;
+    lane.exerciseAttempted = true;
+
+    return queueAdviceAttempt(workoutId, async () => {
+      const user = await getUser();
+      const item = selectSurfaceAdvice(
+        {
+          surface: 'exercise-selection',
+          exerciseId,
+          experience: user.trainingExperience,
+        },
+        CLAIMS,
+        {
+          suppressedClaimIds: await suppressedClaimIds(),
+          recentlyShownClaimIds: await recentlyShownClaimIds(),
+        },
+      );
+      if (!item) return false;
+
+      const claim = CLAIMS.find((candidate) => candidate.id === item.claimId);
+      if (!claim) return false;
+
+      await recordAdviceShown(claim.id, item.trigger, workoutId, 'exercise-selection');
+      setPeek({ claim, kind: 'general-evidence' });
+      return true;
+    });
   }
 
   async function handleFinish() {
@@ -730,7 +811,8 @@ function LoggingSurface(): ReactElement {
       {peek && (
         <AdvicePeek
           claim={peek.claim}
-          why={peek.why}
+          why={peek.kind === 'snapshot' ? peek.why : undefined}
+          kind={peek.kind}
           onDismiss={() => setPeek(null)}
           onSuppress={() => {
             void suppressClaim(peek.claim.id);
@@ -758,6 +840,7 @@ function LoggingSurface(): ReactElement {
           setExtras((prev) => (prev.includes(id) ? prev : [...prev, id]));
           setJustAdded(id);
           setPicking(false);
+          void tryExerciseSelectionAdvice(workout.id, id);
         }}
       />
     </div>

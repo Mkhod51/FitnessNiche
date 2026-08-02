@@ -28,17 +28,20 @@ const TAP = 'transition-colors duration-[var(--motion-tap)] ease-[var(--motion-e
 export function AdvicePeek({
   claim,
   why,
+  kind = 'snapshot',
   onDismiss,
   onSuppress,
 }: {
   claim: Claim;
   /** A fact about the user's own data — never a recommendation. */
   why?: string;
+  kind?: 'general-evidence' | 'snapshot';
   onDismiss: () => void;
   onSuppress: () => void;
 }): ReactElement {
   const [expanded, setExpanded] = useState(false);
   const toneClass = `text-conf-${claim.grade.toLowerCase()}`;
+  const visibleWhy = kind === 'snapshot' ? why : undefined;
 
   if (expanded) {
     return (
@@ -58,9 +61,13 @@ export function AdvicePeek({
           <span aria-hidden="true" className="h-[3px] w-9 bg-rule-strong" />
         </button>
 
-        {why && (
+        {kind === 'general-evidence' && (
+          <p className={`${LABEL} px-4 pb-1 text-ink-faint`}>General evidence</p>
+        )}
+
+        {visibleWhy && (
           <p data-testid="advice-why" className="px-4 pb-1 font-figure text-[14px] tabular-nums text-ink">
-            {why}
+            {visibleWhy}
           </p>
         )}
 
@@ -112,7 +119,10 @@ export function AdvicePeek({
                 a peek that shrinks it away is the skimmable badge this whole
                 direction exists to refuse. */}
             <ConfidenceTicks grade={claim.grade} />
-            {why && <span className={`${LABEL} mt-1 block ${toneClass}`}>{why}</span>}
+            {kind === 'general-evidence' && (
+              <span className={`${LABEL} mt-1 block text-ink-faint`}>General evidence</span>
+            )}
+            {visibleWhy && <span className={`${LABEL} mt-1 block ${toneClass}`}>{visibleWhy}</span>}
             {/* The curated short form, never a truncation of the statement:
                 an ellipsis cuts the qualifier, and the qualifier is what stops
                 a low grade being read as a certainty. */}
