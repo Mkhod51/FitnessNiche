@@ -96,8 +96,9 @@ review date for historical records: leave it visibly pending until it is read.
 
 Two independent readers must each perform a hostile review against the direct
 source. They check statement scope, grade, population, extracted values,
-`peekStatement`, and predicates. Record both reviews and a next-review date in
-the ledger. A successful DOI resolution is not a source review.
+`peekStatement`, predicates, and any surface contexts. Record both reviews and
+a next-review date in the ledger. A successful DOI resolution is not a source
+review.
 
 ## 6. Grade it
 
@@ -145,6 +146,8 @@ grade: A            # A | B | C | D
 status: settled     # settled | contested
 domain: volume
 predicates: null    # null = search-only. See below.
+trigger: null       # rule | data-earned when predicates is non-null
+surfaceContexts: null # null = no general-evidence surface selection
 clusterId: null     # required (and shared) when status is contested
 phrasingKey: <domain>-<slug>
 supersededBy: null  # a claim id, when a newer claim replaces this one
@@ -193,6 +196,27 @@ predicates:
     - "<":  [{ var: proteinPerKg7d }, 1.6]
 ```
 
+**Surface contexts** are a separate, non-personal selection route. They are
+metadata, never JSON Logic predicates, and do not claim that an empty history or
+a selected exercise proves anything about the user. A claim can opt into one or
+more supported surfaces:
+
+```yaml
+surfaceContexts:
+  - surface: hub-empty
+  - surface: exercise-selection        # general; no experience is required
+    exerciseIds: [barbell-bench-press] # optional, known seed ids only
+    populations: [trained]             # optional citation-population values
+  - surface: goal-draft
+    goals: [bulk, maintain]             # one or more distinct known goals
+```
+
+Use `surfaceContexts: null` when the claim has no reviewed general-evidence
+placement. The build rejects unknown surfaces, unknown exercise ids, empty or
+duplicate goal lists, and any populated surface context on a `data-earned`
+claim. Training experience is runtime ranking context, not authored claim
+metadata; do not encode it as a predicate or infer it from an empty history.
+
 ## Build and check
 
 ```bash
@@ -207,7 +231,9 @@ The build rejects, with the offending filename: an unknown grade, zero citations
 a malformed or missing DOI, a citation whose `claimId` does not match its parent,
 a `lastReviewed` that is not a real calendar date, a duplicate id, a filename that
 disagrees with the id, a `supersededBy` pointing at nothing, and a contested claim
-sitting alone in its cluster.
+sitting alone in its cluster. It also rejects malformed surface contexts,
+unknown exercise ids, impossible goal lists, and general contexts attached to a
+data-earned claim.
 
 ## Amending an existing claim
 

@@ -32,9 +32,54 @@ const valid = {
   ],
 };
 
+const dataEarned = {
+  ...valid,
+  predicates: { '==': [{ var: 'e1rmTrend' }, 'down'] },
+  trigger: 'data-earned',
+};
+
 describe('claimSchema', () => {
   it('accepts a well-formed claim', () => {
     expect(() => claimSchema.parse(valid)).not.toThrow();
+  });
+
+  it('defaults surface contexts to null', () => {
+    expect(claimSchema.parse(valid).surfaceContexts).toBeNull();
+  });
+
+  it('accepts a general exercise-selection context without training experience', () => {
+    expect(claimSchema.parse({
+      ...valid,
+      surfaceContexts: [{ surface: 'exercise-selection' }],
+    }).surfaceContexts).toEqual([{ surface: 'exercise-selection' }]);
+  });
+
+  it('rejects a data-earned claim with a general surface context', () => {
+    expect(() => claimSchema.parse({
+      ...dataEarned,
+      surfaceContexts: [{ surface: 'hub-empty' }],
+    })).toThrow(/data-earned/i);
+  });
+
+  it('rejects an unknown advice surface', () => {
+    expect(() => claimSchema.parse({
+      ...valid,
+      surfaceContexts: [{ surface: 'workout-finish' }],
+    })).toThrow(/surface/i);
+  });
+
+  it('rejects an exercise-selection context with an unknown exercise id', () => {
+    expect(() => claimSchema.parse({
+      ...valid,
+      surfaceContexts: [{ surface: 'exercise-selection', exerciseIds: ['invented-lift'] }],
+    })).toThrow(/unknown exercise id/i);
+  });
+
+  it('rejects a goal-draft context that cannot match any goal', () => {
+    expect(() => claimSchema.parse({
+      ...valid,
+      surfaceContexts: [{ surface: 'goal-draft', goals: [] }],
+    })).toThrow(/goal/i);
   });
 
   it('requires every claim to declare how its predicate is triggered', () => {

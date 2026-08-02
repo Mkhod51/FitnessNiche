@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import type { JsonLogicRule } from './types.ts';
+import { SEED_EXERCISES } from '../db/seed-exercises.ts';
+import type { JsonLogicRule, SurfaceContext } from './types.ts';
 
 const ROOT_PREDICATE_VARIABLES = new Set([
   'goal',
@@ -12,6 +13,7 @@ const ROOT_PREDICATE_VARIABLES = new Set([
 ]);
 const MUSCLE_SET_VARIABLES = new Set(['muscle', 'sets']);
 const COMPARISON_OPERATORS = new Set(['==', '!=', '<', '<=', '>', '>=']);
+const EXERCISE_IDS = new Set(SEED_EXERCISES.map((exercise) => exercise.id));
 
 type PredicateScope = 'root' | 'some';
 
@@ -142,6 +144,51 @@ export function validatePredicate(rule: unknown): asserts rule is JsonLogicRule 
   validateValue(rule, 'root');
 }
 
+const exerciseSelectionContextSchema = z.strictObject({
+  surface: z.literal('exercise-selection'),
+  exerciseIds: z.array(z.string().min(1)).min(1).optional(),
+  populations: z.array(z.enum(['trained', 'untrained', 'mixed', 'unstated'])).min(1).optional(),
+});
+
+const goalDraftContextSchema = z.strictObject({
+  surface: z.literal('goal-draft'),
+  goals: z.array(z.enum(['cut', 'bulk', 'maintain'])).min(1),
+}).superRefine(({ goals }, ctx) => {
+  if (new Set(goals).size !== goals.length) {
+    ctx.addIssue({ code: 'custom', message: 'goal-draft goals must not contain duplicates' });
+  }
+});
+
+const surfaceContextsSchema = z.array(z.discriminatedUnion('surface', [
+  z.strictObject({ surface: z.literal('hub-empty') }),
+  exerciseSelectionContextSchema,
+  goalDraftContextSchema,
+])).min(1).nullable();
+
+/** Validate authored selection metadata without treating it as a snapshot predicate. */
+export function validateSurfaceContexts(
+  value: unknown,
+  trigger: 'rule' | 'data-earned' | null = null,
+): asserts value is SurfaceContext[] | null {
+  const result = surfaceContextsSchema.safeParse(value);
+  if (!result.success) {
+    throw new Error(result.error.issues.map((issue) => issue.message).join('; '));
+  }
+
+  for (const context of result.data ?? []) {
+    if (context.surface !== 'exercise-selection') continue;
+    for (const exerciseId of context.exerciseIds ?? []) {
+      if (!EXERCISE_IDS.has(exerciseId)) {
+        throw new Error(`unknown exercise id "${exerciseId}" in surface context`);
+      }
+    }
+  }
+
+  if (trigger === 'data-earned' && result.data !== null) {
+    throw new Error('a data-earned claim cannot carry general surface contexts');
+  }
+}
+
 const doi = z.string().regex(/^10\.\d{4,9}\/\S+$/, 'must be a bare DOI, e.g. 10.1080/02640414.2016.1210197');
 // regex only checks shape (2026-13-45 would pass); FR-CLAIM-4 needs a date a human
 // actually reviewed against, so round-trip through Date.UTC to catch calendar nonsense
@@ -198,6 +245,7 @@ export const claimSchema = z
     domain: z.string().min(1),
     predicates: predicateSchema.nullable(),
     trigger: z.enum(['rule', 'data-earned']).nullable(),
+    surfaceContexts: surfaceContextsSchema.default(null),
     clusterId: z.string().min(1).nullable(),
     phrasingKey: z.string().min(1),
     supersededBy: z.string().min(1).nullable(),
@@ -218,6 +266,13 @@ export const claimSchema = z
   .refine((c) => (c.predicates === null) === (c.trigger === null), {
     message: 'trigger must be null exactly when predicates is null',
     path: ['trigger'],
+  })
+  .superRefine((c, ctx) => {
+    try {
+      validateSurfaceContexts(c.surfaceContexts, c.trigger);
+    } catch (error) {
+      ctx.addIssue({ code: 'custom', message: (error as Error).message, path: ['surfaceContexts'] });
+    }
   });
 
 export const claimsFileSchema = z.array(claimSchema);

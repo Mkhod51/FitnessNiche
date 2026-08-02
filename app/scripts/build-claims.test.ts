@@ -35,6 +35,31 @@ describe('buildClaims', () => {
     expect(claims).toHaveLength(1);
     expect(claims[0].id).toBe('c-test-volume');
     expect(claims[0].grade).toBe('A');
+    expect(claims[0].surfaceContexts).toBeNull();
+  });
+
+  it('preserves surface contexts as selection metadata', () => {
+    const withSurface = goodYaml.replace(
+      'trigger: null',
+      'trigger: null\nsurfaceContexts:\n  - surface: exercise-selection\n    exerciseIds: [barbell-bench-press]',
+    );
+    const [claim] = buildClaims([{ file: 'c-test-volume.yaml', yaml: withSurface }]);
+
+    expect(claim.predicates).toBeNull();
+    expect(claim.trigger).toBeNull();
+    expect(claim.surfaceContexts).toEqual([
+      { surface: 'exercise-selection', exerciseIds: ['barbell-bench-press'] },
+    ]);
+  });
+
+  it('rejects an unknown exercise id before generating a claim bundle', () => {
+    const withUnknownExercise = goodYaml.replace(
+      'trigger: null',
+      'trigger: null\nsurfaceContexts:\n  - surface: exercise-selection\n    exerciseIds: [invented-lift]',
+    );
+
+    expect(() => buildClaims([{ file: 'c-test-volume.yaml', yaml: withUnknownExercise }]))
+      .toThrow(/unknown exercise id/i);
   });
 
   it('rejects an unknown variable before a predicate reaches the runtime evaluator', () => {

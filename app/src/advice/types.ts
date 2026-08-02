@@ -10,6 +10,13 @@ export type Grade = 'A' | 'B' | 'C' | 'D';
  */
 export type Population = 'trained' | 'untrained' | 'mixed' | 'unstated';
 
+export type AdviceSurface = 'hub-empty' | 'exercise-selection' | 'goal-draft';
+export type TrainingExperience = 'new' | 'returning' | 'experienced';
+export type SurfaceContext =
+  | { surface: 'hub-empty' }
+  | { surface: 'exercise-selection'; exerciseIds?: string[]; populations?: Population[] }
+  | { surface: 'goal-draft'; goals: Array<'cut' | 'bulk' | 'maintain'> };
+
 /** A single extracted number, re-plotted in our own chart style (GR-3). */
 export interface Figure {
   label: string;
@@ -49,6 +56,8 @@ export interface Claim {
   predicates: JsonLogicRule | null;
   /** Declares whether a matching predicate is generic context or earned from logged data. */
   trigger: 'rule' | 'data-earned' | null;
+  /** General-evidence selection metadata. Parsing defaults omitted authoring to null. Never JSON Logic. */
+  surfaceContexts?: SurfaceContext[] | null;
   /** Contested claims sharing a clusterId are opposing sides of one question. */
   clusterId: string | null;
   phrasingKey: string;

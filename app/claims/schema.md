@@ -49,6 +49,24 @@ null — do not fill the blank with a plausible-sounding guess.
   start as `null`; only add predicates once you know the exact
   `UserStateSnapshot` condition that should surface this claim
   unprompted.
+- **`trigger`** — `rule` | `data-earned` | `null`. It must be `null` exactly
+  when `predicates` is `null`. `data-earned` is reserved for conclusions whose
+  context is established by reliable logged data; configured targets and
+  general facts are not data-earned.
+- **`surfaceContexts`** — an array of explicit general-evidence selection
+  contexts, or `null` (the default). This metadata is separate from JSON Logic:
+  it says where a non-personal claim may be considered, not what the user's
+  snapshot proves. Supported entries are:
+
+  - `{ surface: hub-empty }`
+  - `{ surface: exercise-selection, exerciseIds?: [...], populations?: [...] }`
+  - `{ surface: goal-draft, goals: [cut | bulk | maintain, ...] }`
+
+  Omitting `exerciseIds` makes an exercise-selection entry general. Exercise
+  ids must exist in `src/db/seed-exercises.ts`; populations use the same four
+  values as citations. Goal lists must contain at least one known, non-duplicate
+  goal. A `data-earned` claim may not carry surface contexts because a general
+  surface must never masquerade as a conclusion earned from the user's data.
 - **`clusterId`** — a shared string for claims that argue opposite sides of
   the same question (e.g. two `protein-timing` claims might both carry
   `clusterId: "protein-timing-window"`). **Mandatory whenever `status` is
@@ -142,12 +160,12 @@ review must stay `pending-M6-review`; never fabricate a locator or sign-off.
 
 ## What "null" means here, one more time
 
-Every nullable field above (`n`, `effectSize`, `ci`, `quote`, `predicates`,
-`clusterId` on settled claims, `supersededBy`) means **"not established
-from a source I actually read."** It is never a placeholder for "I'll fill
-this in later" and never a slot to paper over with a default or a
-best-guess number. The schema will happily accept `null` in every one of
-these spots — that's deliberate, not a gap you should route around.
+For evidence fields (`n`, `effectSize`, `ci`, `quote`), `null` means **"not
+established from a source I actually read."** For selection fields,
+`predicates: null`, `trigger: null`, and `surfaceContexts: null` mean the claim
+has no authored automatic route of that kind. `clusterId` and `supersededBy`
+remain null when those relationships do not exist. None of these nulls is a
+placeholder to paper over with a default, inferred number, or guessed context.
 
 Record the source-specific reason for each null or `unstated` population value
 in the review ledger. The field remains null when no direct-source fact exists;
