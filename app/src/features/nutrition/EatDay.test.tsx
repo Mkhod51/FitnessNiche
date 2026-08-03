@@ -1,4 +1,6 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
+import type { ReactElement } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EatDay } from './EatDay';
 import { getUser, type User } from '../../db/user';
@@ -25,6 +27,9 @@ vi.mock('../../db/nutrition', async () => {
     deleteFoodEntry: vi.fn(),
   };
 });
+
+// EatDay links to the goal screen, so it needs router context to render at all.
+const render = (ui: ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
 
 const mockGetUser = vi.mocked(getUser);
 const mockGetEntriesForDay = vi.mocked(getEntriesForDay);
