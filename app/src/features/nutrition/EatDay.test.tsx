@@ -47,6 +47,7 @@ const baseUser: User = {
   proteinTargetG: 180,
   deficitKcal: 0,
   birthYear: 1999,
+  goalStartedAt: null,
   consentedAt: '2026-07-01T00:00:00.000Z',
   updatedAt: '2026-07-01T00:00:00.000Z',
 };

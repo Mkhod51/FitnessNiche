@@ -28,6 +28,7 @@ const consentedUser: User = {
   proteinTargetG: null,
   deficitKcal: 0,
   birthYear: null,
+  goalStartedAt: null,
   consentedAt: '2026-07-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
 };

@@ -69,6 +69,7 @@ describe('drizzle-orm/sqlite-proxy contract against a real sqlite engine', () =>
         sex: 'unspecified',
         heightCm: null,
         numbersHidden: false,
+        goalStartedAt: null,
         consentedAt: null,
         updatedAt: '2026-01-01T00:00:00.000Z',
       },

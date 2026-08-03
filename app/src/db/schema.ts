@@ -17,6 +17,9 @@ export const users = sqliteTable('users', {
   // A year, not an age: an age column is wrong within twelve months and nothing
   // would ever correct it. Mifflin-St Jeor needs it.
   birthYear: integer('birth_year'),
+  // When the current goal was set. Null means unknown — see 0004_goal_clock.sql
+  // for why that is not backfilled to "now".
+  goalStartedAt: text('goal_started_at'),
   consentedAt: text('consented_at'), // GR-5: no logging before this is set
   updatedAt: text('updated_at').notNull(),
 });

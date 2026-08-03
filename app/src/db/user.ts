@@ -67,9 +67,23 @@ export async function updateProfile(
   now: Date = new Date(),
 ): Promise<User> {
   const db = getDrizzle();
+  const current = await getUser();
+
+  // FR-SIG-5: the goal carries a clock, and it restarts only when the goal
+  // actually changes. Re-saving the same goal from the profile screen must not
+  // reset it — that would silently zero the time-in-deficit the >= 3 and >= 4
+  // week claims predicate on, so a lifter who edited their height would lose
+  // six weeks of cut as far as the advice engine could tell.
+  const goalChanged = patch.goal !== undefined && patch.goal !== current.goal;
+  const goalClock = goalChanged
+    ? { goalStartedAt: now.toISOString() }
+    : current.goalStartedAt === null && patch.goal !== undefined
+      ? { goalStartedAt: now.toISOString() }
+      : {};
+
   await db
     .update(users)
-    .set({ ...patch, updatedAt: now.toISOString() })
+    .set({ ...patch, ...goalClock, updatedAt: now.toISOString() })
     .where(eq(users.id, LOCAL_USER_ID))
     .run();
   return getUser();
