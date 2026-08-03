@@ -4,6 +4,8 @@ import {
   MAX_DAILY_DEFICIT_KCAL,
   ABSOLUTE_FLOOR_KCAL,
   SEX_FLOOR_KCAL,
+  targetForDeficit,
+  maxAllowedDeficit,
 } from './guards';
 
 /**
@@ -132,5 +134,45 @@ describe('clampCalorieTarget — hostile input', () => {
     const a = clampCalorieTarget(female, 1200);
     const b = clampCalorieTarget(female, 1200);
     expect(a).toEqual(b);
+  });
+});
+
+describe('targetForDeficit — so no screen does the arithmetic itself', () => {
+  it('turns a deficit into a target', () => {
+    expect(targetForDeficit(male, 400)).toEqual({ value: 2400, clamped: false, reason: 'none' });
+  });
+
+  it('clamps an over-cap deficit exactly as a direct request would', () => {
+    expect(targetForDeficit(male, 900)).toEqual(clampCalorieTarget(male, 1900));
+  });
+
+  it('lets a surplus through — GR-1 guards under-eating, not bulking', () => {
+    expect(targetForDeficit(male, -600).value).toBe(3400);
+  });
+
+  it('refuses a nonsense deficit rather than producing a nonsense target', () => {
+    expect(targetForDeficit(male, NaN).reason).toBe('invalid');
+  });
+});
+
+describe('maxAllowedDeficit — what a slider is allowed to offer', () => {
+  it('is the cap for someone the floors do not bind', () => {
+    expect(maxAllowedDeficit(male)).toBe(MAX_DAILY_DEFICIT_KCAL);
+  });
+
+  // The control must STOP at what is achievable. Letting someone drag to 500
+  // and silently clamping back to 300 is a warning wearing a guard's clothes.
+  it('is smaller than the cap when the floor bites first', () => {
+    const small = { sex: 'female' as const, maintenanceKcal: 1700 };
+    expect(maxAllowedDeficit(small)).toBe(300); // 1700 -> floor 1400
+    expect(maxAllowedDeficit(small)).toBeLessThan(MAX_DAILY_DEFICIT_KCAL);
+  });
+
+  it('is zero for someone who cannot safely cut at all', () => {
+    expect(maxAllowedDeficit({ sex: 'female', maintenanceKcal: 1300 })).toBe(0);
+  });
+
+  it('never returns a negative allowance', () => {
+    expect(maxAllowedDeficit({ sex: 'female', maintenanceKcal: 900 })).toBeGreaterThanOrEqual(0);
   });
 });

@@ -6,6 +6,7 @@ import { Hub } from './features/hub/Hub';
 import { LogWorkout } from './features/log/LogWorkout';
 import { LogWeight } from './features/log/LogWeight';
 import { EatDay } from './features/nutrition/EatDay';
+import { GoalSetup } from './features/nutrition/GoalSetup';
 
 type BootState = StorageMode | 'booting' | `error: ${string}`;
 
@@ -109,6 +110,7 @@ function Shell() {
             <Route path="/" element={<Hub />} />
             <Route path="/train" element={<LogWorkout />} />
             <Route path="/eat" element={<EatDay />} />
+            <Route path="/goal" element={<GoalSetup />} />
             <Route path="/weight" element={<LogWeight />} />
             <Route path="/settings" element={<SettingsPlaceholder />} />
           </Routes>
