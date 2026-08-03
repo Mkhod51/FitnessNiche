@@ -4,6 +4,7 @@ import { buildClaims, renderModule } from './build-claims';
 const goodYaml = `
 id: c-test-volume
 statement: A statement about volume.
+peekStatement: A short curated form about volume.
 grade: A
 status: settled
 domain: volume
