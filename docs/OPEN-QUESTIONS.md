@@ -6,16 +6,30 @@ cheaply if the answer differs.
 
 ## Q1 — Ticking a set saves with empty weight and reps
 
-**Status:** unanswered, default in place since the tracker landed.
+**Status: ANSWERED 2026-07-29 by the developer.** A blank field takes the previous set for
+that exercise.
 
-`LogWorkout`'s tick always calls `logSet`, even with both fields blank, storing a
-`0 kg × 0` set. It is that way because the test contract demanded it and because it
+`LogWorkout`'s tick always called `logSet`, even with both fields blank, storing a
+`0 kg × 0` set. It was that way because the test contract demanded it and because it
 protects "never lose a write" — but a 0-rep set is not a write worth protecting, and it
-will pollute weekly volume (it counts as a hard set) without touching e1RM (no RIR).
+polluted weekly volume (it counts as a hard set) without touching e1RM (no RIR).
 
-**Default taken:** permissive — the tick always saves.
-**Alternative:** require reps > 0 before the tick does anything, greying the control until
-then. Weight legitimately stays 0 for bodyweight work, so only reps should gate it.
+**Resolution taken:** the tick still always saves — "never lose a write" is preserved —
+but a blank box now falls back rather than writing a zero. The precedence is:
+
+1. the last set logged for **this exercise in this session**;
+2. failing that, the exercise's own historical last set (the same value that prefills the
+   row);
+3. failing both, `0`.
+
+Chosen over gating the control on `reps > 0` because it keeps the one-tap path intact
+mid-workout, which is the NFR-3 design target. Nothing is invented — both fallbacks are
+the lifter's own recorded work — and an explicit `0` still stores `0`, which bodyweight
+work legitimately needs. Covered by three tests in `LogWorkout.test.tsx`.
+
+**Residual edge, accepted:** an exercise with no history and nothing logged this session
+still writes `0 × 0` on a blank tick, because there is genuinely nothing to fall back to.
+Rare, and inventing a number there would be worse.
 
 ## Q2 — `LogWeight` still uses `type="number"`
 

@@ -224,6 +224,88 @@ describe('LogWorkout — State B: an open session', () => {
     );
   });
 
+  // OQ-1. Ticking an empty box used to store 0 kg × 0, which counts as a hard
+  // set against weekly volume while contributing nothing to the e1RM estimate —
+  // so it inflated exactly the number the reconciliation engine will read.
+  // This session already has one bench set logged at 60 × 5 (see the beforeEach
+  // above), and history holds a heavier 80 × 8. The set from THIS session is the
+  // one that carries: "previous" means the last thing actually done, not the
+  // best thing ever done.
+  it('a blank weight or reps takes the previous set for that exercise, never a zero', async () => {
+    mockGetLastSetForExercise.mockResolvedValue(makeSet({ weightKg: 80, reps: 8, rir: 2 }));
+    mockLogSet.mockResolvedValue(makeSet({ id: 'set-2', weightKg: 60, reps: 5 }));
+
+    render(<LogWorkout />);
+    const weightInput = await screen.findByTestId('weight-input');
+    await waitFor(() => expect(weightInput).toHaveValue('80'));
+
+    // Clear both, as a lifter wiping the prefill would.
+    fireEvent.change(weightInput, { target: { value: '' } });
+    fireEvent.change(screen.getByTestId('reps-input'), { target: { value: '' } });
+    fireEvent.click(screen.getByTestId('tick-button'));
+
+    await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
+    expect(mockLogSet).toHaveBeenCalledWith(
+      expect.objectContaining({ exerciseId: BENCH_ID, weightKg: 60, reps: 5 }),
+    );
+  });
+
+  // An exercise added mid-session has nothing logged against it yet, so the
+  // fallback drops back to that exercise's OWN historical last set — never to
+  // the bench set sitting above it on the same screen.
+  it('falls back to the historical last set for an exercise added mid-session', async () => {
+    const SQUAT_ID = 'barbell-back-squat';
+    mockGetLastSetForExercise.mockImplementation(async (id: string) =>
+      id === SQUAT_ID ? makeSet({ exerciseId: SQUAT_ID, weightKg: 100, reps: 3 }) : makeSet(),
+    );
+    mockLogSet.mockResolvedValue(makeSet({ id: 'set-2', exerciseId: SQUAT_ID, weightKg: 100, reps: 3 }));
+
+    render(<LogWorkout />);
+    fireEvent.click(await screen.findByTestId('add-exercise-button'));
+    fireEvent.click(
+      (await screen.findAllByTestId('exercise-row')).find(
+        (el) => el.getAttribute('data-exercise-id') === SQUAT_ID,
+      )!,
+    );
+
+    // Re-queried inside waitFor: the squat section mounts after the picker
+    // closes, so an array captured before that still holds only the bench row.
+    await waitFor(() => {
+      const w = screen.getAllByTestId('weight-input');
+      expect(w).toHaveLength(2);
+      expect(w[1]).toHaveValue('100');
+    });
+
+    fireEvent.change(screen.getAllByTestId('weight-input')[1], { target: { value: '' } });
+    fireEvent.change(screen.getAllByTestId('reps-input')[1], { target: { value: '' } });
+    fireEvent.click(screen.getAllByTestId('tick-button')[1]);
+
+    await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
+    expect(mockLogSet).toHaveBeenCalledWith(
+      expect.objectContaining({ exerciseId: SQUAT_ID, weightKg: 100, reps: 3 }),
+    );
+  });
+
+  // The other half of the same rule: an explicit zero is a real value, because
+  // bodyweight work legitimately weighs nothing. Only a BLANK box falls back.
+  it('an explicit 0 weight is stored as 0, not replaced by the previous set', async () => {
+    mockGetLastSetForExercise.mockResolvedValue(makeSet({ weightKg: 80, reps: 8, rir: 2 }));
+    mockLogSet.mockResolvedValue(makeSet({ id: 'set-2', weightKg: 0, reps: 12 }));
+
+    render(<LogWorkout />);
+    const weightInput = await screen.findByTestId('weight-input');
+    await waitFor(() => expect(weightInput).toHaveValue('80'));
+
+    fireEvent.change(weightInput, { target: { value: '0' } });
+    fireEvent.change(screen.getByTestId('reps-input'), { target: { value: '12' } });
+    fireEvent.click(screen.getByTestId('tick-button'));
+
+    await waitFor(() => expect(mockLogSet).toHaveBeenCalledTimes(1));
+    expect(mockLogSet).toHaveBeenCalledWith(
+      expect.objectContaining({ weightKg: 0, reps: 12 }),
+    );
+  });
+
   it('tapping the RIR cell then tapping "2" causes the next logSet to carry rir: 2', async () => {
     mockLogSet.mockResolvedValue(makeSet({ id: 'set-2', rir: 2 }));
     render(<LogWorkout />);
