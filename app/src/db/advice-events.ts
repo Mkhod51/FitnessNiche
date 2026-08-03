@@ -2,6 +2,7 @@ import { and, desc, eq, gte, isNull, isNotNull } from 'drizzle-orm';
 import { getDrizzle } from './client';
 import { adviceEvents } from './schema';
 import { LOCAL_USER_ID } from './user';
+import { newId } from './id';
 
 export type AdviceEvent = typeof adviceEvents.$inferSelect;
 
@@ -23,7 +24,7 @@ export async function recordAdviceShown(
   now: Date = new Date(),
 ): Promise<AdviceEvent> {
   const db = getDrizzle();
-  const id = crypto.randomUUID();
+  const id = newId();
   const nowIso = now.toISOString();
   await db
     .insert(adviceEvents)

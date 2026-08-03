@@ -2,6 +2,7 @@ import { eq, and, isNull, isNotNull, desc, gte } from 'drizzle-orm';
 import { getDrizzle } from './client';
 import { workouts, sets } from './schema';
 import { LOCAL_USER_ID } from './user';
+import { newId } from './id';
 
 export type Workout = typeof workouts.$inferSelect;
 // Named LoggedSet, not Set — `Set` would shadow the built-in collection type
@@ -59,7 +60,7 @@ export async function findOpenWorkout(_now: Date = new Date()): Promise<Workout 
 /** Starts a session explicitly. Always creates — the caller checks findOpenWorkout first. */
 export async function startWorkout(name: string | null = null, now: Date = new Date()): Promise<Workout> {
   const db = getDrizzle();
-  const id = crypto.randomUUID();
+  const id = newId();
   const nowIso = now.toISOString();
   await db
     .insert(workouts)
@@ -184,7 +185,7 @@ export async function getOrCreateOpenWorkout(now: Date = new Date()): Promise<Wo
 export async function logSet(input: SetInput, now: Date = new Date()): Promise<LoggedSet> {
   const workout = await getOrCreateOpenWorkout(now);
   const db = getDrizzle();
-  const id = crypto.randomUUID();
+  const id = newId();
   const nowIso = now.toISOString();
 
   await db

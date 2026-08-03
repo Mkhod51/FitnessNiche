@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { ConsentGate } from '../onboarding/ConsentGate';
 import { SEED_EXERCISES } from '../../db/seed-exercises';
 import {
@@ -94,12 +94,31 @@ function LoggingSurface(): ReactElement {
   const [defaults, setDefaults] = useState<Record<string, { weight: string; reps: string }>>({});
   const [rirFor, setRirFor] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
+  const [justAdded, setJustAdded] = useState<string | null>(null);
   const [recentExercises, setRecentExercises] = useState<string[]>([]);
   const [peek, setPeek] = useState<{ claim: Claim; why: string } | null>(null);
   const [finishing, setFinishing] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
+
+  // Start (0) → session (1) → finishing (2). Naming the position lets the pane
+  // animate on the DIRECTION of travel rather than merely on "something
+  // changed", so stepping back out of the finish screen reads as a return
+  // instead of a second arrival.
+  //
+  // Refs computed during render, for the reason AnimatedPane documents: the
+  // keyframe reads `--step-from` live, so settling the direction in an effect
+  // would rewrite the start value of an animation already running.
+  const step = workout ? (finishing ? 2 : 1) : 0;
+  const prevStep = useRef(step);
+  const stepFrom = useRef('12px');
+  if (prevStep.current !== step) {
+    stepFrom.current = step > prevStep.current ? '12px' : '-12px';
+    prevStep.current = step;
+  }
+  const stepStyle = { ['--step-from' as string]: stepFrom.current };
 
   useEffect(() => {
     let off = false;
@@ -188,6 +207,17 @@ function LoggingSurface(): ReactElement {
   }
 
   async function handleStart(name: string | null, repeatOf?: string) {
+    try {
+      await openSession(name, repeatOf);
+    } catch (err) {
+      // A tap that silently does nothing is the worst failure this screen can
+      // have — it reads as a dead button, and the cause never reaches anyone.
+      // Say it on screen instead of leaving it in an unhandled rejection.
+      setStartError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  async function openSession(name: string | null, repeatOf?: string) {
     const created = await startWorkout(name);
 
     // "Pick up a previous session" lays last time's session out again: the same
@@ -294,10 +324,33 @@ function LoggingSurface(): ReactElement {
     if (busy) return; // guards a double-tap writing the set twice
     setBusy(true);
     try {
+      // OQ-1, answered 2026-07-29: a blank field takes the PREVIOUS set for this
+      // exercise rather than writing a zero. Ticking with an empty box used to
+      // store 0 kg × 0, which counts as a hard set against weekly volume while
+      // contributing nothing to the e1RM estimate — it quietly inflated the one
+      // number M4's reconciliation is going to read.
+      //
+      // The previous set means, in order: the last one logged for this exercise
+      // in THIS session, then the historical last set already sitting in
+      // `defaults`. Both are the lifter's own recorded work, so nothing is
+      // invented — an explicit "0" still stores 0, which is what bodyweight work
+      // legitimately needs.
+      const priorThisSession = logged
+        .filter((s) => s.exerciseId === exId)
+        .sort((a, b) => a.performedAt.localeCompare(b.performedAt))
+        .at(-1);
+      const fallback = priorThisSession
+        ? { weight: priorThisSession.weightKg, reps: priorThisSession.reps }
+        : {
+            weight: Number(defaults[exId]?.weight) || 0,
+            reps: Number(defaults[exId]?.reps) || 0,
+          };
+      const blank = (v: string) => v.trim() === '';
+
       const created = await logSet({
         exerciseId: exId,
-        weightKg: Number(row.weight) || 0,
-        reps: Number(row.reps) || 0,
+        weightKg: blank(row.weight) ? fallback.weight : Number(row.weight) || 0,
+        reps: blank(row.reps) ? fallback.reps : Number(row.reps) || 0,
         rir: row.rir, // FR-LOG-1: blank stays null, never defaulted to a number
         setType: row.setType,
       });
@@ -329,7 +382,7 @@ function LoggingSurface(): ReactElement {
     );
 
     return (
-      <div className="mx-auto max-w-[480px] px-4 pt-5 pb-10">
+      <div key={step} className="step-in mx-auto max-w-[480px] px-4 pt-5 pb-10" style={stepStyle}>
         <p className={LABEL}>Finishing</p>
 
         <label className="mt-3 block">
@@ -348,7 +401,12 @@ function LoggingSurface(): ReactElement {
           </span>
         </label>
 
-        <section className="mt-6 border-t border-rule pt-4">
+        {/* The tally arrives in reading order, one line after another, because
+            finishing IS a re-count — the session stops being a thing you are
+            doing and becomes a thing that was measured. The stagger is capped at
+            two steps; it reads as the figures settling, not as a sequence the
+            lifter has to wait through. */}
+        <section className="figure-settle mt-6 border-t border-rule pt-4">
           <p className={LABEL}>Working sets logged</p>
           <p data-testid="summary-working" className={`${FIGURE} text-[19px] text-ink`}>
             {working.length}
@@ -358,7 +416,10 @@ function LoggingSurface(): ReactElement {
           </p>
         </section>
 
-        <section className="mt-4 border-t border-rule pt-4">
+        <section
+          className="figure-settle mt-4 border-t border-rule pt-4"
+          style={{ animationDelay: 'calc(var(--motion-settle) * 0.2)' }}
+        >
           <p className={LABEL}>Usable for the 1RM estimate</p>
           <p data-testid="summary-qualifying" className={`${FIGURE} text-[19px] text-ink`}>
             {qualifying.length} of {working.length}
@@ -372,7 +433,10 @@ function LoggingSurface(): ReactElement {
         </section>
 
         {heaviest && (
-          <section className="mt-4 border-t border-rule pt-4">
+          <section
+            className="figure-settle mt-4 border-t border-rule pt-4"
+            style={{ animationDelay: 'calc(var(--motion-settle) * 0.4)' }}
+          >
             <p className={LABEL}>Heaviest working set</p>
             <p className={`${FIGURE} text-[17px] text-ink`}>
               {exerciseName(heaviest.exerciseId)} {heaviest.weightKg} &times; {heaviest.reps}
@@ -405,7 +469,7 @@ function LoggingSurface(): ReactElement {
 
   if (!workout) {
     return (
-      <div className="mx-auto max-w-[480px] px-4 pt-5 pb-10">
+      <div key={step} className="step-in mx-auto max-w-[480px] px-4 pt-5 pb-10" style={stepStyle}>
         <h1 className="font-serif text-[20px] leading-[1.2] text-ink">Train</h1>
         <button
           type="button"
@@ -415,6 +479,12 @@ function LoggingSurface(): ReactElement {
         >
           Start a workout
         </button>
+
+        {startError && (
+          <p data-testid="start-error" className="mt-3 border border-flag p-2 font-serif text-[13px] leading-[1.45] text-flag">
+            Couldn&rsquo;t start a session: {startError}. Nothing was recorded.
+          </p>
+        )}
 
         {recent.length > 0 && (
           <section className="mt-7">
@@ -441,11 +511,18 @@ function LoggingSurface(): ReactElement {
   }
 
   return (
-    <div className="mx-auto max-w-[480px] pb-10">
+    <div key={step} className="step-in mx-auto max-w-[480px] pb-10" style={stepStyle}>
       <header className="flex items-baseline justify-between gap-3 border-b border-rule px-4 py-3">
         <div>
           <p className={LABEL}>
-            {workout.name ?? 'Session'} &middot; {workingCount} {workingCount === 1 ? 'set' : 'sets'}
+            {workout.name ?? 'Session'} &middot;{' '}
+            {/* Re-keyed on the count so the running total is seen to move when a
+                set lands. The elapsed clock beside it deliberately does NOT do
+                this — it changes every second, and a figure that animates every
+                second is a flicker rather than a signal. */}
+            <span key={workingCount} className="figure-settle inline-block">
+              {workingCount} {workingCount === 1 ? 'set' : 'sets'}
+            </span>
           </p>
           <p className={`${FIGURE} mt-0.5 text-[21px] text-ink`}>{elapsed(workout.startedAt, now)}</p>
         </div>
@@ -467,7 +544,17 @@ function LoggingSurface(): ReactElement {
         let working = 0;
 
         return (
-          <section key={exId} className="border-b border-rule px-4 pt-4 pb-3">
+          // The wrapper exists for the animation and nothing else: `.disclose`
+          // is a 0fr → 1fr grid track, which needs exactly one child to size, so
+          // it cannot go on the section itself without the header, table and
+          // buttons landing in separate implicit rows.
+          //
+          // Only the exercise you just picked opens from nothing. Every section
+          // animating on mount would mean the whole session replays itself on
+          // resume, which says "all of this is new" about sets that are hours
+          // old — the opposite of what the movement is for.
+          <div key={exId} className={exId === justAdded ? 'disclose disclose-settle' : undefined}>
+          <section className="border-b border-rule px-4 pt-4 pb-3">
             <h2 className="font-serif text-[17px] leading-[1.3] text-ink">{exerciseName(exId)}</h2>
 
             <table className="mt-2 w-full table-fixed border-collapse">
@@ -512,7 +599,14 @@ function LoggingSurface(): ReactElement {
                       <td className="border-b border-rule py-2">
                         <span className="tick-fill mx-auto flex h-[28px] w-[28px] items-center justify-center bg-ink text-paper">
                           <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
-                            <path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" strokeWidth={2} />
+                            <path
+                              className="tick-draw"
+                              d="M3 8.5l3.2 3.2L13 5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                              strokeLinecap="square"
+                            />
                           </svg>
                         </span>
                       </td>
@@ -607,6 +701,9 @@ function LoggingSurface(): ReactElement {
             </table>
 
             {rirFor !== null && queue.some((r) => r.key === rirFor) && (
+              // Opens beneath the cell that summoned it, so the targets read as
+              // belonging to that row rather than appearing from the section.
+              <div className="disclose">
               <div className="mt-2 flex items-center gap-2">
                 <span className={LABEL}>Reps left</span>
                 {[0, 1, 2, 3, 4].map((n) => (
@@ -624,6 +721,7 @@ function LoggingSurface(): ReactElement {
                   </button>
                 ))}
               </div>
+              </div>
             )}
 
             <button
@@ -635,6 +733,7 @@ function LoggingSurface(): ReactElement {
               + Add set
             </button>
           </section>
+          </div>
         );
       })}
 
@@ -673,6 +772,7 @@ function LoggingSurface(): ReactElement {
         onClose={() => setPicking(false)}
         onPick={(id) => {
           setExtras((prev) => (prev.includes(id) ? prev : [...prev, id]));
+          setJustAdded(id);
           setPicking(false);
         }}
       />

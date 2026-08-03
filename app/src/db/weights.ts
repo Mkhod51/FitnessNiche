@@ -2,13 +2,14 @@ import { and, asc, eq, isNull } from 'drizzle-orm';
 import { getDrizzle } from './client';
 import { weights } from './schema';
 import { LOCAL_USER_ID } from './user';
+import { newId } from './id';
 
 export type WeightReading = typeof weights.$inferSelect;
 
 /** FR-LOG-4/NFR-1: writes straight to sqlite, same pattern as logSet. */
 export async function logWeight(valueKg: number, now: Date = new Date()): Promise<WeightReading> {
   const db = getDrizzle();
-  const id = crypto.randomUUID();
+  const id = newId();
   const nowIso = now.toISOString();
 
   await db

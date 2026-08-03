@@ -2,6 +2,7 @@ import { and, eq, gte, isNull, lt, desc } from 'drizzle-orm';
 import { getDrizzle } from './client';
 import { foodLogEntries } from './schema';
 import { LOCAL_USER_ID } from './user';
+import { newId } from './id';
 
 export type FoodEntry = typeof foodLogEntries.$inferSelect;
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -41,7 +42,7 @@ export function localDayBounds(day: Date): { start: string; end: string } {
  */
 export async function logFood(input: FoodEntryInput, now: Date = new Date()): Promise<FoodEntry> {
   const db = getDrizzle();
-  const id = crypto.randomUUID();
+  const id = newId();
   const nowIso = now.toISOString();
 
   await db
