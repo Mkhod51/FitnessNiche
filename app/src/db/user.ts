@@ -56,3 +56,43 @@ export async function recordConsent(): Promise<User> {
   await db.update(users).set({ consentedAt: now, updatedAt: now }).where(eq(users.id, LOCAL_USER_ID)).run();
   return getUser();
 }
+
+/**
+ * The profile fields the calorie estimate needs. Kept separate from the target
+ * itself: these are facts about a person, where a target is a decision that has
+ * to go through `src/domain/guards.ts`.
+ */
+export async function updateProfile(
+  patch: Partial<Pick<User, 'sex' | 'heightCm' | 'birthYear' | 'goal' | 'numbersHidden'>>,
+  now: Date = new Date(),
+): Promise<User> {
+  const db = getDrizzle();
+  await db
+    .update(users)
+    .set({ ...patch, updatedAt: now.toISOString() })
+    .where(eq(users.id, LOCAL_USER_ID))
+    .run();
+  return getUser();
+}
+
+/**
+ * Stores an already-clamped target.
+ *
+ * GR-1: this does NOT clamp. `src/domain/guards.ts` is the only thing allowed
+ * to decide a target, and a second clamp here would be a second policy — the
+ * two would drift and nobody would notice which one was in force. Callers pass
+ * what the guard returned, and `guards-enforcement.test.ts` watches for anyone
+ * computing one themselves.
+ */
+export async function setCalorieTarget(
+  target: { calorieTargetKcal: number; proteinTargetG: number; deficitKcal: number },
+  now: Date = new Date(),
+): Promise<User> {
+  const db = getDrizzle();
+  await db
+    .update(users)
+    .set({ ...target, updatedAt: now.toISOString() })
+    .where(eq(users.id, LOCAL_USER_ID))
+    .run();
+  return getUser();
+}
