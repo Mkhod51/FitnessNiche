@@ -109,6 +109,17 @@ export function Hub(): ReactElement {
 
       <section className="mt-5 border-t border-rule pt-4">
         <Link
+          to="/review"
+          data-testid="review-link"
+          className={`${LABEL} flex min-h-[44px] items-center justify-between text-ink transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)]`}
+        >
+          <span>Weekly review</span>
+          <span>&rsaquo;</span>
+        </Link>
+      </section>
+
+      <section className="mt-4 border-t border-rule pt-4">
+        <Link
           to="/trends"
           data-testid="trends-link"
           className={`${LABEL} flex min-h-[44px] items-center justify-between text-ink transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)]`}
