@@ -1,6 +1,8 @@
 # Project State
 
-**Updated:** 2026-07-29 · **Phase:** Build · **Branch:** `m2-training-loop`, nothing merged to `main` past M0.
+**Updated:** 2026-07-29 · **Phase:** Build · **Branch:** `main` — M0, M1 and M2 are all merged
+(fast-forward; m0/m1 were already ancestors of m2). `main` is **87+ commits ahead of
+`origin/main` and has not been pushed.**
 
 ---
 
@@ -17,7 +19,7 @@
    cd app && ls src/domain src/features && npm run typecheck && npm test -- --run
    ```
 
-**Verified 2026-07-29:** typecheck clean · **462 unit tests / 43 files** · build OK · e2e 18/18.
+**Verified 2026-07-29 (latest):** typecheck clean · **502 unit tests / 47 files** · build OK · e2e 21/21.
 
 ## What exists now
 
@@ -33,13 +35,42 @@ a real state.
 **Advice.** `peekStatement` on every claim with guards against overstating it, one-per-session
 selection with a 7-day cooldown, and the peek wired to real logged data.
 
+**Reconciliation (M4).** `reconcile.ts` reads the weight trend against the e1RM trend and
+returns a verdict *plus* the list of signals it could not resolve; `advice/snapshot.ts` feeds
+that into the claim engine, so `deficitWeeks`/`weightTrend`/`e1rmTrend` are real instead of the
+placeholders the session peek used to hand-fill. Weekly review screen at `/review`.
+
 **Also.** Three-tab shell with animated pane transitions, dark ground, Trends (bodyweight,
 e1RM with FR-SIG-2 noise honesty, volume vs the population range), Settings with GR-5 export
 and erasure plus the GR-1 Beat/NHS signpost, and the Hevy CSV parser.
 
+## M4 — the differentiator closes the loop (2026-07-29)
+
+**Partially delivered on `main`.** `domain/reconcile.ts` (FR-SIG-5), the snapshot builder that
+makes advice data-earned (FR-ADV-4/AC-3), migration `0004_goal_clock`, and the weekly review
+screen at `/review`.
+
+**Verified 2026-07-29:** typecheck clean · **502 unit tests / 47 files** · build OK · **e2e 21/21**.
+
+Two things worth knowing about how it was scoped:
+
+- **No rate-of-loss threshold exists in the engine, deliberately.** GR-4 forbids invented
+  precision and no such boundary is evidenced anywhere in this repo, so `down_fast` is never
+  emitted and a strength trend is only called falling when its own 95% interval excludes zero.
+  The only cutoffs are data-sufficiency ones. If a rate threshold is ever wanted it needs a
+  curated claim first, not a constant.
+- **OQ-4 has a candidate answer, not a verdict.** What distinguishes the screen from two
+  overlaid charts is the *refusal*: it names the half it cannot read and holds the verdict back
+  rather than guessing. That is a design claim that still needs the developer's eye on it — the
+  gate is not self-certifying.
+
+**Still open in M4:** `proteinPerKg7d` is wired as `null` (M3 owns the nutrition half), and the
+review screen shows sets-per-muscle as a plain list rather than against the population range the
+way Trends does.
+
 ## What does not exist
 
-`domain/reconcile.ts` and data-earned advice (M4) · sync (M5) · **the food database** — the
+Sync (M5) · **the food database** — the
 Open Food Facts + CoFID + FDC ETL is the largest single piece of unbuilt work, and quick-add
 was built first precisely so nothing waits on it · the predicate-focused curation tranche that
 would make the advice peek fire more than rarely.
