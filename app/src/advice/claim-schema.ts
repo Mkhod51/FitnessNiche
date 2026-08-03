@@ -37,6 +37,12 @@ export const claimSchema = z
   .object({
     id: z.string().regex(/^c-[a-z0-9-]+$/),
     statement: z.string().min(1),
+    // The curated short form the advice peek renders. It exists so a small
+    // surface shows a COMPLETE sentence rather than an ellipsis through a claim
+    // — truncating a claim cuts the qualifier, which is exactly how a [C] ends
+    // up read as a certainty. Capped so it cannot quietly become a second
+    // full-length statement that drifts from the real one.
+    peekStatement: z.string().min(1).max(100),
     grade: z.enum(['A', 'B', 'C', 'D']),
     status: z.enum(['settled', 'contested']),
     domain: z.string().min(1),

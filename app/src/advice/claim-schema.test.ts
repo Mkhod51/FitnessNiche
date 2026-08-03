@@ -4,6 +4,7 @@ import { claimSchema } from './claim-schema';
 const valid = {
   id: 'c-test-example',
   statement: 'A statement.',
+  peekStatement: 'Short curated form',
   grade: 'A',
   status: 'settled',
   domain: 'volume',

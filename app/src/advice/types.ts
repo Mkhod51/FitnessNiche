@@ -40,6 +40,8 @@ export type JsonLogicRule = Record<string, unknown>;
 export interface Claim {
   id: string;
   statement: string;
+  /** Curated short form for the advice peek — never a truncation of `statement`. */
+  peekStatement: string;
   grade: Grade;
   status: 'settled' | 'contested';
   domain: string;

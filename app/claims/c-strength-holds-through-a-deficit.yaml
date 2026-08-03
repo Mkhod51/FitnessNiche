@@ -3,6 +3,8 @@ statement: >-
   Strength appears to hold up better than muscle size does in an energy deficit,
   though the strength comparison is a non-significant result rather than a
   demonstrated equivalence
+peekStatement: >-
+  Strength appears to hold up better than size in a deficit, on a non-significant result
 grade: B
 status: settled
 domain: energy-balance

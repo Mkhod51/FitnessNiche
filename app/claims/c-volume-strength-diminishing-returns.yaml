@@ -2,6 +2,8 @@ id: c-volume-strength-diminishing-returns
 statement: >-
   Strength gains keep rising with weekly volume too, but they flatten off much
   faster than muscle size does
+peekStatement: >-
+  Strength rises with weekly volume too, but flattens off much faster than size does
 grade: B
 status: settled
 domain: volume

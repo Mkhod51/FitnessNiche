@@ -6,6 +6,7 @@ function claim(over: Partial<Claim> = {}): Claim {
   return {
     id: 'c-test-a',
     statement: 'A statement',
+    peekStatement: 'Short curated form',
     grade: 'A',
     status: 'settled',
     domain: 'volume',

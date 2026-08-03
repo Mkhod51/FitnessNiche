@@ -2,6 +2,8 @@ id: c-volume-dose-response
 statement: >-
   More weekly sets per muscle produce more hypertrophy, with each additional set
   adding less than the one before
+peekStatement: >-
+  More weekly sets per muscle produce more growth, each set adding less than the last
 grade: A
 status: settled
 domain: volume

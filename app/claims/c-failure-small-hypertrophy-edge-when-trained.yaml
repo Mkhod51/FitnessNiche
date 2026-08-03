@@ -2,6 +2,8 @@ id: c-failure-small-hypertrophy-edge-when-trained
 statement: >-
   In lifters who already train, sets taken to failure show a small hypertrophy
   advantage that does not appear in untrained beginners
+peekStatement: >-
+  In lifters who already train, failure shows a small hypertrophy edge
 grade: B
 status: settled
 domain: failure-proximity

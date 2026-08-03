@@ -6,6 +6,7 @@ import type { Claim } from '../advice/types';
 const claim: Claim = {
   id: 'c-test-volume',
   statement: 'More weekly sets produce more growth, with diminishing returns',
+  peekStatement: 'Short curated form',
   grade: 'C', status: 'settled', domain: 'volume',
   predicates: null, clusterId: null, phrasingKey: 'test-volume',
   supersededBy: null, lastReviewed: '2026-07-25',
@@ -61,9 +62,11 @@ describe('ClaimCard', () => {
   it('renders both sides when given a contested cluster', () => {
     const a: Claim = { ...claim, id: 'c-timing-for', status: 'contested', clusterId: 'protein-timing',
       statement: 'Peri-workout protein timing matters',
+      peekStatement: 'Short curated form',
       citations: [{ ...claim.citations[0], claimId: 'c-timing-for' }] };
     const b: Claim = { ...claim, id: 'c-timing-against', status: 'contested', clusterId: 'protein-timing',
-      statement: 'Total daily protein dominates timing', grade: 'A',
+      statement: 'Total daily protein dominates timing',
+      peekStatement: 'Short curated form', grade: 'A',
       citations: [{ ...claim.citations[0], claimId: 'c-timing-against' }] };
     render(<ClaimCard claim={a} cluster={[a, b]} />);
     expect(screen.getByText(/peri-workout protein timing matters/i)).toBeInTheDocument();

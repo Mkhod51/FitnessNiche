@@ -2,6 +2,8 @@ id: c-frequency-irrelevant-when-volume-equated
 statement: >-
   Once weekly volume is matched, how many sessions you split it across makes
   little difference to muscle growth
+peekStatement: >-
+  With weekly volume matched, how you split it makes little difference to growth
 grade: A
 status: settled
 domain: frequency

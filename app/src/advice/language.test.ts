@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { GRADE_LANGUAGE, renderHeadline } from './language';
 import type { Claim, Grade } from './types';
+import { CLAIMS } from '../generated/claims';
 
 const GRADES: Grade[] = ['A', 'B', 'C', 'D'];
 
@@ -28,6 +29,7 @@ function claimWith(grade: Grade): Claim {
   return {
     id: 'c-test-x',
     statement: 'Training more produces more growth',
+    peekStatement: 'Short curated form',
     grade,
     status: 'settled',
     domain: 'volume',
@@ -95,6 +97,52 @@ describe('renderHeadline', () => {
       for (const word of CERTAINTY_WORDS) {
         expect(assertsCertainty(out, word), `${claim.id} rendered "${word}"`).toBe(false);
       }
+    }
+  });
+});
+
+/**
+ * The peek renders `peekStatement` instead of truncating `statement`, which is
+ * the whole reason the field exists — an ellipsis through a claim cuts the
+ * qualifier, and the qualifier is what stops a [C] being read as a certainty.
+ *
+ * But a hand-written short form can overstate all by itself, which is a worse
+ * failure than truncation because it looks deliberate. These check the curated
+ * copy the same way the grade language is checked.
+ */
+describe('peekStatement — the short form must not overstate what it shortens', () => {
+  it('exists on every claim, since the peek has no fallback', () => {
+    for (const c of CLAIMS) {
+      expect(c.peekStatement.trim().length, `${c.id} has no peek statement`).toBeGreaterThan(0);
+    }
+  });
+
+  it('stays short enough to render whole, so it never needs truncating in turn', () => {
+    for (const c of CLAIMS) {
+      expect(c.peekStatement.length, `${c.id} peek statement is too long to render whole`).toBeLessThanOrEqual(100);
+    }
+  });
+
+  it.each(CERTAINTY_WORDS)('never asserts "%s", whatever the grade', (word) => {
+    const offenders = CLAIMS.filter((c) => assertsCertainty(c.peekStatement.toLowerCase(), word)).map((c) => c.id);
+    expect(offenders, `these peek statements assert "${word}": ${offenders.join(', ')}`).toEqual([]);
+  });
+
+  // A shortening that drops the hedge is how nuance degrades under interface
+  // constraints — the exact failure D3 names.
+  it('keeps a hedge on every claim graded below B', () => {
+    const HEDGES = /\bmay\b|\bmight\b|\btends? to\b|\bappears? to\b|\bsuggest|\bnot clearly\b|\bbarely\b|\blittle\b/i;
+    for (const c of CLAIMS.filter((x) => x.grade === 'C' || x.grade === 'D')) {
+      expect(
+        HEDGES.test(c.peekStatement),
+        `${c.id} is graded ${c.grade} but its peek statement reads as settled: "${c.peekStatement}"`,
+      ).toBe(true);
+    }
+  });
+
+  it('is a distinct sentence, not a prefix of the full statement chopped short', () => {
+    for (const c of CLAIMS) {
+      expect(c.statement.startsWith(c.peekStatement), `${c.id} peek is just a truncation`).toBe(false);
     }
   });
 });

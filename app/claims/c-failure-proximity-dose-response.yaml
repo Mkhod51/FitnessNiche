@@ -2,6 +2,8 @@ id: c-failure-proximity-dose-response
 statement: >-
   Muscle growth tends to increase the closer sets are taken to failure, while
   strength looks much the same across a wide range of reps-in-reserve
+peekStatement: >-
+  Growth tends to rise closer to failure; strength looks similar across a wide RIR range
 grade: B
 status: settled
 domain: failure-proximity

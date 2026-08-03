@@ -2,6 +2,8 @@ id: c-protein-supplementation-works
 statement: >-
   Supplementing protein while you lift produces a real but modest increase in
   lean mass and strength
+peekStatement: >-
+  Supplementing protein while you lift gives a real but modest gain
 grade: A
 status: settled
 domain: protein-dose

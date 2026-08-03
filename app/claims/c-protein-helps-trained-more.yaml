@@ -2,6 +2,8 @@ id: c-protein-helps-trained-more
 statement: >-
   Training experience increases how much extra protein helps, while getting
   older reduces it
+peekStatement: >-
+  Training experience raises how much extra protein helps; getting older reduces it
 grade: B
 status: settled
 domain: protein-dose

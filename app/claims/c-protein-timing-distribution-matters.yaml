@@ -2,6 +2,8 @@ id: c-protein-timing-distribution-matters
 statement: >-
   Spreading protein into 20-40 g doses every three to four hours, including
   around training, may still add something total intake alone does not
+peekStatement: >-
+  Spreading protein through the day may add something total intake alone does not
 grade: C
 status: contested
 domain: protein-timing

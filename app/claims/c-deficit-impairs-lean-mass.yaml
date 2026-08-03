@@ -2,6 +2,8 @@ id: c-deficit-impairs-lean-mass
 statement: >-
   Training in an energy deficit blunts how much lean mass you gain compared with
   training at maintenance
+peekStatement: >-
+  Training in an energy deficit blunts lean-mass gain compared with maintenance
 grade: B
 status: settled
 domain: energy-balance
