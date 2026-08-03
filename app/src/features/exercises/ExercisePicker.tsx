@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { createPortal } from 'react-dom';
 import { SEED_EXERCISES } from '../../db/seed-exercises';
 
 /**
@@ -122,7 +123,16 @@ export function ExercisePicker({
     </li>
   );
 
-  return (
+  // Portalled to <body>, and that is load-bearing rather than tidiness.
+  // `position: fixed` resolves against the viewport ONLY while no ancestor
+  // carries a transform, filter or perspective; any one of those silently
+  // becomes the containing block and the overlay starts sizing to a route pane
+  // instead of the screen. This sheet lives inside two animated wrappers (the
+  // tab pane and the start → session → finish step), so every animation added
+  // to either would otherwise be one more chance to re-break it — mid-flight,
+  // for the 200ms a transform is actually applied. Rendering outside them makes
+  // the sheet structurally independent of anything the routes animate.
+  return createPortal(
     <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label="Choose an exercise">
       <button
         type="button"
@@ -194,6 +204,12 @@ export function ExercisePicker({
             {query.trim() ? `${matches.length} match${matches.length === 1 ? '' : 'es'}` : 'All exercises'}
           </p>
 
+          {/* Re-keyed on the query so the results cross-fade when the set of
+              matches changes, rather than the list silently becoming a
+              different list under a thumb that is still typing. Keyed on the
+              COUNT, not the text: typing that narrows nothing should not
+              re-announce a list that did not move. */}
+          <div key={matches.length} className="figure-settle">
           {matches.length === 0 ? (
             <p className="px-4 py-5 font-serif text-[15px] leading-[1.45] text-ink-soft">
               Nothing matches “{query.trim()}”. The catalogue is {SEED_EXERCISES.length} exercises —
@@ -202,8 +218,10 @@ export function ExercisePicker({
           ) : (
             <ul>{matches.map((e) => row(e.id, e.name, `${e.modality} · ${primaryMuscle(e.id)}`))}</ul>
           )}
+          </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
