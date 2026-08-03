@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { BrowserRouter, NavLink, Route, Routes, useLocation } from 'react-router';
 import { initDb } from './db/client';
 import type { StorageMode } from './db/protocol';
@@ -43,19 +43,26 @@ function tabIndexOf(pathname: string): number {
 function AnimatedPane({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const index = tabIndexOf(pathname);
-  const [prev, setPrev] = useState(index);
 
-  useEffect(() => {
-    setPrev(index);
-  }, [index]);
-
-  const from = index >= prev ? '12px' : '-12px';
+  // Refs, and computed during render — deliberately not state plus an effect.
+  // `--pane-from` is read live by the running keyframe, so an effect that
+  // updates the previous index after paint rewrites the animation's own start
+  // value while it is still in flight: a backward move began at -12px and
+  // snapped to +12px partway through, which is why leftward navigation never
+  // actually read as leftward. Deriving it during render means the direction is
+  // fixed before the first frame and stays fixed for the whole animation.
+  const prevIndex = useRef(index);
+  const from = useRef('12px');
+  if (prevIndex.current !== index) {
+    from.current = index > prevIndex.current ? '12px' : '-12px';
+    prevIndex.current = index;
+  }
 
   return (
     <div
       key={pathname}
       className="pane-enter"
-      style={{ ['--pane-from' as string]: from }}
+      style={{ ['--pane-from' as string]: from.current }}
     >
       {children}
     </div>

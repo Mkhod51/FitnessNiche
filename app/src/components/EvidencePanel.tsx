@@ -73,10 +73,16 @@ export function EvidencePanel({ claim }: { claim: Claim }): ReactElement {
         <summary className="inline-flex min-h-[44px] cursor-pointer select-none items-center font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
           show citations &amp; figures
         </summary>
-        <div className="mt-2 flex flex-col gap-3">
-          {claim.citations.map((citation) => (
-            <CitationBlock key={citation.id} citation={citation} />
-          ))}
+        {/* `details` gives no open/close transition of its own, so the panel
+            body opens from zero height on the same 0fr → 1fr track the set rows
+            use. Wrapping rather than styling the list directly keeps `.disclose`
+            to the single child it needs. */}
+        <div className="disclose">
+          <div className="mt-2 flex flex-col gap-3">
+            {claim.citations.map((citation) => (
+              <CitationBlock key={citation.id} citation={citation} />
+            ))}
+          </div>
         </div>
       </details>
     </div>

@@ -67,8 +67,21 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
+/* `backwards`, deliberately not `both`. `forwards` would leave the final
+   keyframe's transform applied for the life of the pane, and a computed
+   transform other than `none` makes this element the containing block for every
+   `position: fixed` descendant inside the route. That is not cosmetic: the
+   exercise picker's `fixed inset-0` overlay sized itself to the pane (196px)
+   instead of the viewport, so the sheet came out ~180px tall and its list ~81px
+   — one row visible, bare ground below it.
+
+   Dropping `forwards` costs nothing visually: with no static transform declared,
+   the resting state this returns to is already `opacity: 1; transform: none`,
+   which is exactly what the `to` frame paints. `backwards` is kept so the first
+   frame still applies before the animation starts, with no flash of the
+   untransformed pane. */
 .pane-enter {
-  animation: pane-enter var(--motion-move) var(--motion-ease) both;
+  animation: pane-enter var(--motion-move) var(--motion-ease) backwards;
 }
 
 /* A sheet arrives from the edge it lives on, and the scrim fades with it. The
@@ -102,14 +115,105 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 /* The tick is the receipt that the write reached sqlite. With no save button,
-   "did that register?" is the expensive ambiguity, so the fill is the one piece
-   of motion in the set table that is genuinely load-bearing. */
+   "did that register?" is the expensive ambiguity, so this is the one piece of
+   motion in the set table that is genuinely load-bearing — and the only moment
+   in the app deliberately authored rather than merely explained.
+
+   Two parts, sequenced. The box fills from the leading edge, then the check is
+   DRAWN as a stroke rather than revealed. Ink laid onto paper is the one
+   metaphor this world already commits to, and a mark being written is the
+   printed-matter reading of "recorded" — where a scale-up pop would have been
+   the generic one. Both run inside --motion-tap; the draw is offset so the
+   stroke lands on a surface that is already there, never onto nothing. */
 @keyframes tick-fill {
-  from { transform: scale(0.6); opacity: 0.4; }
-  to { transform: scale(1); opacity: 1; }
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
 }
 .tick-fill {
-  animation: tick-fill var(--motion-tap) var(--motion-ease) both;
+  animation: tick-fill var(--motion-tap) var(--motion-ease) backwards;
+}
+
+@keyframes tick-draw {
+  from { stroke-dashoffset: var(--tick-len); }
+  to { stroke-dashoffset: 0; }
+}
+.tick-draw {
+  /* The path length, hard-coded: this is a fixed 16-unit viewBox drawn once in
+     LogWorkout, so measuring it at runtime with getTotalLength() would buy
+     nothing and cost a layout read per committed set. */
+  --tick-len: 14;
+  stroke-dasharray: var(--tick-len);
+  animation: tick-draw var(--motion-tap) var(--motion-ease) calc(var(--motion-tap) * 0.5) backwards;
+}
+
+/* Height from zero, without animating `height`.
+
+   A 0fr → 1fr grid track interpolates where `height: auto` cannot, so a row,
+   a disclosure or a freshly added exercise opens from nothing to exactly its
+   own content height with no measurement, no ResizeObserver and no magic
+   max-height that clips whatever outgrows it. The child needs `min-height: 0`
+   and `overflow: hidden` or it refuses to be squeezed — both are set here so no
+   call site has to remember.
+
+   DESIGN.md permits height as the exception where it carries meaning: an
+   element opening from zero says "this was added" in a way a fade cannot. */
+@keyframes disclose {
+  from { grid-template-rows: 0fr; opacity: 0; }
+  to { grid-template-rows: 1fr; opacity: 1; }
+}
+.disclose {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: disclose var(--motion-move) var(--motion-ease) backwards;
+}
+.disclose > * {
+  min-height: 0;
+  overflow: hidden;
+}
+.disclose-settle {
+  animation-duration: var(--motion-settle);
+}
+
+/* Start → session → finish is a sequence, so the pane carries the order: a step
+   deeper arrives from the right, a step back from the left. Same grammar as the
+   tab panes, one level down, so the two never contradict each other. */
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--step-from, 12px), 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+.step-in {
+  animation: step-in var(--motion-move) var(--motion-ease) backwards;
+}
+
+/* One mark of a countable meter arriving. Scales from the baseline edge so the
+   mark reads as being laid down in place, and never as a bar growing sideways —
+   the direction contract shows quantity by repeating a mark, never by scaling
+   one, and a sideways grow would smuggle the banned reading back in. */
+@keyframes mark-fill {
+  from { transform: scaleY(0.15); opacity: 0; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+.mark-fill {
+  transform-origin: bottom;
+  animation: mark-fill var(--motion-tap) var(--motion-ease) backwards;
+}
+
+/* A figure that has just been recomputed should be seen to have changed, rather
+   than a new number appearing where the old one was. Opacity and a hairline
+   rise only — the digits must stay readable throughout, since this fires on the
+   session clock's neighbours mid-workout. */
+@keyframes figure-settle {
+  from { opacity: 0.35; transform: translate3d(0, 2px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.figure-settle {
+  animation: figure-settle var(--motion-settle) var(--motion-ease) backwards;
 }
 
 /* Zeroed at the source, so every consumer of the tokens is covered without each

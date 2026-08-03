@@ -368,6 +368,19 @@ spring.** This world is printed matter; paper does not wobble.
 - **`prefers-reduced-motion: reduce` disables all of it**, and the interface stays completely
   usable — because of the rule above, nothing is lost but the movement. This is an
   accessibility requirement, not a courtesy.
+- **Never `animation-fill-mode: forwards` (or `both`) on a layout wrapper.** A transform left
+  applied after an animation ends makes that element the containing block for every
+  `position: fixed` descendant, so an overlay inside it silently sizes to the wrapper instead
+  of the viewport. This has cost real bugs twice: `.pane-enter` shrank the exercise sheet to
+  a fraction of the screen, and adding `.step-in` re-broke it for the 200ms the step
+  transition runs. Use `backwards`, so the resting state is the untransformed one, **and**
+  portal overlays to `<body>` so they cannot be captured in the first place. Both, not either.
+- **Direction is settled during render, never in an effect.** `--pane-from` / `--step-from`
+  are read live by the running keyframe, so assigning them after paint rewrites the start
+  value of an animation already in flight — backward navigation began at -12px and snapped to
+  +12px partway through. It still looked animated, which is why it shipped unnoticed.
+  `e2e/motion.spec.ts` asserts the property mid-transition; a screenshot cannot catch this,
+  because both directions end in the same place.
 
 ---
 
