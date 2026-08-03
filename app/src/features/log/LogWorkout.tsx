@@ -16,6 +16,20 @@ import {
   type LoggedSet,
 } from '../../db/workouts';
 import { setE1rm } from '../../domain/e1rm';
+import { weeklySetsByMuscle } from '../../domain/volume';
+import { getSetsSince } from '../../db/workouts';
+import { getUser } from '../../db/user';
+import { CLAIMS } from '../../generated/claims';
+import { selectSessionAdvice } from '../../advice/session-advice';
+import {
+  recordAdviceShown,
+  suppressClaim,
+  suppressedClaimIds,
+  recentlyShownClaimIds,
+  shownInWorkout,
+} from '../../db/advice-events';
+import { AdvicePeek } from '../advice/AdvicePeek';
+import type { Claim } from '../../advice/types';
 import { ExercisePicker } from '../exercises/ExercisePicker';
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
@@ -81,6 +95,7 @@ function LoggingSurface(): ReactElement {
   const [rirFor, setRirFor] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const [recentExercises, setRecentExercises] = useState<string[]>([]);
+  const [peek, setPeek] = useState<{ claim: Claim; why: string } | null>(null);
   const [finishing, setFinishing] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [now, setNow] = useState(() => Date.now());
@@ -92,7 +107,10 @@ function LoggingSurface(): ReactElement {
       const open = await findOpenWorkout();
       if (off) return;
       setWorkout(open ?? null);
-      if (open) setLogged(await getOpenSessionSets());
+      if (open) {
+        setLogged(await getOpenSessionSets());
+        void pickSessionAdvice(open.id);
+      }
       else setRecent(await getRecentWorkouts(5));
       setRecentExercises(await getRecentExerciseIds(6));
     })();
@@ -202,12 +220,57 @@ function LoggingSurface(): ReactElement {
     setExtras(template.map((g) => g.exerciseId));
     setPending(carriedPending);
     setDefaults(carriedDefaults);
+    void pickSessionAdvice(created.id);
   }
 
   function openFinish() {
     if (!workout) return;
     setDraftName(workout.name ?? '');
     setFinishing(true);
+  }
+
+  /**
+   * Chosen ONCE, when the session opens, and never re-evaluated inside it.
+   * No predicate in the claim base reads within-session state, so nothing can
+   * become true because of the set just logged — and the 90 seconds that matter
+   * stay free of computation.
+   */
+  async function pickSessionAdvice(workoutId: string) {
+    const user = await getUser();
+    if (await shownInWorkout(workoutId)) return;
+
+    const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
+    const recentSets = await getSetsSince(weekAgo);
+    const byMuscle = weeklySetsByMuscle(recentSets, SEED_EXERCISES, weekAgo);
+
+    const item = selectSessionAdvice(
+      {
+        goal: user.goal,
+        deficitWeeks: 0,
+        weightTrend: 'unknown',
+        e1rmTrend: 'insufficient_data',
+        weeklySetsByMuscle: byMuscle,
+        proteinPerKg7d: null,
+        numbersHidden: user.numbersHidden,
+      },
+      CLAIMS,
+      {
+        suppressedClaimIds: await suppressedClaimIds(),
+        recentlyShownClaimIds: await recentlyShownClaimIds(),
+        alreadyShownThisSession: false,
+      },
+    );
+    if (!item) return;
+
+    const claim = CLAIMS.find((c) => c.id === item.claimId);
+    if (!claim) return;
+
+    // A fact about the user's own data, never a recommendation (GR-4).
+    const lowest = Object.entries(byMuscle).sort((a, b) => a[1] - b[1])[0];
+    const why = lowest ? `${lowest[0].replace(/_/g, ' ')} · ${Math.round(lowest[1] * 10) / 10} sets in 7 days` : '';
+
+    await recordAdviceShown(claim.id, item.trigger, workoutId);
+    setPeek({ claim, why });
   }
 
   async function handleFinish() {
@@ -579,6 +642,18 @@ function LoggingSurface(): ReactElement {
         <p data-testid="warmup-note" className="px-4 pt-3 font-serif text-[12.5px] italic leading-[1.45] text-ink-soft">
           Warm-ups aren&rsquo;t counted toward your weekly sets or the 1RM estimate.
         </p>
+      )}
+
+      {peek && (
+        <AdvicePeek
+          claim={peek.claim}
+          why={peek.why}
+          onDismiss={() => setPeek(null)}
+          onSuppress={() => {
+            void suppressClaim(peek.claim.id);
+            setPeek(null);
+          }}
+        />
       )}
 
       <div className="px-4 pt-5">
