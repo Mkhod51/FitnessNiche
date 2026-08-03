@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
-import { Link } from 'react-router';
 import { Logo } from '../../components/Logo';
+import { Link } from 'react-router';
 import { AdviceFeed } from '../advice/AdviceFeed';
 import { AskEvidence } from '../advice/AskEvidence';
 import { getWeightHistory } from '../../db/weights';
@@ -107,7 +107,18 @@ export function Hub(): ReactElement {
         )}
       </section>
 
-      <section className="mt-6 border-t border-rule pt-4">
+      <section className="mt-5 border-t border-rule pt-4">
+        <Link
+          to="/trends"
+          data-testid="trends-link"
+          className={`${LABEL} flex min-h-[44px] items-center justify-between text-ink transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)]`}
+        >
+          <span>All trends</span>
+          <span>&rsaquo;</span>
+        </Link>
+      </section>
+
+      <section className="mt-4 border-t border-rule pt-4">
         <h1 className="font-serif text-[19px] leading-[1.3] tracking-[-0.005em] text-ink">
           The evidence base
         </h1>

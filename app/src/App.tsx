@@ -8,6 +8,7 @@ import { LogWeight } from './features/log/LogWeight';
 import { EatDay } from './features/nutrition/EatDay';
 import { GoalSetup } from './features/nutrition/GoalSetup';
 import { Settings } from './features/settings/Settings';
+import { Trends } from './features/trends/Trends';
 import { HubIcon, TrainIcon, EatIcon } from './components/icons';
 
 type BootState = StorageMode | 'booting' | `error: ${string}`;
@@ -104,6 +105,7 @@ function Shell() {
             <Route path="/goal" element={<GoalSetup />} />
             <Route path="/weight" element={<LogWeight />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/trends" element={<Trends />} />
           </Routes>
         </AnimatedPane>
       </main>
