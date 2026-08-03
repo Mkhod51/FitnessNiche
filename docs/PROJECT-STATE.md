@@ -1,52 +1,60 @@
 # Project State
 
-**Updated:** 2026-07-28 · **Phase:** Build · **Branch:** `m2-training-loop`, in sync with origin, nothing merged to `main` past M0.
+**Updated:** 2026-07-29 · **Phase:** Build · **Branch:** `m2-training-loop`, nothing merged to `main` past M0.
 
 ---
 
 ## ▶ START HERE (new session)
 
-1. **Read `superpowers/plans/2026-07-27-trackers-redesign.md` first.** It is the live plan: six
-   consulted design gates for the health-hub trackers, the schema and migration plan, and the
-   revised build order. It supersedes the unfinished tail of `superpowers/plans/2026-07-26-m2-training-loop.md`.
-2. **Verify state before trusting any document, including this one.** Two sessions have worked
-   this branch concurrently and documents have already gone stale mid-flight:
+1. **Read [`superpowers/plans/2026-07-27-trackers-redesign.md`](superpowers/plans/2026-07-27-trackers-redesign.md).**
+   Six consulted design gates for the health-hub trackers, the schema plan, and the build
+   order. It supersedes the unfinished tail of the M2 plan.
+2. **Read [`OPEN-QUESTIONS.md`](OPEN-QUESTIONS.md)** — five questions awaiting the developer,
+   each with the default that was taken so work could continue.
+3. **Verify state before trusting any document, including this one.** Documents here have gone
+   stale mid-flight more than once:
    ```bash
-   cd "app" && ls src/domain src/features && npm run typecheck && npm test -- --run
+   cd app && ls src/domain src/features && npm run typecheck && npm test -- --run
    ```
-3. **Agree who owns `app/` before dispatching any worker.** Concurrent sessions on this branch
-   collide — that has already happened once.
 
-**Verified 2026-07-28:** typecheck clean · **279 unit tests / 31 files** · build OK · e2e 11/11
-at last run. `git stash@{0}` holds work-in-progress on the trends screen (`getSetsSince` plus a
-red `Trends.test.tsx`), stashed deliberately, **recoverable and not discarded**.
+**Verified 2026-07-29:** typecheck clean · **462 unit tests / 43 files** · build OK · e2e 18/18.
 
-**Design is signed off; implementation has not started.** No schema change and no tracker code
-has been written. The only spec change made is FR-LOG-3 (gram-first entry); **GR-1 was pressed
-and held.**
+## What exists now
+
+**Training.** Explicit session start/finish (`workouts.name`, `finished_at`), the Hevy-idiom
+set table with queued rows, optional-but-visible RIR, warm-ups excluded from volume and e1RM,
+the exercise picker sheet, session summary, and repeat-a-previous-session carrying its sets.
+
+**Nutrition.** `domain/guards.ts` (GR-1 floors and the deficit cap, with a dormant enforcement
+test), migration `0003`, the Eat day view with quick-add — **working with no food database at
+all** — goal setup with the Mifflin–St Jeor estimate and its error band, and numbers-hidden as
+a real state.
+
+**Advice.** `peekStatement` on every claim with guards against overstating it, one-per-session
+selection with a 7-day cooldown, and the peek wired to real logged data.
+
+**Also.** Three-tab shell with animated pane transitions, dark ground, Trends (bodyweight,
+e1RM with FR-SIG-2 noise honesty, volume vs the population range), Settings with GR-5 export
+and erasure plus the GR-1 Beat/NHS signpost, and the Hevy CSV parser.
+
+## What does not exist
+
+`domain/reconcile.ts` and data-earned advice (M4) · sync (M5) · **the food database** — the
+Open Food Facts + CoFID + FDC ETL is the largest single piece of unbuilt work, and quick-add
+was built first precisely so nothing waits on it · the predicate-focused curation tranche that
+would make the advice peek fire more than rarely.
+
+**No food data has been hand-authored.** Inventing macro values is the fabrication this
+product exists to refuse.
+
+## Recently answered
+
+- **OQ-2 is closed.** Hevy's free CSV carries `rpe`, so RIR is recoverable as 10 − RPE, and
+  imported history *can* feed the e1RM trend. See decision-log entry 32.
+- **GR-1 was pressed and held.** The day view has no eat-back-to-zero counter; the calorie bar
+  fills toward the target. The one spec change made was FR-LOG-3 (gram-first entry).
 
 ---
-
-**M0 complete and merged.** The TA-1 iOS gate PASSED on a real iPhone (`opfs-sahpool`) on
-2026-07-25 — the offline-first premise holds and no Expo/React Native pivot is needed.
-
-**M1 complete** (unmerged): 17 curated claims, the advice engine, grade-calibrated language,
-`ConfidenceTicks` / `ClaimCard` / `EvidencePanel` / `FigureChart`, the evidence feed and the
-minisearch question surface.
-
-**M2 substantially complete** (unmerged): the snapshot fallback, `ConsentGate`, `domain/e1rm.ts`,
-`domain/trends.ts`, `domain/volume.ts`, `components/TrendChart.tsx`, `db/weights.ts`,
-`features/log/LogWorkout.tsx` and `features/log/LogWeight.tsx`.
-
-**Outstanding in M2:** `features/trends/Trends.tsx` (the screen itself — `TrendChart` exists),
-and the Hevy CSV import, which also closes OQ-2. **Note:** `LogWeight.tsx` exists but is not
-reachable from any route; `App.tsx` still routes only `/` and `/log`.
-
-**The M2 set-logging screen's layout was rejected by the developer.** Its *behaviour* is the
-reference — defaults from the last set of the same exercise, immediate write, no save button —
-and its *layout* is what the trackers redesign replaces.
-
-**Structure note:** `04-sources/` (renamed from the prior sources dir to clear the numbering for `03-thesis-review/`), `archive/phase1-ideation/` (consolidated Phase 1 ideation archive), `03-thesis-review/` (new, empty, Phase 3 output). Full detail in `MIGRATION.md`.
 
 ## Where this stands
 
@@ -81,7 +89,7 @@ Stress-testing one specific idea rather than generating breadth: **a combined tr
 
 ## Idea chosen — moving toward build
 
-The developer has committed to the citation-graded advice product. Repo restructured into a live/archive split (see `MIGRATION.md`): all other ideas are in `archive/`; the live product knowledge base is `03-thesis-review/` plus the research it points to. Two build-facing docs added:
+The developer has committed to the citation-graded advice product. Repo restructured into a live/archive split (see `archive/build-history/MIGRATION.md`): all other ideas are in `archive/`; the live product knowledge base is `03-thesis-review/` plus the research it points to. Two build-facing docs added:
 - `03-thesis-review/advice-strategies.md` — how advice is generated. **Load-bearing decision:** claim provenance is *structural* — advice is `claim_id`-bound, citations/grades app-rendered, no ungrounded text path. Deterministic engine (rules + retrieval + data-earned triggers) is the trust root; no LLM in the trust path for v1 (LLM fabricates citations 20–47% of the time — disqualifying here). LLM later only as a validated phrasing layer.
 - `03-thesis-review/feasibility.md` — buildable as a portfolio v1 in 2–3 months; infrastructure is solved, the long pole is ~50 claims of human curation (~50–75 hrs) and the A+C interaction UX. Rough 12-week shape included.
 
@@ -92,7 +100,7 @@ The developer has committed to the citation-graded advice product. Repo restruct
 Planning is complete; the project hands off to a build session now:
 - `REQUIREMENTS.md` — the spec (FR/NFR/GR/AC IDs are the shared vocabulary)
 - `BUILD-PLAN.md` — master plan: locked stack (React+TS PWA, sqlite-wasm/OPFS, drizzle, json-logic predicates, CF Worker+D1 sync), repo layout under a new top-level `app/`, pinned interfaces, milestones M0–M6 with checks and cut lines
-- `KICKOFF-PROMPT.md` — paste into a fresh Claude Code session (Opus orchestrator, Sonnet implementers, frequent human-style commits, claim curation reserved to Opus, human gates at M0/M1/M4)
+- `archive/build-history/KICKOFF-PROMPT.md` — paste into a fresh Claude Code session (Opus orchestrator, Sonnet implementers, frequent human-style commits, claim curation reserved to Opus, human gates at M0/M1/M4)
 
 ## M0 — status (2026-07-24)
 

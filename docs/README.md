@@ -43,4 +43,5 @@ The thesis under test was: a tracker whose differentiators are (1) advice backed
 - [00-meta/](00-meta/) — decision log, evidence standards, carryover, migration maps
 - [04-sources/](04-sources/) — raw subagent notes
 - [archive/](archive/) — all other, non-chosen ideas: Phase 1 ideation & research, Phase 2 ideation (incl. the Cut Reconciler)
-- [PROJECT-STATE.md](PROJECT-STATE.md) · [MIGRATION.md](MIGRATION.md)
+- [PROJECT-STATE.md](PROJECT-STATE.md) · [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md)
+- Superseded one-offs (kickoff prompts, the folder migration) are in [archive/build-history/](archive/build-history/)
