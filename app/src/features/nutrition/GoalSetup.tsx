@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { useNavigate } from 'react-router';
 import { ConsentGate } from '../onboarding/ConsentGate';
 import { ClaimCard } from '../../components/ClaimCard';
@@ -14,6 +14,13 @@ import {
 } from '../../domain/energy';
 import { targetForDeficit, maxAllowedDeficit, MAX_DAILY_DEFICIT_KCAL } from '../../domain/guards';
 import type { TrainingExperience } from '../../advice/types';
+import type { AdviceItem, Claim } from '../../advice/types';
+import { selectSurfaceAdvice } from '../../advice/surface-advice';
+import {
+  recordAdviceShown,
+  recentlyShownClaimIds,
+  suppressedClaimIds,
+} from '../../db/advice-events';
 
 const LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 const FIGURE = 'font-figure tabular-nums';
@@ -39,6 +46,7 @@ const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
 
 type Goal = 'cut' | 'maintain' | 'bulk';
 type ExperienceSelection = TrainingExperience | 'skip';
+type DraftAdvice = { claim: Claim; item: AdviceItem; goal: Goal };
 
 function Segmented<T extends string>({
   value,
@@ -83,6 +91,12 @@ function GoalForm(): ReactElement {
   const [trainingExperience, setTrainingExperience] = useState<TrainingExperience | null>(null);
   const [deficit, setDeficit] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [draftAdvice, setDraftAdvice] = useState<DraftAdvice | null>(null);
+  const draftAdviceRef = useRef<DraftAdvice | null>(null);
+  const selectionVersion = useRef(0);
+  const shownClaimIds = useRef(new Set<string>());
+  const recordedClaimIds = useRef(new Set<string>());
 
   useEffect(() => {
     let off = false;
@@ -100,6 +114,7 @@ function GoalForm(): ReactElement {
       // The weight the estimate uses comes from the log rather than being asked
       // for twice — it is already the most recent thing the user told us.
       if (history.length > 0) setWeightKg(String(history[history.length - 1].valueKg));
+      setProfileLoaded(true);
     })();
     return () => {
       off = true;
@@ -134,6 +149,76 @@ function GoalForm(): ReactElement {
   const clamped = profile ? targetForDeficit(profile, goal === 'cut' ? deficit : 0) : null;
 
   const capClaim = CLAIMS.find((c) => c.id === DEFICIT_CAP_CLAIM_ID);
+
+  useEffect(() => {
+    const version = ++selectionVersion.current;
+    if (!profileLoaded) {
+      draftAdviceRef.current = null;
+      setDraftAdvice(null);
+      return;
+    }
+
+    let cancelled = false;
+    const currentClaimId =
+      draftAdviceRef.current?.goal === goal ? draftAdviceRef.current.claim.id : null;
+    if (currentClaimId === null) {
+      draftAdviceRef.current = null;
+      setDraftAdvice(null);
+    }
+    void (async () => {
+      const [suppressed, recent] = await Promise.all([
+        suppressedClaimIds(),
+        recentlyShownClaimIds(),
+      ]);
+      if (cancelled || version !== selectionVersion.current) return;
+
+      const item = selectSurfaceAdvice(
+        {
+          surface: 'goal-draft',
+          goal,
+          hasEstimate: estimate !== null,
+          deficitKcal: goal === 'cut' ? Math.min(deficit, allowedDeficit) : null,
+        },
+        CLAIMS,
+        {
+          suppressedClaimIds: [
+            ...suppressed,
+            ...[...shownClaimIds.current].filter((claimId) => claimId !== currentClaimId),
+          ],
+          recentlyShownClaimIds: recent.filter((claimId) => claimId !== currentClaimId),
+        },
+      );
+      if (!item) {
+        draftAdviceRef.current = null;
+        setDraftAdvice(null);
+        return;
+      }
+      const claim = CLAIMS.find((candidate) => candidate.id === item.claimId);
+      if (!claim || cancelled || version !== selectionVersion.current) return;
+
+      shownClaimIds.current.add(claim.id);
+      const selected = { claim, item, goal };
+      draftAdviceRef.current = selected;
+      setDraftAdvice(selected);
+    })().catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [allowedDeficit, estimate, goal, profileLoaded]);
+
+  const visibleDraftAdvice = draftAdvice?.goal === goal ? draftAdvice : null;
+
+  useEffect(() => {
+    if (!visibleDraftAdvice || recordedClaimIds.current.has(visibleDraftAdvice.claim.id)) return;
+    recordedClaimIds.current.add(visibleDraftAdvice.claim.id);
+    void recordAdviceShown(
+      visibleDraftAdvice.claim.id,
+      visibleDraftAdvice.item.trigger,
+      null,
+      'goal-draft',
+    ).catch(() => undefined);
+  }, [visibleDraftAdvice]);
 
   async function save() {
     if (!profile || !clamped) return;
@@ -190,6 +275,18 @@ function GoalForm(): ReactElement {
           Maintenance is the default. Nothing here is set up to push you off it.
         </p>
       </section>
+
+      {visibleDraftAdvice && (
+        <section
+          aria-label="General evidence"
+          className="mt-6 border-t border-rule pt-4"
+        >
+          <h2 className={LABEL}>General evidence</h2>
+          <div className="-mx-4 mt-2 border-t border-rule">
+            <ClaimCard claim={visibleDraftAdvice.claim} />
+          </div>
+        </section>
+      )}
 
       <section className="mt-6 border-t border-rule pt-4">
         <p className={LABEL}>Training experience (optional)</p>

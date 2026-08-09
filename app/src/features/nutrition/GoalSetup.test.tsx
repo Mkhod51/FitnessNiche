@@ -1,10 +1,43 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GoalSetup } from './GoalSetup';
 import { getUser, updateProfile, setCalorieTarget, type User } from '../../db/user';
 import { getWeightHistory } from '../../db/weights';
 import { MAX_DAILY_DEFICIT_KCAL } from '../../domain/guards';
+import {
+  recordAdviceShown,
+  recentlyShownClaimIds,
+  suppressedClaimIds,
+} from '../../db/advice-events';
+
+const { TEST_GOAL_CLAIM_ID } = vi.hoisted(() => ({
+  TEST_GOAL_CLAIM_ID: 'test-bulk-goal-context',
+}));
+
+vi.mock('../../generated/claims', async () => {
+  const actual = await vi.importActual<typeof import('../../generated/claims')>(
+    '../../generated/claims',
+  );
+  const source = actual.CLAIMS.find((claim) => claim.id === 'c-rest-at-least-60-seconds');
+  if (!source) throw new Error('expected source claim fixture');
+  return {
+    CLAIMS: [
+      ...actual.CLAIMS,
+      {
+        ...source,
+        id: TEST_GOAL_CLAIM_ID,
+        phrasingKey: TEST_GOAL_CLAIM_ID,
+        surfaceContexts: [{ surface: 'goal-draft', goals: ['bulk'] }],
+        citations: source.citations.map((citation, index) => ({
+          ...citation,
+          id: `${TEST_GOAL_CLAIM_ID}-citation-${index}`,
+          claimId: TEST_GOAL_CLAIM_ID,
+        })),
+      },
+    ],
+  };
+});
 
 vi.mock('../../db/user', async () => {
   const actual = await vi.importActual<typeof import('../../db/user')>('../../db/user');
@@ -14,11 +47,19 @@ vi.mock('../../db/weights', async () => {
   const actual = await vi.importActual<typeof import('../../db/weights')>('../../db/weights');
   return { ...actual, getWeightHistory: vi.fn() };
 });
+vi.mock('../../db/advice-events', () => ({
+  recordAdviceShown: vi.fn(),
+  recentlyShownClaimIds: vi.fn(),
+  suppressedClaimIds: vi.fn(),
+}));
 
 const mockGetUser = vi.mocked(getUser);
 const mockUpdateProfile = vi.mocked(updateProfile);
 const mockSetTarget = vi.mocked(setCalorieTarget);
 const mockWeights = vi.mocked(getWeightHistory);
+const mockRecordAdviceShown = vi.mocked(recordAdviceShown);
+const mockRecentlyShownClaimIds = vi.mocked(recentlyShownClaimIds);
+const mockSuppressedClaimIds = vi.mocked(suppressedClaimIds);
 
 const user: User = {
   id: 'local-user', goal: 'maintain', sex: 'male', heightCm: 178, numbersHidden: false,
@@ -37,6 +78,9 @@ beforeEach(() => {
     { id: 'w', userId: 'local-user', valueKg: 78, measuredAt: '2026-07-27T07:00:00.000Z',
       updatedAt: '2026-07-27T07:00:00.000Z', deletedAt: null },
   ] as never);
+  mockRecordAdviceShown.mockResolvedValue({} as never);
+  mockRecentlyShownClaimIds.mockResolvedValue([]);
+  mockSuppressedClaimIds.mockResolvedValue([]);
 });
 
 function renderGoalSetup() {
@@ -128,6 +172,79 @@ describe('GoalSetup — the estimate is told honestly', () => {
     expect(mockUpdateProfile).toHaveBeenCalledWith(
       expect.objectContaining({ trainingExperience: null }),
     );
+  });
+});
+
+describe('GoalSetup — authored general evidence for the unsaved goal', () => {
+  it('renders one cited bulk-context claim before the draft goal is saved', async () => {
+    renderGoalSetup();
+    await screen.findByTestId('maintenance-estimate');
+
+    fireEvent.click(screen.getByTestId('goal-bulk'));
+
+    const lane = await screen.findByRole('region', { name: 'General evidence' });
+    expect(within(lane).getByText('General evidence')).toBeVisible();
+    expect(within(lane).getByTestId('claim-card')).toHaveAttribute(
+      'data-claim-id',
+      TEST_GOAL_CLAIM_ID,
+    );
+    expect(within(lane).getByTestId('claim-source')).toBeVisible();
+    expect(lane).not.toHaveTextContent(/for you/i);
+    expect(screen.queryByTestId('goal-saved')).not.toBeInTheDocument();
+
+    await waitFor(() => expect(mockRecordAdviceShown).toHaveBeenCalledWith(
+      TEST_GOAL_CLAIM_ID,
+      'surface-context',
+      null,
+      'goal-draft',
+    ));
+  });
+
+  it('keeps an unrelated authored goal context silent and avoids duplicate event writes', async () => {
+    renderGoalSetup();
+    await screen.findByTestId('maintenance-estimate');
+
+    expect(screen.queryByRole('region', { name: 'General evidence' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('goal-bulk'));
+    await screen.findByRole('region', { name: 'General evidence' });
+    fireEvent.click(screen.getByTestId('goal-maintain'));
+    await waitFor(() => {
+      expect(screen.queryByRole('region', { name: 'General evidence' })).not.toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('goal-bulk'));
+    await waitFor(() => expect(mockRecordAdviceShown).toHaveBeenCalledTimes(1));
+  });
+
+  it('keeps the displayed claim while the estimate becomes available without recording twice', async () => {
+    mockGetUser.mockResolvedValue({ ...user, birthYear: null, heightCm: null });
+    mockWeights.mockResolvedValue([]);
+    renderGoalSetup();
+    await screen.findByTestId('estimate-missing');
+
+    fireEvent.click(screen.getByTestId('goal-bulk'));
+    await screen.findByRole('region', { name: 'General evidence' });
+    fireEvent.change(screen.getByTestId('height-input'), { target: { value: '178' } });
+    fireEvent.change(screen.getByTestId('birth-year-input'), { target: { value: '1999' } });
+    fireEvent.change(screen.getByTestId('weight-input'), { target: { value: '78' } });
+
+    await screen.findByTestId('maintenance-estimate');
+    expect(screen.getByRole('region', { name: 'General evidence' })).toBeVisible();
+    await waitFor(() => expect(mockRecordAdviceShown).toHaveBeenCalledTimes(1));
+  });
+
+  it.each([
+    ['suppressed', mockSuppressedClaimIds],
+    ['inside its cooldown', mockRecentlyShownClaimIds],
+  ])('keeps a draft-goal claim quiet when it is %s', async (_state, blockedIds) => {
+    blockedIds.mockResolvedValue([TEST_GOAL_CLAIM_ID]);
+    renderGoalSetup();
+    await screen.findByTestId('maintenance-estimate');
+
+    fireEvent.click(screen.getByTestId('goal-bulk'));
+
+    await waitFor(() => expect(blockedIds).toHaveBeenCalled());
+    expect(screen.queryByRole('region', { name: 'General evidence' })).not.toBeInTheDocument();
+    expect(mockRecordAdviceShown).not.toHaveBeenCalled();
   });
 });
 
