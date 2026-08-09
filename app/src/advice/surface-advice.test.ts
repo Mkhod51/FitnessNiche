@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { EMPTY_SNAPSHOT } from './engine';
 import { selectSurfaceAdvice } from './surface-advice';
 import type { Claim } from './types';
+import { CLAIMS } from '../generated/claims';
 
 const NO_FILTERS = { suppressedClaimIds: [], recentlyShownClaimIds: [] };
 
@@ -151,5 +152,21 @@ describe('selectSurfaceAdvice', () => {
       [claim('general')],
       NO_FILTERS,
     )).toBeNull();
+  });
+
+  // Pins the shipped curation: the reviewed Slater evidence-gap claim is the
+  // one general fact that may surface while a user drafts a bulk goal, and it
+  // must stay silent for cut and maintenance, where its scope does not apply.
+  it('surfaces the reviewed bulk surplus claim only on the bulk goal-draft surface', () => {
+    const bulkDraft = { surface: 'goal-draft', goal: 'bulk', hasEstimate: true, deficitKcal: null } as const;
+    expect(selectSurfaceAdvice(bulkDraft, CLAIMS, NO_FILTERS)?.claimId).toBe('c-bulk-rate-surplus-unknown');
+
+    for (const goal of ['cut', 'maintain'] as const) {
+      expect(selectSurfaceAdvice(
+        { surface: 'goal-draft', goal, hasEstimate: true, deficitKcal: null },
+        CLAIMS,
+        NO_FILTERS,
+      )).toBeNull();
+    }
   });
 });
