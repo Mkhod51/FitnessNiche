@@ -56,7 +56,9 @@ null rationale, and two hostile direct-source reviews are complete.
   regression is not a user-specific loss-rate target and cannot weaken the
   existing code-enforced cap or intake floors.
 - **Bulk draft:** the existing direct-read energy-surplus review documents an
-  evidence gap around a validated hypertrophy surplus. It may support an
+  evidence gap around a validated hypertrophy surplus. It now ships one
+  reviewed goal-draft claim (`c-bulk-rate-surplus-unknown`) that surfaces the
+  unvalidated-surplus fact while a bulk goal is drafted. It remains an
   uncertainty statement, never a personal surplus or gain-rate calculation.
 - **Maintenance draft:** the direct-read weight-maintenance overview concerns
   adults with overweight or obesity after weight loss and finds no significant

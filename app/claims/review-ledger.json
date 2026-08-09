@@ -590,6 +590,18 @@
           "No pooled intervention effect, n, or CI exists for this evidence-gap claim; Grade C is appropriate."
         ]
       },
+      "surfacePlacementReview": {
+        "reviewer": "M6 surface-placement hostile review",
+        "reviewedOn": "2026-08-07",
+        "surfaceContext": "goal-draft: bulk",
+        "directSource": "Direct re-read of the Frontiers full text for 10.3389/fnut.2019.00131 (Slater et al. 2019); the 2026-08-02 claim reviews were not relied on for placement.",
+        "verdict": "approved",
+        "checks": [
+          "The Introduction directly states 'the specific energy surplus required to facilitate muscle hypertrophy is unknown' and the Abstract states surplus estimates 'have never been validated in a resistance training population to confirm the sweet spot', so the claim statement is source-accurate.",
+          "Surfacing this evidence-gap fact on a bulk goal-draft computes no personal surplus, gain rate, or energy target, so it does not weaken GR-1, the deficit cap, or the intake floors (which concern deficits, not surplus).",
+          "The claim remains non-prescriptive and population-honest (citation population unstated); it asserts only that the maximizing surplus is unvalidated, not that an energy surplus has no effect, which the source explicitly disputes."
+        ]
+      },
       "nextReview": "2027-08-02"
     },
     {
@@ -1015,7 +1027,7 @@
       "gradeRationale": "No new grade is assigned at intake. The existing evidence-gap claim's reviewed C grade cannot be copied to a different statement without its own hostile review.",
       "firstReview": null,
       "secondReview": null,
-      "nextReview": "Map to an existing reviewed claim or obtain claim-specific hostile reviews before any YAML drafting."
+      "nextReview": "Mapped 2026-08-07 to c-bulk-rate-surplus-unknown (surfaceContext goal-draft: bulk); the placement hostile review is recorded in that claim's ledger entry."
     },
     {
       "claimId": "candidate-advice-surface-maintenance-no-claim",
