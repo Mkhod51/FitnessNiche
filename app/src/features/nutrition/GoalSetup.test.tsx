@@ -22,8 +22,14 @@ vi.mock('../../generated/claims', async () => {
   const source = actual.CLAIMS.find((claim) => claim.id === 'c-rest-at-least-60-seconds');
   if (!source) throw new Error('expected source claim fixture');
   return {
+    // These tests own a deterministic synthetic goal-draft fixture, so strip any
+    // real curated goal-draft claims out of the imported set: a second live bulk
+    // claim would tie with the synthetic and make the selector fail closed. The
+    // shipped curation is pinned separately in surface-advice.test.ts.
     CLAIMS: [
-      ...actual.CLAIMS,
+      ...actual.CLAIMS.filter(
+        (claim) => !claim.surfaceContexts?.some((context) => context.surface === 'goal-draft'),
+      ),
       {
         ...source,
         id: TEST_GOAL_CLAIM_ID,

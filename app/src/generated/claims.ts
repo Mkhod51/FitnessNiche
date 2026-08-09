@@ -159,11 +159,18 @@ export const CLAIMS: Claim[] = [
     "domain": "bulk-rate",
     "predicates": null,
     "trigger": null,
-    "surfaceContexts": null,
+    "surfaceContexts": [
+      {
+        "surface": "goal-draft",
+        "goals": [
+          "bulk"
+        ]
+      }
+    ],
     "clusterId": null,
     "phrasingKey": "bulk-rate-surplus-unknown",
     "supersededBy": null,
-    "lastReviewed": "2026-08-02",
+    "lastReviewed": "2026-08-07",
     "citations": [
       {
         "id": "cit-bulk-rate-slater",
