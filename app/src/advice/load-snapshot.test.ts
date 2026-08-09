@@ -5,6 +5,11 @@ import { getWeightHistory, type WeightReading } from '../db/weights';
 import { getEntriesSince, type FoodEntry } from '../db/nutrition';
 import { loadAdviceSnapshot } from './load-snapshot';
 
+const { mockHasLoggedSets, mockHasFoodEntries } = vi.hoisted(() => ({
+  mockHasLoggedSets: vi.fn(),
+  mockHasFoodEntries: vi.fn(),
+}));
+
 vi.mock('../db/user', async () => {
   const actual = await vi.importActual<typeof import('../db/user')>('../db/user');
   return { ...actual, getUser: vi.fn() };
@@ -12,7 +17,7 @@ vi.mock('../db/user', async () => {
 
 vi.mock('../db/workouts', async () => {
   const actual = await vi.importActual<typeof import('../db/workouts')>('../db/workouts');
-  return { ...actual, getSetsSince: vi.fn() };
+  return { ...actual, getSetsSince: vi.fn(), hasLoggedSets: mockHasLoggedSets };
 });
 
 vi.mock('../db/weights', async () => {
@@ -22,7 +27,7 @@ vi.mock('../db/weights', async () => {
 
 vi.mock('../db/nutrition', async () => {
   const actual = await vi.importActual<typeof import('../db/nutrition')>('../db/nutrition');
-  return { ...actual, getEntriesSince: vi.fn() };
+  return { ...actual, getEntriesSince: vi.fn(), hasFoodEntries: mockHasFoodEntries };
 });
 
 const mockGetUser = vi.mocked(getUser);
@@ -97,6 +102,8 @@ describe('loadAdviceSnapshot', () => {
       recentWeight,
     ]);
     mockGetEntriesSince.mockReset().mockResolvedValue([recentFood]);
+    mockHasLoggedSets.mockReset().mockResolvedValue(true);
+    mockHasFoodEntries.mockReset().mockResolvedValue(true);
   });
 
   it('builds advice state from the user and their logged rows, not a placeholder snapshot', async () => {
@@ -110,6 +117,41 @@ describe('loadAdviceSnapshot', () => {
       proteinPerKg7d: 1,
     });
     expect(built.latestWeightKg).toBe(80);
+    expect(built.hasAnyLoggedData).toBe(true);
+  });
+
+  it.each([
+    ['food entry', mockHasFoodEntries, mockHasLoggedSets],
+    ['set', mockHasLoggedSets, mockHasFoodEntries],
+  ])('does not call the Hub empty when an older %s exists outside the snapshot window', async (
+    _row,
+    present,
+    absent,
+  ) => {
+    mockGetWeightHistory.mockResolvedValue([]);
+    mockGetSetsSince.mockResolvedValue([]);
+    mockGetEntriesSince.mockResolvedValue([]);
+    present.mockResolvedValue(true);
+    absent.mockResolvedValue(false);
+
+    const built = await loadAdviceSnapshot(NOW);
+    if (built === null) throw new Error('expected a consented snapshot');
+
+    expect(built.hasAnyLoggedData).toBe(true);
+    expect(built.snapshot.proteinPerKg7d).toBeNull();
+  });
+
+  it('marks a snapshot empty only when weight, set, and food logs are all absent', async () => {
+    mockGetWeightHistory.mockResolvedValue([]);
+    mockGetSetsSince.mockResolvedValue([]);
+    mockGetEntriesSince.mockResolvedValue([]);
+    mockHasLoggedSets.mockResolvedValue(false);
+    mockHasFoodEntries.mockResolvedValue(false);
+
+    const built = await loadAdviceSnapshot(NOW);
+    if (built === null) throw new Error('expected a consented snapshot');
+
+    expect(built.hasAnyLoggedData).toBe(false);
   });
 
   it('uses one exact 84-day reconciliation window for weights, sets, and food', async () => {
@@ -128,5 +170,7 @@ describe('loadAdviceSnapshot', () => {
     expect(mockGetWeightHistory).not.toHaveBeenCalled();
     expect(mockGetSetsSince).not.toHaveBeenCalled();
     expect(mockGetEntriesSince).not.toHaveBeenCalled();
+    expect(mockHasLoggedSets).not.toHaveBeenCalled();
+    expect(mockHasFoodEntries).not.toHaveBeenCalled();
   });
 });

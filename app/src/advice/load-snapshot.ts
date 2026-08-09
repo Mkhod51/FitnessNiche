@@ -1,8 +1,8 @@
 import { SEED_EXERCISES } from '../db/seed-exercises';
-import { getEntriesSince } from '../db/nutrition';
+import { getEntriesSince, hasFoodEntries } from '../db/nutrition';
 import { getUser, hasConsented } from '../db/user';
 import { getWeightHistory } from '../db/weights';
-import { getSetsSince } from '../db/workouts';
+import { getSetsSince, hasLoggedSets } from '../db/workouts';
 import { buildSnapshot, type BuiltSnapshot } from './snapshot';
 
 const RECONCILE_WINDOW_DAYS = 84;
@@ -19,10 +19,12 @@ export async function loadAdviceSnapshot(now: Date = new Date()): Promise<BuiltS
   if (!hasConsented(user)) return null;
 
   const windowStart = new Date(now.getTime() - RECONCILE_WINDOW_DAYS * MS_PER_DAY).toISOString();
-  const [weights, sets, food] = await Promise.all([
+  const [weights, sets, food, anySets, anyFood] = await Promise.all([
     getWeightHistory(),
     getSetsSince(windowStart),
     getEntriesSince(windowStart),
+    hasLoggedSets(),
+    hasFoodEntries(),
   ]);
 
   return buildSnapshot({
@@ -32,6 +34,7 @@ export async function loadAdviceSnapshot(now: Date = new Date()): Promise<BuiltS
     weights: weights.filter((reading) => reading.measuredAt >= windowStart),
     sets,
     food: food.map((entry) => ({ loggedAt: entry.loggedAt, proteinG: entry.proteinG })),
+    hasAnyLoggedData: weights.length > 0 || anySets || anyFood,
     exercises: SEED_EXERCISES,
     now,
   });

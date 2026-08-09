@@ -116,6 +116,7 @@ const exerciseAdviceItem: AdviceItem = {
 };
 
 const emptyBuiltSnapshot: BuiltSnapshot = {
+  hasAnyLoggedData: false,
   snapshot: EMPTY_SNAPSHOT,
   primaryExerciseId: null,
   latestWeightKg: null,
@@ -140,6 +141,7 @@ const emptyBuiltSnapshot: BuiltSnapshot = {
 
 const strengthHoldingSnapshot: BuiltSnapshot = {
   ...emptyBuiltSnapshot,
+  hasAnyLoggedData: true,
   primaryExerciseId: BENCH_ID,
   latestWeightKg: 78,
   snapshot: {

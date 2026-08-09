@@ -18,6 +18,7 @@ const mockRecentlyShownClaimIds = vi.mocked(recentlyShownClaimIds);
 const mockSuppressedClaimIds = vi.mocked(suppressedClaimIds);
 
 const emptyBuiltSnapshot: BuiltSnapshot = {
+  hasAnyLoggedData: false,
   snapshot: EMPTY_SNAPSHOT,
   primaryExerciseId: null,
   latestWeightKg: null,

@@ -267,3 +267,15 @@ export async function getSetsSince(sinceIso: string): Promise<LoggedSet[]> {
     .from(sets)
     .where(and(isNull(sets.deletedAt), gte(sets.performedAt, sinceIso)));
 }
+
+/** Whether any non-deleted set exists, including sets outside trend windows. */
+export async function hasLoggedSets(): Promise<boolean> {
+  const db = getDrizzle();
+  const row = await db
+    .select({ id: sets.id })
+    .from(sets)
+    .where(isNull(sets.deletedAt))
+    .limit(1)
+    .get();
+  return row !== undefined;
+}

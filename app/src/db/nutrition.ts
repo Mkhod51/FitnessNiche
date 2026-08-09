@@ -120,6 +120,18 @@ export async function getEntriesSince(sinceIso: string): Promise<FoodEntry[]> {
     .orderBy(desc(foodLogEntries.loggedAt));
 }
 
+/** Whether any non-deleted food row exists, regardless of the advice window. */
+export async function hasFoodEntries(): Promise<boolean> {
+  const db = getDrizzle();
+  const row = await db
+    .select({ id: foodLogEntries.id })
+    .from(foodLogEntries)
+    .where(and(eq(foodLogEntries.userId, LOCAL_USER_ID), isNull(foodLogEntries.deletedAt)))
+    .limit(1)
+    .get();
+  return row !== undefined;
+}
+
 export type DayTotals = { kcal: number; proteinG: number; carbsG: number; fatG: number };
 
 /** Pure. Missing carbs/fat count as zero rather than poisoning the sum with NaN. */

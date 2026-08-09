@@ -34,6 +34,8 @@ export interface SnapshotSources {
   exercises: ExerciseRow[];
   /** Food logged in the window. Empty is fine — the protein figure goes null. */
   food?: { loggedAt: string; proteinG: number }[];
+  /** Raw-log presence across all time, when the caller can see beyond this window. */
+  hasAnyLoggedData?: boolean;
   now?: Date;
 }
 
@@ -104,6 +106,8 @@ function byExercise(sets: LoggedSet[]): Map<string, { date: string; e1rm: number
 export interface BuiltSnapshot {
   snapshot: UserStateSnapshot;
   reconciliation: Reconciliation;
+  /** True when any non-deleted weight, set, or food row exists at any time. */
+  hasAnyLoggedData: boolean;
   /** Which lift the strength half was read from, so the UI can name it. */
   primaryExerciseId: string | null;
   /** Most recent reading, for anything reported per kg of bodyweight. */
@@ -140,6 +144,11 @@ export function buildSnapshot(sources: SnapshotSources): BuiltSnapshot {
   const proteinPerKg7d = proteinPerKgOnTrainingDays(recentFood, recentSets, latestWeight);
 
   return {
+    hasAnyLoggedData:
+      sources.hasAnyLoggedData ??
+      (sources.weights.length > 0 ||
+        sources.sets.length > 0 ||
+        (sources.food?.length ?? 0) > 0),
     primaryExerciseId,
     reconciliation,
     latestWeightKg: latestWeight,

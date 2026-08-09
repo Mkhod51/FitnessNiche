@@ -121,6 +121,7 @@ const holdingReconciliation: Reconciliation = {
 
 function builtSnapshot(snapshot: UserStateSnapshot): BuiltSnapshot {
   return {
+    hasAnyLoggedData: true,
     snapshot,
     reconciliation: holdingReconciliation,
     primaryExerciseId: 'barbell-bench-press',
