@@ -1,14 +1,47 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { AdviceFeed } from './AdviceFeed';
 import { CLAIMS } from '../../generated/claims';
 import { EMPTY_SNAPSHOT } from '../../advice/engine';
 import { loadAdviceSnapshot } from '../../advice/load-snapshot';
 import type { BuiltSnapshot } from '../../advice/snapshot';
-import { recentlyShownClaimIds, suppressedClaimIds } from '../../db/advice-events';
+import {
+  recordAdviceShown,
+  recentlyShownClaimIds,
+  suppressedClaimIds,
+} from '../../db/advice-events';
+
+const { TEST_HUB_CLAIM_ID } = vi.hoisted(() => ({
+  TEST_HUB_CLAIM_ID: 'test-hub-empty-context',
+}));
+
+vi.mock('../../generated/claims', async () => {
+  const actual = await vi.importActual<typeof import('../../generated/claims')>(
+    '../../generated/claims',
+  );
+  const source = actual.CLAIMS.find((claim) => claim.id === 'c-rest-at-least-60-seconds');
+  if (!source) throw new Error('expected source claim fixture');
+  return {
+    CLAIMS: [
+      ...actual.CLAIMS,
+      {
+        ...source,
+        id: TEST_HUB_CLAIM_ID,
+        phrasingKey: TEST_HUB_CLAIM_ID,
+        surfaceContexts: [{ surface: 'hub-empty' }],
+        citations: source.citations.map((citation, index) => ({
+          ...citation,
+          id: `${TEST_HUB_CLAIM_ID}-citation-${index}`,
+          claimId: TEST_HUB_CLAIM_ID,
+        })),
+      },
+    ],
+  };
+});
 
 vi.mock('../../advice/load-snapshot', () => ({ loadAdviceSnapshot: vi.fn() }));
 vi.mock('../../db/advice-events', () => ({
+  recordAdviceShown: vi.fn(),
   recentlyShownClaimIds: vi.fn(),
   suppressedClaimIds: vi.fn(),
 }));
@@ -16,6 +49,7 @@ vi.mock('../../db/advice-events', () => ({
 const mockLoadAdviceSnapshot = vi.mocked(loadAdviceSnapshot);
 const mockRecentlyShownClaimIds = vi.mocked(recentlyShownClaimIds);
 const mockSuppressedClaimIds = vi.mocked(suppressedClaimIds);
+const mockRecordAdviceShown = vi.mocked(recordAdviceShown);
 
 const emptyBuiltSnapshot: BuiltSnapshot = {
   hasAnyLoggedData: false,
@@ -85,6 +119,7 @@ describe('AdviceFeed', () => {
     mockLoadAdviceSnapshot.mockReset().mockResolvedValue(emptyBuiltSnapshot);
     mockRecentlyShownClaimIds.mockReset().mockResolvedValue([]);
     mockSuppressedClaimIds.mockReset().mockResolvedValue([]);
+    mockRecordAdviceShown.mockReset().mockResolvedValue({} as never);
   });
 
   it('carries a non-empty data-claim-id on every element that represents a claim', () => {
@@ -128,6 +163,56 @@ describe('AdviceFeed', () => {
     const empty = await screen.findByTestId('no-user-data');
     expect(empty).toBeVisible();
     expect(empty).toHaveTextContent(/nothing here/i);
+  });
+
+  it('shows one cited, labelled general-evidence claim on a truly empty Hub', async () => {
+    render(<AdviceFeed />);
+
+    const lane = await screen.findByRole('region', { name: 'General evidence' });
+    expect(within(lane).getByText('General evidence')).toBeVisible();
+    expect(within(lane).getByTestId('claim-card')).toHaveAttribute(
+      'data-claim-id',
+      TEST_HUB_CLAIM_ID,
+    );
+    expect(within(lane).getByTestId('claim-source')).toBeVisible();
+    expect(lane).not.toHaveTextContent(/for you/i);
+
+    await waitFor(() => expect(mockRecordAdviceShown).toHaveBeenCalledWith(
+      TEST_HUB_CLAIM_ID,
+      'surface-context',
+      null,
+      'hub-empty',
+    ));
+    expect(mockRecordAdviceShown).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['one meal', 'one weigh-in', 'one set'])(
+    'does not surface empty-Hub evidence after %s',
+    async () => {
+      mockLoadAdviceSnapshot.mockResolvedValue({
+        ...emptyBuiltSnapshot,
+        hasAnyLoggedData: true,
+      });
+
+      render(<AdviceFeed />);
+
+      await screen.findByTestId('no-user-data');
+      expect(screen.queryByRole('region', { name: 'General evidence' })).not.toBeInTheDocument();
+      expect(mockRecordAdviceShown).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ['suppressed', mockSuppressedClaimIds],
+    ['inside its cooldown', mockRecentlyShownClaimIds],
+  ])('keeps an empty-Hub claim quiet when it is %s', async (_state, blockedIds) => {
+    blockedIds.mockResolvedValue([TEST_HUB_CLAIM_ID]);
+
+    render(<AdviceFeed />);
+
+    await screen.findByTestId('no-user-data');
+    expect(screen.queryByRole('region', { name: 'General evidence' })).not.toBeInTheDocument();
+    expect(mockRecordAdviceShown).not.toHaveBeenCalled();
   });
 
   it('renders the matching data-earned claim from the loaded snapshot', async () => {

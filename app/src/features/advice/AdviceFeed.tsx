@@ -1,11 +1,16 @@
-import { useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { ClaimCard } from '../../components/ClaimCard';
 import { CLAIMS } from '../../generated/claims';
 import { evaluateClaims } from '../../advice/engine';
-import type { Claim } from '../../advice/types';
+import type { AdviceItem, Claim } from '../../advice/types';
 import { loadAdviceSnapshot } from '../../advice/load-snapshot';
 import { filterNumbersHiddenAdvice } from '../../advice/session-advice';
-import { recentlyShownClaimIds, suppressedClaimIds } from '../../db/advice-events';
+import {
+  recordAdviceShown,
+  recentlyShownClaimIds,
+  suppressedClaimIds,
+} from '../../db/advice-events';
+import { selectSurfaceAdvice } from '../../advice/surface-advice';
 
 const DOMAIN_LABEL_CLASS = 'px-4 pt-4 pb-2 font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint';
 
@@ -51,6 +56,8 @@ export function collapseClusters(claims: Claim[]): Claim[][] {
 export function AdviceFeed(): ReactElement {
   const domainGroups = useMemo(() => groupByDomain(CLAIMS), []);
   const [ruleTriggered, setRuleTriggered] = useState<Claim[] | null>(null);
+  const [emptyHubAdvice, setEmptyHubAdvice] = useState<{ claim: Claim; item: AdviceItem } | null>(null);
+  const recordedClaimIds = useRef(new Set<string>());
 
   useEffect(() => {
     let cancelled = false;
@@ -70,6 +77,19 @@ export function AdviceFeed(): ReactElement {
             .map((item) => CLAIMS.find((claim) => claim.id === item.claimId))
             .filter((claim): claim is Claim => claim !== undefined),
         );
+
+        if (!built.hasAnyLoggedData) {
+          const item = selectSurfaceAdvice(
+            { surface: 'hub-empty' },
+            CLAIMS,
+            {
+              suppressedClaimIds: suppressed,
+              recentlyShownClaimIds: recent,
+            },
+          );
+          const claim = item ? CLAIMS.find((candidate) => candidate.id === item.claimId) : undefined;
+          if (item && claim) setEmptyHubAdvice({ claim, item });
+        }
       })
       // The evidence base remains browsable when storage is unavailable, but
       // the personalised section makes no claim about whether data exists.
@@ -78,6 +98,17 @@ export function AdviceFeed(): ReactElement {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!emptyHubAdvice || recordedClaimIds.current.has(emptyHubAdvice.claim.id)) return;
+    recordedClaimIds.current.add(emptyHubAdvice.claim.id);
+    void recordAdviceShown(
+      emptyHubAdvice.claim.id,
+      emptyHubAdvice.item.trigger,
+      null,
+      'hub-empty',
+    ).catch(() => undefined);
+  }, [emptyHubAdvice]);
 
   return (
     <div className="mx-auto max-w-[480px]">
@@ -101,6 +132,18 @@ export function AdviceFeed(): ReactElement {
           ))
         )}
       </section>
+
+      {emptyHubAdvice && (
+        <section
+          aria-label="General evidence"
+          className="border-b border-rule pt-4"
+        >
+          <h2 className="px-4 pb-2 font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
+            General evidence
+          </h2>
+          <ClaimCard claim={emptyHubAdvice.claim} />
+        </section>
+      )}
 
       {domainGroups.map(([domain, claims]) => (
         <section key={domain}>
