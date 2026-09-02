@@ -239,3 +239,20 @@ and received `200`, `count: 4013`, and a product with `energy-kcal_100g`, `prote
 direct-PWA path. The known production caveat remains: browsers cannot set OFF's requested custom
 `User-Agent`, so a deployed app should later use a small proxy that identifies the app and
 enforces OFF's search/product-read limits.
+
+## Advice surface coverage (2026-09-02)
+
+37. **A static empty-Hub fact may appear before consent; personalised advice may not.** The
+browser check exposed that `loadAdviceSnapshot()` correctly returns `null` without consent but
+`AdviceFeed` was treating that as a reason to suppress *all* first-use evidence. That conflated a
+health-data permission boundary with a public, claim-bound explanation. The corrected Hub branch
+can select only a reviewed claim whose `predicates` and `trigger` are both `null`, labels it
+“General evidence”, has no personal “why” or “for you” language, and never evaluates a user
+snapshot. Data-earned Hub and weekly-review advice still require their normal consent-backed
+aggregate data. The card uses the same local event ledger as other automatic advice, including
+the seven-day cooldown and an explicit permanent “don’t show this again” action; its shown write
+is allowed to settle before suppression so an immediate tap cannot race and disappear on reload.
+This preserves the new-user evidence surface without relaxing the personal-advice or
+local-first/privacy boundaries. **Reversal trigger:** any future generic card that needs a user
+fact, ranking input, or inferred applicability belongs behind consent and the aggregate snapshot
+path instead.

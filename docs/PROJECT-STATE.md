@@ -1,30 +1,64 @@
 # Project State
 
-**Updated:** 2026-07-31 · **Phase:** Build · **Branch:** `main` — M0–M5 and
-FR-LOG-6 food database are feature-complete at `a380c9a`.
-`main`, `OpenSourceMod`, `origin/main`, and `origin/OpenSourceMod` all contain this commit in
-the current workspace. Older notes saying this work is unmerged from `OpenSourceMod` are stale.
+**Updated:** 2026-09-02 · **Phase:** Build / M6 hardening · **Branch:** `m6` — the
+advice-surface coverage batch is complete through `a466831`. The historical M0–M5 snapshot
+below remains useful context, but its branch and test-count references are not the current
+working state.
 
 ---
 
 ## ▶ START HERE (new session)
 
-1. **Read [`agent-handoff/README.md`](agent-handoff/README.md).**
-   This is the fresh handoff packet for the next agent, including ranked remaining work and
-   a paste-ready kickoff prompt.
-2. **Read [`superpowers/plans/2026-07-27-trackers-redesign.md`](superpowers/plans/2026-07-27-trackers-redesign.md).**
-   Six consulted design gates for the health-hub trackers, the schema plan, and the build
-   order. It supersedes the unfinished tail of the M2 plan.
-3. **Read [`OPEN-QUESTIONS.md`](OPEN-QUESTIONS.md)** — five questions awaiting the developer,
-   each with the default that was taken so work could continue.
-4. **Verify state before trusting any document, including this one.** Documents here have gone
-   stale mid-flight more than once:
+1. **Read [`superpowers/plans/2026-08-02-advice-surface-coverage.md`](superpowers/plans/2026-08-02-advice-surface-coverage.md).**
+   It is the completed M6 implementation contract and records the hard distinction between
+   static general evidence and data-earned advice.
+2. **Read [`00-meta/claim-review-queue.md`](00-meta/claim-review-queue.md) and
+   [`../app/claims/review-ledger.json`](../app/claims/review-ledger.json).** They are the
+   authority for source access, review state, and intentionally deferred surface claims.
+3. **Read [`OPEN-QUESTIONS.md`](OPEN-QUESTIONS.md)** for product questions outside this batch.
+4. **Verify state before trusting any document, including this one:**
    ```bash
-   cd app && ls src/domain src/features && npm run typecheck && npm test -- --run
+   cd app && npm run claims && npm test && npm run typecheck && npm run build
    ```
 
-**Verified 2026-07-31 (handoff):** typecheck clean · **639 unit tests / 61 files** ·
-production build OK · full Playwright e2e **23/23** after clearing a stale preview on `:4173`.
+**Targeted browser verification 2026-09-02:** `e2e/advice-surfaces.spec.ts` 5/5 verifies
+empty-Hub general evidence, its seven-day cooldown and permanent suppression, first-exercise
+one-card budget, bulk draft context before save, and the visible numbers-hidden preference.
+**Deterministic verification 2026-09-02:** claims generation wrote 32 records; Vitest passed
+770 tests across 70 files; typecheck and production build passed. The build retains its known
+dynamic-import and chunk-size warnings without a build failure.
+
+## M6 — advice surface coverage (2026-09-02)
+
+**Shipped, evidence-first scope.** There are now **32** generated claims. This batch adds one
+new fully reviewed, directly read mechanism claim: `c-mechanism-tension-motor-units` [C], based
+on Alix-Fages et al. (2022; DOI `10.1007/s00421-022-04906-6`). It states that mechanical tension
+is a key hypertrophy stimulus and that motor-unit activity helps regulate it. Its source
+population remains `unstated`; the card keeps that applicability visible rather than inferring a
+training history. The pre-existing fully reviewed `c-bulk-rate-surplus-unknown` is now explicitly
+eligible for an unsaved bulk goal draft.
+
+**Surface behaviour.** An empty Hub and the first selected supported exercise may show at most
+one labelled, cited **General evidence** card. The Hub can show this static fact before consent:
+it never reads a personal snapshot to select it, uses only a claim with null predicates and
+trigger, and never uses “for you” framing. A workout shares one automatic-card budget across
+opening and first-exercise selection; set logging, RIR changes, meal entries, weigh-ins, and
+workout finish do not invoke a surface selector. Draft goal setup may show the bulk claim before
+save. Existing aggregate Hub and weekly-review advice remain rule/data-earned paths.
+
+**User controls and safety.** Every automatic general-evidence card now offers a local,
+permanent “don’t show this again” action. It waits for the shown-event write before suppressing,
+so a fast tap cannot be lost; the existing seven-day cooldown still applies. Training experience
+is optional, never inferred, and can only rank authored relevance — it cannot hide a
+novice-population record from an experienced lifter. The calorie floor, 500-kcal/day deficit cap,
+maintenance default, numbers-hidden handling, local-first persistence, and no-runtime-network
+advice policy remain unchanged.
+
+**Honest gaps.** There is no exercise-specific surface claim yet: the mechanism claim is a
+general fact. There is no newly curated cut-rate or maintenance surface claim: cut retains its
+existing population-level safety-cap claim, and maintenance stays silent. Do not create an
+apparent target or maintenance recommendation until direct source review and two hostile reviews
+support one. See the queue and ledger for rejected/deferred routes.
 
 **Gates closed 2026-07-30 (developer verdict: yes on both):** the M1 A+C interaction is
 decisive-and-honest enough to ship, and the M4 reconciliation verdict earns its keep beyond
