@@ -970,7 +970,7 @@
       "doi": "10.1007/s00421-022-04906-6",
       "resolvedOn": "2026-09-02",
       "resolution": "direct-read candidate; mapped to c-mechanism-tension-motor-units",
-      "sourceRead": "Direct full-text read from the Universidad Autónoma de Madrid repository's author-produced post-peer-review manuscript via Firecrawl scrape; the manuscript identifies the publisher DOI and its accepted-manuscript status.",
+      "sourceRead": "Direct full-text read of the Universidad Autónoma de Madrid repository's author-produced post-peer-review manuscript; the manuscript identifies the publisher DOI and its accepted-manuscript status. Firecrawl located the access route only.",
       "evidenceLocations": [
         "Alix-Fages et al. author manuscript, Introduction: neural drive is the sum of action potentials from active motor units and modulates force through recruitment and discharge-rate adjustments.",
         "Alix-Fages et al. author manuscript, What Causes Muscle Growth?: mechanical tension in skeletal-muscle fibres is identified as key to the hypertrophy stimulus.",
@@ -992,7 +992,7 @@
       "doi": "10.1007/s00421-022-04906-6",
       "resolvedOn": "2026-09-02",
       "resolution": "direct-read author-produced post-peer-review manuscript; DOI confirmed in manuscript front matter",
-      "sourceRead": "Direct full-text read from the Universidad Autónoma de Madrid repository's author-produced post-peer-review manuscript via Firecrawl scrape; the manuscript identifies European Journal of Applied Physiology 122 (2022), DOI 10.1007/s00421-022-04906-6.",
+      "sourceRead": "Direct full-text read of the Universidad Autónoma de Madrid repository's author-produced post-peer-review manuscript; the manuscript identifies European Journal of Applied Physiology 122 (2022), DOI 10.1007/s00421-022-04906-6. Firecrawl located the access route only.",
       "evidenceLocations": [
         "Alix-Fages et al. author manuscript, What Causes Muscle Growth?: 'The mechanical tension produced in the skeletal muscle fibers is key for the muscle hypertrophy stimulus.'",
         "Alix-Fages et al. author manuscript, Introduction: neural drive from active motor units modulates force through recruitment and discharge-rate adjustments.",
