@@ -65,6 +65,10 @@ test('only the first selected exercise can use the workout general-evidence budg
   );
 
   await page.getByTestId('advice-dismiss').click();
+  await page.getByTestId('weight-input').fill('60');
+  await page.getByTestId('reps-input').fill('8');
+  await page.getByTestId('tick-button').click();
+  await expect(page.getByTestId('set-number')).toHaveCount(1);
   await page.getByTestId('add-exercise-button').click();
   await page.getByTestId('exercise-row').filter({ hasText: 'Deadlift' }).first().click();
 
@@ -76,6 +80,22 @@ test('only the first selected exercise can use the workout general-evidence budg
 test('a bulk draft can show cited general context before save and honor permanent suppression', async ({ page }) => {
   await page.goto('/goal');
   await page.getByTestId('consent-accept').click();
+
+  await page.getByTestId('height-input').fill('178');
+  await page.getByTestId('birth-year-input').fill('1999');
+  await page.getByTestId('weight-input').fill('78');
+  await page.getByTestId('sex-male').click();
+
+  // A cut keeps the established guard card, but no new goal-draft general
+  // context is inferred; maintenance remains silent for the same evidence gap.
+  await page.getByTestId('goal-cut').click();
+  const slider = page.getByTestId('deficit-slider');
+  await expect(slider).toBeVisible();
+  expect(Number(await slider.getAttribute('max'))).toBeLessThanOrEqual(500);
+  await expect(page.getByRole('region', { name: 'General evidence' })).toHaveCount(0);
+  await page.getByTestId('goal-maintain').click();
+  await expect(page.getByRole('region', { name: 'General evidence' })).toHaveCount(0);
+
   await page.getByTestId('goal-bulk').click();
 
   const lane = page.getByRole('region', { name: 'General evidence' });

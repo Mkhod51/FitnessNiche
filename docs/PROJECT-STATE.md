@@ -23,7 +23,8 @@ working state.
 
 **Targeted browser verification 2026-09-02:** `e2e/advice-surfaces.spec.ts` 5/5 verifies
 empty-Hub general evidence, its seven-day cooldown and permanent suppression, first-exercise
-one-card budget, bulk draft context before save, and the visible numbers-hidden preference.
+one-card budget after a set and second exercise, cut/maintenance context silence plus the cut cap,
+bulk draft context before save, and the visible numbers-hidden preference.
 **Deterministic verification 2026-09-02:** claims generation wrote 32 records; Vitest passed
 770 tests across 70 files; typecheck and production build passed. The build retains its known
 dynamic-import and chunk-size warnings without a build failure.
