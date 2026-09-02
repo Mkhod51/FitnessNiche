@@ -8,6 +8,7 @@ import { MAX_DAILY_DEFICIT_KCAL } from '../../domain/guards';
 import {
   recordAdviceShown,
   recentlyShownClaimIds,
+  suppressClaim,
   suppressedClaimIds,
 } from '../../db/advice-events';
 
@@ -56,6 +57,7 @@ vi.mock('../../db/weights', async () => {
 vi.mock('../../db/advice-events', () => ({
   recordAdviceShown: vi.fn(),
   recentlyShownClaimIds: vi.fn(),
+  suppressClaim: vi.fn(),
   suppressedClaimIds: vi.fn(),
 }));
 
@@ -66,6 +68,7 @@ const mockWeights = vi.mocked(getWeightHistory);
 const mockRecordAdviceShown = vi.mocked(recordAdviceShown);
 const mockRecentlyShownClaimIds = vi.mocked(recentlyShownClaimIds);
 const mockSuppressedClaimIds = vi.mocked(suppressedClaimIds);
+const mockSuppressClaim = vi.mocked(suppressClaim);
 
 const user: User = {
   id: 'local-user', goal: 'maintain', sex: 'male', heightCm: 178, numbersHidden: false,
@@ -87,6 +90,7 @@ beforeEach(() => {
   mockRecordAdviceShown.mockResolvedValue({} as never);
   mockRecentlyShownClaimIds.mockResolvedValue([]);
   mockSuppressedClaimIds.mockResolvedValue([]);
+  mockSuppressClaim.mockResolvedValue();
 });
 
 function renderGoalSetup() {
@@ -204,6 +208,18 @@ describe('GoalSetup — authored general evidence for the unsaved goal', () => {
       null,
       'goal-draft',
     ));
+  });
+
+  it('lets the reader permanently silence a draft-goal general-evidence claim', async () => {
+    renderGoalSetup();
+    await screen.findByTestId('maintenance-estimate');
+    fireEvent.click(screen.getByTestId('goal-bulk'));
+
+    const lane = await screen.findByRole('region', { name: 'General evidence' });
+    fireEvent.click(within(lane).getByRole('button', { name: /don.t show this again/i }));
+
+    await waitFor(() => expect(mockSuppressClaim).toHaveBeenCalledWith(TEST_GOAL_CLAIM_ID));
+    expect(screen.queryByRole('region', { name: 'General evidence' })).not.toBeInTheDocument();
   });
 
   it('keeps an unrelated authored goal context silent and avoids duplicate event writes', async () => {

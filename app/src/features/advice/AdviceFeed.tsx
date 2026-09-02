@@ -8,6 +8,7 @@ import { filterNumbersHiddenAdvice } from '../../advice/session-advice';
 import {
   recordAdviceShown,
   recentlyShownClaimIds,
+  suppressClaim,
   suppressedClaimIds,
 } from '../../db/advice-events';
 import { selectSurfaceAdvice } from '../../advice/surface-advice';
@@ -58,6 +59,7 @@ export function AdviceFeed(): ReactElement {
   const [ruleTriggered, setRuleTriggered] = useState<Claim[] | null>(null);
   const [emptyHubAdvice, setEmptyHubAdvice] = useState<{ claim: Claim; item: AdviceItem } | null>(null);
   const recordedClaimIds = useRef(new Set<string>());
+  const adviceRecordings = useRef(new Map<string, Promise<void>>());
 
   useEffect(() => {
     let cancelled = false;
@@ -102,13 +104,24 @@ export function AdviceFeed(): ReactElement {
   useEffect(() => {
     if (!emptyHubAdvice || recordedClaimIds.current.has(emptyHubAdvice.claim.id)) return;
     recordedClaimIds.current.add(emptyHubAdvice.claim.id);
-    void recordAdviceShown(
+    const recording = recordAdviceShown(
       emptyHubAdvice.claim.id,
       emptyHubAdvice.item.trigger,
       null,
       'hub-empty',
-    ).catch(() => undefined);
+    ).then(() => undefined).catch(() => undefined);
+    adviceRecordings.current.set(emptyHubAdvice.claim.id, recording);
   }, [emptyHubAdvice]);
+
+  function suppressEmptyHubAdvice(): void {
+    if (!emptyHubAdvice) return;
+    const { claim, item } = emptyHubAdvice;
+    const recording = adviceRecordings.current.get(claim.id)
+      ?? recordAdviceShown(claim.id, item.trigger, null, 'hub-empty').then(() => undefined).catch(() => undefined);
+    adviceRecordings.current.set(claim.id, recording);
+    setEmptyHubAdvice(null);
+    void recording.then(() => suppressClaim(claim.id)).catch(() => undefined);
+  }
 
   return (
     <div className="mx-auto max-w-[480px]">
@@ -141,7 +154,7 @@ export function AdviceFeed(): ReactElement {
           <h2 className="px-4 pb-2 font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
             General evidence
           </h2>
-          <ClaimCard claim={emptyHubAdvice.claim} />
+          <ClaimCard claim={emptyHubAdvice.claim} onSuppress={suppressEmptyHubAdvice} />
         </section>
       )}
 

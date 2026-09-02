@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { AdviceFeed } from './AdviceFeed';
 import { CLAIMS } from '../../generated/claims';
@@ -8,6 +8,7 @@ import type { BuiltSnapshot } from '../../advice/snapshot';
 import {
   recordAdviceShown,
   recentlyShownClaimIds,
+  suppressClaim,
   suppressedClaimIds,
 } from '../../db/advice-events';
 
@@ -43,6 +44,7 @@ vi.mock('../../advice/load-snapshot', () => ({ loadAdviceSnapshot: vi.fn() }));
 vi.mock('../../db/advice-events', () => ({
   recordAdviceShown: vi.fn(),
   recentlyShownClaimIds: vi.fn(),
+  suppressClaim: vi.fn(),
   suppressedClaimIds: vi.fn(),
 }));
 
@@ -50,6 +52,7 @@ const mockLoadAdviceSnapshot = vi.mocked(loadAdviceSnapshot);
 const mockRecentlyShownClaimIds = vi.mocked(recentlyShownClaimIds);
 const mockSuppressedClaimIds = vi.mocked(suppressedClaimIds);
 const mockRecordAdviceShown = vi.mocked(recordAdviceShown);
+const mockSuppressClaim = vi.mocked(suppressClaim);
 
 const emptyBuiltSnapshot: BuiltSnapshot = {
   hasAnyLoggedData: false,
@@ -120,6 +123,7 @@ describe('AdviceFeed', () => {
     mockRecentlyShownClaimIds.mockReset().mockResolvedValue([]);
     mockSuppressedClaimIds.mockReset().mockResolvedValue([]);
     mockRecordAdviceShown.mockReset().mockResolvedValue({} as never);
+    mockSuppressClaim.mockReset().mockResolvedValue();
   });
 
   it('carries a non-empty data-claim-id on every element that represents a claim', () => {
@@ -184,6 +188,16 @@ describe('AdviceFeed', () => {
       'hub-empty',
     ));
     expect(mockRecordAdviceShown).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets the reader permanently silence an empty-Hub general-evidence claim', async () => {
+    render(<AdviceFeed />);
+
+    const lane = await screen.findByRole('region', { name: 'General evidence' });
+    fireEvent.click(within(lane).getByRole('button', { name: /don.t show this again/i }));
+
+    await waitFor(() => expect(mockSuppressClaim).toHaveBeenCalledWith(TEST_HUB_CLAIM_ID));
+    expect(screen.queryByRole('region', { name: 'General evidence' })).not.toBeInTheDocument();
   });
 
   it.each(['one meal', 'one weigh-in', 'one set'])(

@@ -19,6 +19,7 @@ import { selectSurfaceAdvice } from '../../advice/surface-advice';
 import {
   recordAdviceShown,
   recentlyShownClaimIds,
+  suppressClaim,
   suppressedClaimIds,
 } from '../../db/advice-events';
 
@@ -97,6 +98,7 @@ function GoalForm(): ReactElement {
   const selectionVersion = useRef(0);
   const shownClaimIds = useRef(new Set<string>());
   const recordedClaimIds = useRef(new Set<string>());
+  const adviceRecordings = useRef(new Map<string, Promise<void>>());
 
   useEffect(() => {
     let off = false;
@@ -212,13 +214,25 @@ function GoalForm(): ReactElement {
   useEffect(() => {
     if (!visibleDraftAdvice || recordedClaimIds.current.has(visibleDraftAdvice.claim.id)) return;
     recordedClaimIds.current.add(visibleDraftAdvice.claim.id);
-    void recordAdviceShown(
+    const recording = recordAdviceShown(
       visibleDraftAdvice.claim.id,
       visibleDraftAdvice.item.trigger,
       null,
       'goal-draft',
-    ).catch(() => undefined);
+    ).then(() => undefined).catch(() => undefined);
+    adviceRecordings.current.set(visibleDraftAdvice.claim.id, recording);
   }, [visibleDraftAdvice]);
+
+  function suppressDraftAdvice(): void {
+    if (!visibleDraftAdvice) return;
+    const { claim, item } = visibleDraftAdvice;
+    const recording = adviceRecordings.current.get(claim.id)
+      ?? recordAdviceShown(claim.id, item.trigger, null, 'goal-draft').then(() => undefined).catch(() => undefined);
+    adviceRecordings.current.set(claim.id, recording);
+    draftAdviceRef.current = null;
+    setDraftAdvice(null);
+    void recording.then(() => suppressClaim(claim.id)).catch(() => undefined);
+  }
 
   async function save() {
     if (!profile || !clamped) return;
@@ -283,7 +297,7 @@ function GoalForm(): ReactElement {
         >
           <h2 className={LABEL}>General evidence</h2>
           <div className="-mx-4 mt-2 border-t border-rule">
-            <ClaimCard claim={visibleDraftAdvice.claim} />
+            <ClaimCard claim={visibleDraftAdvice.claim} onSuppress={suppressDraftAdvice} />
           </div>
         </section>
       )}

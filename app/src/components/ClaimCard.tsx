@@ -38,7 +38,7 @@ function SourceLine({ citation }: { citation: Citation }): ReactElement {
 // Layers 1 and 2 only (Task 7b owns the evidence panel behind this affordance).
 // DESIGN.md fixed order: advice, then confidence, then source, then the one
 // affordance — never the DOI, figures, effect size or CI on the card itself.
-function ClaimBody({ claim }: { claim: Claim }): ReactElement {
+function ClaimBody({ claim, onSuppress }: { claim: Claim; onSuppress?: () => void }): ReactElement {
   const citation = claim.citations[0] as Citation | undefined;
   // Lazy-mounted, not lazy-rendered: the <details> itself stays fully native
   // (no controlled `open`, no animation), but the panel's DOM nodes don't
@@ -61,6 +61,15 @@ function ClaimBody({ claim }: { claim: Claim }): ReactElement {
         </summary>
         {evidenceOpen && <EvidencePanel claim={claim} />}
       </details>
+      {onSuppress && (
+        <button
+          type="button"
+          onClick={onSuppress}
+          className="inline-flex min-h-[44px] items-center font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-faint underline decoration-rule-strong underline-offset-4 transition-colors duration-[var(--motion-tap)] ease-[var(--motion-ease)] hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+        >
+          don&apos;t show this again
+        </button>
+      )}
     </>
   );
 }
@@ -72,7 +81,16 @@ function ClaimBody({ claim }: { claim: Claim }): ReactElement {
  * as proof. A contested cluster (FR-ADV-6) renders every side at equal visual
  * weight instead of a single claim.
  */
-export function ClaimCard({ claim, cluster }: { claim: Claim; cluster?: Claim[] }): ReactElement {
+export function ClaimCard({
+  claim,
+  cluster,
+  onSuppress,
+}: {
+  claim: Claim;
+  cluster?: Claim[];
+  /** Automatic-card surfaces may offer a permanent opt-out for this claim. */
+  onSuppress?: () => void;
+}): ReactElement {
   const contested = (cluster?.length ?? 0) > 1;
 
   return (
@@ -91,7 +109,7 @@ export function ClaimCard({ claim, cluster }: { claim: Claim; cluster?: Claim[] 
           </div>
         </>
       ) : (
-        <ClaimBody claim={claim} />
+        <ClaimBody claim={claim} onSuppress={onSuppress} />
       )}
     </div>
   );

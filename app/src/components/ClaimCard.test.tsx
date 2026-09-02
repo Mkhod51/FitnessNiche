@@ -1,5 +1,5 @@
-import { render, screen, within } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import { ClaimCard, shortenAuthors } from './ClaimCard';
 import type { Claim } from '../advice/types';
 
@@ -57,6 +57,16 @@ describe('ClaimCard', () => {
     render(<ClaimCard claim={claim} />);
     expect(screen.queryByTestId('figure-n')).toBeNull();
     expect(screen.queryByText('10.1080/02640414.2016.1210197')).toBeNull();
+  });
+
+  it('renders an explicit permanent-dismissal action only when its surface supplies one', () => {
+    const onSuppress = vi.fn();
+    render(<ClaimCard claim={claim} onSuppress={onSuppress} />);
+
+    const button = screen.getByRole('button', { name: /don.t show this again/i });
+    expect(button).toHaveClass('min-h-[44px]');
+    fireEvent.click(button);
+    expect(onSuppress).toHaveBeenCalledOnce();
   });
 
   it('renders both sides when given a contested cluster', () => {
