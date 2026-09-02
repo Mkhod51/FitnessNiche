@@ -65,22 +65,30 @@ export function AdviceFeed(): ReactElement {
     let cancelled = false;
     loadAdviceSnapshot()
       .then(async (built) => {
-        if (cancelled || built === null) return;
+        if (cancelled) return;
         const [suppressed, recent] = await Promise.all([
           suppressedClaimIds(),
           recentlyShownClaimIds(),
         ]);
         if (cancelled) return;
         const blocked = new Set([...suppressed, ...recent]);
-        const { snapshot } = built;
-        setRuleTriggered(
-          filterNumbersHiddenAdvice(snapshot, CLAIMS, evaluateClaims(snapshot, CLAIMS))
-            .filter((item) => !blocked.has(item.claimId))
-            .map((item) => CLAIMS.find((claim) => claim.id === item.claimId))
-            .filter((claim): claim is Claim => claim !== undefined),
-        );
+        // A missing consent-backed snapshot means personal advice is unavailable,
+        // not that the public evidence base has to become empty. This branch only
+        // selects static, predicate-free material and never draws a conclusion
+        // from a user record.
+        if (built === null) {
+          setRuleTriggered([]);
+        } else {
+          const { snapshot } = built;
+          setRuleTriggered(
+            filterNumbersHiddenAdvice(snapshot, CLAIMS, evaluateClaims(snapshot, CLAIMS))
+              .filter((item) => !blocked.has(item.claimId))
+              .map((item) => CLAIMS.find((claim) => claim.id === item.claimId))
+              .filter((claim): claim is Claim => claim !== undefined),
+          );
+        }
 
-        if (!built.hasAnyLoggedData) {
+        if (built === null || !built.hasAnyLoggedData) {
           const item = selectSurfaceAdvice(
             { surface: 'hub-empty' },
             CLAIMS,

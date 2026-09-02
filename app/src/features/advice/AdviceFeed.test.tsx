@@ -267,12 +267,18 @@ describe('AdviceFeed', () => {
     expect(forYou?.querySelector('[data-claim-id="c-volume-dose-response"]')).toBeNull();
   });
 
-  it('renders no personalised advice when the consent-aware loader declines a snapshot', async () => {
+  it('keeps personal advice off without consent but can show one cited empty-Hub fact', async () => {
     mockLoadAdviceSnapshot.mockResolvedValue(null);
 
     const { container } = render(<AdviceFeed />);
 
     expect(container.querySelector('[aria-label="for you"] [data-claim-id]')).toBeNull();
+    const lane = await screen.findByRole('region', { name: 'General evidence' });
+    expect(within(lane).getByTestId('claim-card')).toHaveAttribute(
+      'data-claim-id',
+      TEST_HUB_CLAIM_ID,
+    );
+    expect(lane).not.toHaveTextContent(/for you/i);
     expect(await screen.findByText(/more weekly sets per muscle/i)).toBeInTheDocument();
     expect(container.querySelector('[aria-label="for you"] [data-claim-id]')).toBeNull();
   });
