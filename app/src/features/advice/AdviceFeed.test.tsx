@@ -23,7 +23,7 @@ vi.mock('../../generated/claims', async () => {
   if (!source) throw new Error('expected source claim fixture');
   return {
     CLAIMS: [
-      ...actual.CLAIMS,
+      ...actual.CLAIMS.filter((claim) => claim.surfaceContexts === null),
       {
         ...source,
         id: TEST_HUB_CLAIM_ID,

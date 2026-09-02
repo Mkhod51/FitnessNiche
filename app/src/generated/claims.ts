@@ -739,6 +739,44 @@ export const CLAIMS: Claim[] = [
     ]
   },
   {
+    "id": "c-mechanism-tension-motor-units",
+    "statement": "During resistance training, mechanical tension in muscle fibres is a key hypertrophy stimulus, and motor-unit activity helps regulate that tension.",
+    "peekStatement": "A review suggests motor-unit activity helps regulate a key hypertrophy stimulus.",
+    "grade": "C",
+    "status": "settled",
+    "domain": "mechanism",
+    "predicates": null,
+    "trigger": null,
+    "surfaceContexts": [
+      {
+        "surface": "hub-empty"
+      },
+      {
+        "surface": "exercise-selection"
+      }
+    ],
+    "clusterId": null,
+    "phrasingKey": "mechanism-tension-motor-units",
+    "supersededBy": null,
+    "lastReviewed": "2026-09-02",
+    "citations": [
+      {
+        "id": "cit-mechanism-tension-motor-units-alix-fages",
+        "claimId": "c-mechanism-tension-motor-units",
+        "doi": "10.1007/s00421-022-04906-6",
+        "authors": "Alix-Fages C, Del Vecchio A, Baz-Valle E, Santos-Concejero J, Balsalobre-Fernández C",
+        "year": 2022,
+        "journal": "European Journal of Applied Physiology",
+        "n": null,
+        "population": "unstated",
+        "effectSize": null,
+        "ci": null,
+        "figures": [],
+        "quote": "The mechanical tension produced in the skeletal muscle fibers is key for the muscle hypertrophy stimulus."
+      }
+    ]
+  },
+  {
     "id": "c-protein-dose-plateau",
     "statement": "Past roughly 1.6 g of protein per kg of bodyweight a day, more protein stops adding measurable lean mass",
     "peekStatement": "Past roughly 1.6 g per kg a day, more protein stops adding measurable lean mass",

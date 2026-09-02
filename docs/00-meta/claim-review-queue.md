@@ -46,11 +46,13 @@ null rationale, and two hostile direct-source reviews are complete.
   candidate only for a labelled novice-population context fact. It is not
   evidence that the app can classify a first-time user as a novice or that any
   particular exercise is appropriate for them.
-- **Hypertrophy mechanisms:** the direct-read open review supports only a
-  cautious explanatory lane for mechanical tension and neural recruitment. A
-  separate motor-unit review is abstract-only and remains ineligible for a
-  shipped claim until full text is directly reviewed. The open mechanism review
-  does not justify a load, volume, or proximity-to-failure prescription.
+- **Hypertrophy mechanisms:** one reviewed general-evidence claim now explains
+  that mechanical tension is a key hypertrophy stimulus and that motor-unit
+  activity helps regulate that tension. Its directly read author-produced
+  manuscript is a narrative review with an unstated population, so it remains
+  Grade C and does not justify a load, volume, proximity-to-failure, or personal
+  prescription. It may appear only as labelled general evidence on an empty Hub
+  or after a first exercise selection.
 - **Cut draft:** the direct-read energy-deficiency synthesis is a candidate for
   a population-level context fact only. Its approximately 500-kcal meta-
   regression is not a user-specific loss-rate target and cannot weaken the

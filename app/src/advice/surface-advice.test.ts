@@ -27,6 +27,24 @@ function claim(id: string, overrides: Partial<Claim> = {}): Claim {
 }
 
 describe('selectSurfaceAdvice', () => {
+  it('ships the reviewed hypertrophy-mechanism fact only as general evidence', () => {
+    const mechanism = CLAIMS.find((claim) => claim.id === 'c-mechanism-tension-motor-units');
+
+    expect(mechanism).toMatchObject({
+      predicates: null,
+      trigger: null,
+      surfaceContexts: [
+        { surface: 'hub-empty' },
+        { surface: 'exercise-selection' },
+      ],
+    });
+    expect(selectSurfaceAdvice(
+      { surface: 'exercise-selection', exerciseId: 'barbell-back-squat', experience: 'experienced' },
+      CLAIMS,
+      NO_FILTERS,
+    )?.claimId).toBe('c-mechanism-tension-motor-units');
+  });
+
   it('prefers an exact exercise context to an exercise-agnostic claim', () => {
     const claims = [
       claim('specific', {

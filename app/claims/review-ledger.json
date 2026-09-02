@@ -968,22 +968,63 @@
       "claimId": "candidate-advice-surface-motor-unit-neural-review",
       "citationId": "candidate-cit-advice-surface-motor-unit-neural",
       "doi": "10.1007/s00421-022-04906-6",
-      "resolvedOn": "2026-08-02",
-      "resolution": "abstract-only candidate; blocked from YAML",
-      "sourceRead": "Direct publisher landing-page/abstract read via Firecrawl scrape; the full text was subscription-only at the checked route.",
+      "resolvedOn": "2026-09-02",
+      "resolution": "direct-read candidate; mapped to c-mechanism-tension-motor-units",
+      "sourceRead": "Direct full-text read from the Universidad Autónoma de Madrid repository's author-produced post-peer-review manuscript via Firecrawl scrape; the manuscript identifies the publisher DOI and its accepted-manuscript status.",
       "evidenceLocations": [
-        "Publisher abstract: the invited review describes motor-unit recruitment and mechanical tension as key roles in muscle-growth stimulus and discusses neural behaviour during resistance training.",
-        "Publisher access notice: full text requires institutional login or purchase at the checked route."
+        "Alix-Fages et al. author manuscript, Introduction: neural drive is the sum of action potentials from active motor units and modulates force through recruitment and discharge-rate adjustments.",
+        "Alix-Fages et al. author manuscript, What Causes Muscle Growth?: mechanical tension in skeletal-muscle fibres is identified as key to the hypertrophy stimulus.",
+        "Alix-Fages et al. author manuscript, Resistance Training and Nervous System/Conclusions: motor-unit recruitment and firing activity determine produced tension, while the review calls for future work linking neural activity with hypertrophic response."
       ],
       "nullRationales": [
-        "The abstract is a discovery lead only under the project evidence rule; no source-derived claim field, quote, population, or grade can be authored from it.",
-        "No alternative direct full-text source has yet been read for a standalone motor-unit-recruitment explanation."
+        "The full manuscript supports a cautious explanatory statement, but not a personal load, volume, failure, exercise-order, or training recommendation.",
+        "It contains no pooled quantitative result for the combined tension-and-motor-unit statement, so a future claim must leave n, effect size, CI, and figures null unless another directly read source supports them."
       ],
-      "populationRationale": "No product claim can be scoped from this abstract-only record.",
-      "gradeRationale": "No grade is assigned because abstract-only access is insufficient for claim curation.",
+      "populationRationale": "The narrative review cites varied examples rather than a pooled or single study population, so any mapped claim must retain an unstated population and must not infer applicability from a selected exercise or optional experience.",
+      "gradeRationale": "The author manuscript is directly readable, but a future claim must reflect its narrative-review design and repeated calls for further research on neural activity's hypertrophic role.",
       "firstReview": null,
       "secondReview": null,
-      "nextReview": "Obtain and directly read full text or reject the candidate before any YAML drafting."
+      "nextReview": "Mapped 2026-09-02 to c-mechanism-tension-motor-units; claim-specific hostile reviews are recorded in that claim's ledger entry."
+    },
+    {
+      "claimId": "c-mechanism-tension-motor-units",
+      "citationId": "cit-mechanism-tension-motor-units-alix-fages",
+      "doi": "10.1007/s00421-022-04906-6",
+      "resolvedOn": "2026-09-02",
+      "resolution": "direct-read author-produced post-peer-review manuscript; DOI confirmed in manuscript front matter",
+      "sourceRead": "Direct full-text read from the Universidad Autónoma de Madrid repository's author-produced post-peer-review manuscript via Firecrawl scrape; the manuscript identifies European Journal of Applied Physiology 122 (2022), DOI 10.1007/s00421-022-04906-6.",
+      "evidenceLocations": [
+        "Alix-Fages et al. author manuscript, What Causes Muscle Growth?: 'The mechanical tension produced in the skeletal muscle fibers is key for the muscle hypertrophy stimulus.'",
+        "Alix-Fages et al. author manuscript, Introduction: neural drive from active motor units modulates force through recruitment and discharge-rate adjustments.",
+        "Alix-Fages et al. author manuscript, Resistance Training and Nervous System: recruitment and firing rate determine the tension produced; Conclusions: fibre recruitment and tension depend on central-nervous-system activity."
+      ],
+      "nullRationales": [
+        "This narrative review supplies no pooled participant count, quantitative effect size, confidence interval, or extractable figure for this explanatory statement, so n, effectSize, ci, and figures remain null or empty.",
+        "The claim excludes the review's practical programming suggestions and does not state that motor-unit activity alone causes hypertrophy; the review itself calls for future research on neural activity's role in hypertrophic response."
+      ],
+      "populationRationale": "The review does not define a pooled or single intervention population for this combined explanatory statement. Its scattered athlete, bodybuilder, and patient examples cannot be converted into a user population, so the citation is labelled unstated and the card preserves that applicability uncertainty.",
+      "gradeRationale": "Grade C reflects a directly read narrative mechanism review available as an accepted manuscript, not a pooled intervention effect. The source supports the physiological relationship in the statement but repeatedly treats neural activity's independent hypertrophic role as requiring further research.",
+      "firstReview": {
+        "reviewer": "M6 primary curator",
+        "reviewedOn": "2026-09-02",
+        "verdict": "approved pending independent hostile review",
+        "checks": [
+          "Direct manuscript sections support both clauses: fibre mechanical tension is key to the hypertrophy stimulus, and motor-unit recruitment/rate activity regulates force and produced tension.",
+          "The wording deliberately excludes the source's prescriptions, individual set logic, and an unsupported claim that neural activity independently causes hypertrophy.",
+          "Narrative-review design, accepted-manuscript access state, unstated population, and absent quantitative fields support Grade C with documented nulls."
+        ]
+      },
+      "secondReview": {
+        "reviewer": "M6 independent hostile reviewer",
+        "reviewedOn": "2026-09-02",
+        "verdict": "approved",
+        "checks": [
+          "The direct manuscript's What Causes Muscle Growth section calls fibre mechanical tension key to the hypertrophy stimulus; its Introduction and nervous-system discussion connect motor-unit recruitment/rate activity to force and tension.",
+          "The statement says motor-unit activity helps regulate tension rather than asserting a personal intervention, a failure/load rule, or a settled independent neural cause of hypertrophy, matching the source's future-research cautions.",
+          "Hub-empty and general exercise-selection are approved only as labelled general evidence with predicates and trigger null; unstated population and null quantitative fields remain visible rather than inferred."
+        ]
+      },
+      "nextReview": "2027-09-02"
     },
     {
       "claimId": "candidate-advice-surface-cut-murphy",
