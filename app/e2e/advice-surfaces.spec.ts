@@ -36,6 +36,18 @@ test('an empty Hub shows cited general evidence and persists its permanent suppr
   ]);
 });
 
+test('an empty-Hub claim stays quiet on reload while its seven-day cooldown is active', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('region', { name: 'General evidence' })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByTestId('storage-mode')).toHaveText('opfs-sahpool');
+  await expect(page.getByRole('region', { name: 'General evidence' })).toHaveCount(0);
+  expect(await adviceRows(page)).toEqual([
+    ['c-mechanism-tension-motor-units', 'hub-empty'],
+  ]);
+});
+
 test('only the first selected exercise can use the workout general-evidence budget', async ({ page }) => {
   await page.goto('/train');
   await page.getByTestId('consent-accept').click();
