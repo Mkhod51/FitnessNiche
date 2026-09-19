@@ -8,7 +8,7 @@
 
 This manifest records the implementation and documentation baseline before any canonical document is rewritten. Runtime code and database migrations outrank tests; tests outrank claim metadata and current requirements; historical plans, handoffs, and research notes are context rather than present-state authority.
 
-No canonical files have been copied at this checkpoint. Task 2 will create byte-for-byte snapshots and add SHA-256 identity hashes before any source document is edited. The pre-existing untracked `docs/handoffs/` directory is outside this work and must not be edited, staged, archived, deleted, or committed.
+The Task 2 snapshot is complete. The pre-existing untracked `docs/handoffs/` directory is outside this work and was not edited, staged, archived, deleted, or committed.
 
 ## Archive inventory
 
@@ -28,6 +28,23 @@ Every possible Task 2 target is listed before copying. Rows marked **conditional
 | `app/claims/ADDING-A-CLAIM.md` | `docs/archive/documentation-pre-overhaul-2026-09-19/claims-ADDING-A-CLAIM.md` (**conditional**) | Claim-authoring procedure | Specialist content should remain authoritative and be linked, not duplicated; any mutable counts or old schema examples require validation if edited. | Unchanged `app/claims/ADDING-A-CLAIM.md` when possible; `docs/guides/evidence-curation.md` as the routing guide | Authoring workflow, validation steps, calibrated language, citations, figures, and review procedure. |
 | `app/claims/schema.md` | `docs/archive/documentation-pre-overhaul-2026-09-19/claims-schema.md` (**conditional**) | Human-readable claim schema contract | Review-ledger records remain pending; examples and fields must match `claim-schema.ts` if edited. | `app/src/advice/types.ts`, `app/src/advice/claim-schema.ts`, and unchanged `app/claims/schema.md`; explanatory pages under `docs/architecture/` | Field definitions, predicate grammar, citation/figure rules, review metadata, and authoring constraints. |
 | `docs/ios-gate.md` | `docs/archive/documentation-pre-overhaul-2026-09-19/ios-gate.md` (**conditional**) | iOS validation and release gate | Retain as an operational procedure; only current command, capability, or cross-link drift warrants editing. | Unchanged `docs/ios-gate.md` when possible; `docs/guides/deployment.md` for discovery | Platform test procedure, go/no-go criteria, evidence capture, and release safeguards. |
+
+## Snapshot identity
+
+**Final snapshot status:** complete. Each unconditional original/archive pair below was verified with `shasum -a 256` and an exact byte comparison before any canonical document edit.
+
+| Original | Archived snapshot | Original SHA-256 | Archived SHA-256 | Byte comparison |
+| --- | --- | --- | --- | --- |
+| `README.md` | `root-README.md` | `1df1ef57e25cafe52fd44fa5941b4c0f24a345c5ba1fa056f8d3876d080a0954` | `1df1ef57e25cafe52fd44fa5941b4c0f24a345c5ba1fa056f8d3876d080a0954` | identical |
+| `PRODUCT.md` | `root-PRODUCT.md` | `cd54580ea211b609e6ad6fa3fddc425c4fcfddc4eacab9e3df93f96e423bf961` | `cd54580ea211b609e6ad6fa3fddc425c4fcfddc4eacab9e3df93f96e423bf961` | identical |
+| `DESIGN.md` | `root-DESIGN.md` | `5c0ecc530fdf305cff4dd900ede0ae85ec5059af35eb78b0831d7a4402d4ae46` | `5c0ecc530fdf305cff4dd900ede0ae85ec5059af35eb78b0831d7a4402d4ae46` | identical |
+| `docs/README.md` | `README.md` | `f12c96133e75e869f38f7d24a83dd1368d68864099e7907401752c0462bd5747` | `f12c96133e75e869f38f7d24a83dd1368d68864099e7907401752c0462bd5747` | identical |
+| `docs/REQUIREMENTS.md` | `REQUIREMENTS.md` | `8cb95a0fb8b1abab03c8d2be49c6b16bdaa93bcda40139d52fadd144e81f6bf2` | `8cb95a0fb8b1abab03c8d2be49c6b16bdaa93bcda40139d52fadd144e81f6bf2` | identical |
+| `docs/BUILD-PLAN.md` | `BUILD-PLAN.md` | `316d949e2528beb3ed8f34219c50b915e1ac87b87d6e44d1f8cacbd40782f7cb` | `316d949e2528beb3ed8f34219c50b915e1ac87b87d6e44d1f8cacbd40782f7cb` | identical |
+| `docs/PROJECT-STATE.md` | `PROJECT-STATE.md` | `207011e538ac5b96e32f6e2c4733ce77380248ecfb8e05047de102b935823cc3` | `207011e538ac5b96e32f6e2c4733ce77380248ecfb8e05047de102b935823cc3` | identical |
+| `docs/OPEN-QUESTIONS.md` | `OPEN-QUESTIONS.md` | `d8c303ea2d0ed374d5abd14822de8d0f1a9234365e2cc68a574d8d723d9eb1da` | `d8c303ea2d0ed374d5abd14822de8d0f1a9234365e2cc68a574d8d723d9eb1da` | identical |
+
+The conditional operational documents (`app/server/README.md`, `app/claims/ADDING-A-CLAIM.md`, `app/claims/schema.md`, and `docs/ios-gate.md`) were not archived because this execution leaves them unchanged.
 
 ## Truth audit
 
