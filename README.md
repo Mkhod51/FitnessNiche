@@ -2,6 +2,8 @@
 
 MyoStat is a local-first strength and nutrition tracker that puts evidence-graded, citation-backed advice beside the decisions it informs. Recommendations come from a curated claim bundle, not generated text, and the interface is designed to show uncertainty instead of manufacturing precision.
 
+![MyoStat app icon: a light barbell silhouette on a black square](app/public/icon-192.png)
+
 ## What works today
 
 The implemented loop covers training, nutrition, bodyweight trends, deterministic advice, and weekly review, with optional Cloudflare Worker/D1 sync. Core records live in an on-device SQLite database and the advice surfaces retain structural provenance to their source claim.
@@ -66,4 +68,4 @@ Run these from `app/`:
 - [Requirements](docs/REQUIREMENTS.md) — normative requirement IDs and acceptance targets
 - [Feature status](docs/reference/feature-status.md) — current implementation and known gaps
 
-No product screenshots are included yet. The [screenshot asset guide](docs/assets/screenshots/README.md) defines the future reproducible, synthetic-data capture set; until then, text and source remain authoritative.
+The hero above is the existing app icon, not a product screenshot. Task 8 owns the future reproducible, synthetic-data screenshot set described in the [screenshot asset guide](docs/assets/screenshots/README.md); until then, text and source remain authoritative.
