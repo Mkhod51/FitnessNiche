@@ -128,6 +128,6 @@ Settings displays a claim count and latest review date, but that summary is not 
 
 ## PWA and offline limits
 
-The [Vite PWA configuration](../../app/vite.config.ts) defines an installable standalone app and precaches the HTML, JavaScript, CSS, icons, SVG, and SQLite wasm assets. Offline browser coverage verifies root boot, local reads and writes, a workout set, and food logging after the shell is cached. It also verifies fallback persistence after an explicit flush/reload sequence.
+The [Vite PWA configuration](../../app/vite.config.ts) defines an installable standalone app and precaches the HTML, JavaScript, CSS, icons, SVG, and SQLite wasm assets. Offline browser coverage verifies root boot, local reads and writes, a workout set, and food logging after the shell is cached. The separate [fallback-persistence browser test](../../app/e2e/fallback-persistence.spec.ts) forces a second tab into memory fallback and verifies snapshot restore after both an explicit flush/reload sequence and the automatic debounced export path.
 
 The current service worker has no deep-route navigation fallback. A hard reload at `/train` while offline is therefore expected to fail even though navigation to Train from an already-loaded shell and its database writes work offline. Snapshot-backed memory is also weaker than durable OPFS: snapshot failures are swallowed, so the visible storage warning should be taken seriously rather than as cosmetic copy.
