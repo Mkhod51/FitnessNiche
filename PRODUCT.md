@@ -4,6 +4,8 @@
 
 Derived from `docs/REQUIREMENTS.md` (the build's source of truth), the Phase 3 thesis review, and two confirmed answers from the developer on 2026-07-25. Requirement IDs (FR/NFR/GR/T/AC/DM/OQ) are the shared vocabulary across every document here — use them rather than paraphrasing.
 
+This file is the durable product contract: thesis, users, principles, and non-goals. Use the [product overview](docs/product/overview.md) and [feature tour](docs/product/feature-tour.md) for the current experience, the [safety and privacy guide](docs/product/safety-privacy.md) for guardrails, and the [feature status matrix](docs/reference/feature-status.md) for mutable implementation and verification claims.
+
 ## Platform
 
 web
@@ -38,14 +40,14 @@ Positioned explicitly *against* the confident-directive content ecosystem — wh
 
 - **The real usage scene:** one hand, phone at arm's length, ~90 seconds between sets, gym lighting, possibly sweaty hands. Rapid use between sets is a stated design target (NFR-3).
 - **Connectivity is not assumed.** Gym basements have no signal. The core loop must work at zero connectivity and never lose a write (T4, NFR-1, AC-1).
-- **The user arrives mid-programme, not at week zero.** They have training history elsewhere; Hevy CSV import is the only verified free-tier import path (FR-LOG-5). Onboarding must not depend on any non-Hevy import.
+- **The user arrives mid-programme, not at week zero.** They have training history elsewhere. Hevy CSV is the chosen v1 import format (FR-LOG-5), but current source exposes only a tested parser; no user-facing import workflow is shipped. Onboarding must not depend on an import that is not wired into the product.
 - **Food logging is approximate by default** — quick-add, portion tiers, recents, barcode. Gram precision is optional depth, never the required path, because approximate-sustained beats precise-abandoned (FR-LOG-3).
 - **Advice at M1 has no user data to stand on.** Logging arrives in M2 and reconciliation in M4, so the first advice surface must be honest and useful with an empty database — claims are browsable and searchable before they are ever data-earned.
 - **The developer is solo, UK-based**, building with Claude Code on a ~2–3 month v1 horizon. Curation is manual and one-time-per-claim; the running app never queries scholarly APIs (FR-CLAIM-3).
 
 ## Capabilities and Constraints
 
-**Confirmed capabilities (v1 scope):** offline set/bodyweight/food logging · Hevy CSV import · e1RM as a many-point regression with a confidence band · per-muscle weekly volume against population ranges · smoothed weight/intake trends · cut/bulk reconciliation verdict · deterministic predicate-driven advice engine · free-text "what does the evidence say about X" retrieval over ~50 claims · progressive disclosure to re-plotted figures · append-log sync with last-write-wins.
+**Confirmed capabilities (v1 scope):** offline set/bodyweight/food logging · Hevy CSV import target (currently parser-only) · e1RM as a many-point regression with a confidence band · per-muscle weekly volume against population ranges · smoothed weight/intake trends · cut/bulk reconciliation verdict · deterministic predicate-driven advice engine · free-text "what does the evidence say about X" retrieval over a curated claim corpus · progressive disclosure to re-plotted figures · append-log sync with last-write-wins.
 
 **Hard fences, enforced in code and not by warnings:**
 
@@ -59,13 +61,13 @@ Positioned explicitly *against* the confident-directive content ecosystem — wh
 - **Every figure card shows sample size and trained/untrained population as first-class fields** (FR-ADV-8) — not as footnotes.
 - **No CRDTs** (NFR-2): append-log plus last-write-wins on a server timestamp.
 
-**Explicitly undecided:** the product name (see Brand Commitments). Whether de-mythologising is a product people sustain using is the top open risk (OQ-1) and is not resolvable by design alone.
+The product name is decided (see Brand Commitments). Whether de-mythologising is a product people sustain using remains the top open risk (OQ-1) and is not resolvable by design alone.
 
 **Known open technical questions:** whether Hevy's free CSV carries RIR (OQ-2); whether the reconciliation verdict reads as more than two overlaid charts (OQ-4) — the core product-value risk, and a design problem as much as an engineering one.
 
 ## Brand Commitments
 
-**The name is confirmed: MyoStat**, decided by the developer on 2026-07-26. It replaces the M0 scaffold placeholder "Evidence-graded training log" everywhere that string functioned as the product's name (browser tab title, PWA install name, package name) — see `00-meta/decision-log.md` for the full list of what changed. **No logo, wordmark, palette, or typographic lockup exists yet** — the name is settled as a word, not as a visual identity. Do not design a lockup, choose a brand typeface, or commit brand colours from this alone; that remains a separate, deliberate design decision if and when the developer asks for one.
+**The name is confirmed: MyoStat**, decided by the developer on 2026-07-26. It replaces the M0 scaffold placeholder "Evidence-graded training log" wherever that string functioned as the product's name. Runtime visual assets now include the PWA install icons and favicon, the UI has an established colour/type system, and the `Logo` component renders the name as text. Those assets do not constitute an approved logo, wordmark, or typographic lockup. Treat the name as settled and the formal visual identity as still requiring a deliberate decision; see [brand asset notes](docs/brand/README.md).
 
 **The one confirmed voice constraint is mechanical, not stylistic:** advice phrasing is generated from the evidence grade via a fixed map, so the product's register is set by the grade rather than chosen per sentence. Everything the app says about certainty must be traceable to a stored grade.
 
@@ -78,12 +80,16 @@ Positioned explicitly *against* the confident-directive content ecosystem — wh
 - `docs/03-thesis-review/` — the thesis review, findings, advice strategies, feasibility, and the D1–D7 credibility risk register.
 - `docs/01-research/` — incumbent teardowns (MyFitnessPal, Cronometer, MacroFactor), the science-based-lifter segment, abandonment research, ethics/regulatory constraints, and the technical findings.
 - `docs/00-meta/evidence-standards.md` — the [A]–[D] grading rubric.
-- Working M0 app in `app/`: SQLite-on-OPFS persistence proven on desktop Chromium *and* on a real iPhone, PWA precache, 56 hand-authored exercises with muscle contributions.
+- The current application in `app/`: eight routes spanning training, nutrition, bodyweight, goals, trends, review, evidence, settings, and optional sync; local SQLite/PWA infrastructure; authored exercises and food seed data.
+- 32 authored claim YAML files, a generated claim bundle, deterministic selection, citation/grade rendering, and structural provenance tests. This is a working corpus, not completion of the roughly 50-claim v1 target or of every editorial review.
+- Runtime PWA icons and favicon plus the current UI design system. These are product assets, not a settled formal logo/wordmark.
 
 **Absences that future work must not paper over:**
-- **The claim base does not exist yet.** Zero curated claims, zero citations, zero extracted figures are in the app today; M1 builds the first 15–20. Any claim text, DOI, effect size, sample size, or grade appearing in a mockup is a placeholder and must be labelled as one. Fabricating a citation is the single most damaging thing that could be done to this product's premise.
+- **The claim base is incomplete.** The generated bundle is built from 32 authored claims rather than the roughly 50-claim v1 target, and the review ledger has mixed states including pending work. A corpus count or latest-review date is not evidence that every claim has completed editorial review. Fabricating or overstating a citation remains the single most damaging failure for the premise.
+- **Hevy import is not a shipped workflow.** The parser is tested, but there is no route, file picker, production caller, persistence step, or browser flow.
+- **Remote integration and erasure are incomplete.** Optional sync code and Worker/D1 contracts exist, but no browser-to-D1 end-to-end test proves the deployed path and no server/cross-device erasure workflow exists.
 - **No users, no testimonials, no case studies, no press, no benchmarks, no pricing, no revenue.** Nothing exists to quote and nothing may be invented.
-- **No brand assets** — no logo, no photography, no illustration library.
+- **No approved formal brand identity** — runtime icons, favicon, typography, and colour tokens exist, but no approved logo/wordmark, photography system, or illustration library is established.
 
 ## Product Principles
 
