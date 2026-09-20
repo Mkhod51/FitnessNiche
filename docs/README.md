@@ -1,47 +1,63 @@
-# Project Zero — Combined Nutrition + Training App: Ideation & Thesis Review
+# MyoStat documentation
 
-A three-phase research and ideation project to land a differentiated, buildable concept for a solo UK developer's 2–3 month portfolio app (strength-training logging + nutrition tracking). Orchestrated by an architect model dispatching bounded research subagents; every consequential call is logged in [00-meta/decision-log.md](00-meta/decision-log.md), with evidence graded [A]–[D] throughout ([00-meta/evidence-standards.md](00-meta/evidence-standards.md)).
+This is the router for the product, engineering, evidence, and historical material in this repository. Start with the path that matches the question you are trying to answer; use [feature status](reference/feature-status.md) for mutable completion claims.
 
-## The three phases
+## Document labels
 
-| Phase | Question | Outcome |
-|---|---|---|
-| **1 — Ideation sprint** | Where are incumbents structurally weak, and what can a combined app do that two separate apps can't? | Killed the "computational moat" premise; recommended **Verdict** (an honest weight-trend × strength-trend read). Archived in [archive/phase1-ideation/](archive/phase1-ideation/) and [01-research/](01-research/). |
-| **2 — Deep ideation (science-based-lifting pivot)** | For the evidence-based lifting niche specifically, what holds up? | e1RM trend is *wounded, not killed*; produced the **Cut Reconciler** engine. Archived in [archive/phase2-ideation/](archive/phase2-ideation/). |
-| **3 — Thesis review + commit** | Does "citation-grounded, nuanced advice" hold as the differentiator? | **Holds, reframed** — and now the chosen direction. [03-thesis-review/review.md](03-thesis-review/review.md). |
+- **Current** — describes the implementation or an actively maintained operational guide.
+- **Normative** — defines intended product or engineering behaviour; it is not proof that every item is implemented.
+- **Generated** — produced from source data or a repeatable tool and should not be hand-edited.
+- **Historical** — preserves research, decisions, plans, or status from a point in time; it is context, not current truth.
 
-> **Status: idea chosen.** The project has committed to the citation-graded advice product. All other ideas are in [archive/](archive/); the live product knowledge base is [03-thesis-review/](03-thesis-review/) (thesis, findings, advice-strategies, feasibility) plus the supporting research it points to.
+## 1. App and recruiter tour
 
-## Phase 3 headline (current)
+Read this path for the product story, the implemented user loop, and the safety posture:
 
-The thesis under test was: a tracker whose differentiators are (1) advice backed by cited studies and (2) nuance instead of confident directives. Wave 1 found:
+1. [Product overview](product/overview.md) — **Current** product promise, audience, and non-goals.
+2. [Feature tour](product/feature-tour.md) — **Current** route and workflow guide.
+3. [Safety and privacy](product/safety-privacy.md) — **Current** guardrails, consent, local storage, export, and erasure boundaries.
+4. [Feature status](reference/feature-status.md) — **Current** implementation states, verification states, and known gaps.
+5. [Product contract](../PRODUCT.md) — **Normative** durable product thesis and principles.
+6. [Visual design contract](../DESIGN.md) — **Normative** interaction and visual language.
 
-- **The in-app market slot is empty** — every citation-rich product (MASS, Examine.com, Helms, Menno, Stronger By Science) keeps evidence in a *content* layer, never inside the tracker at the point of decision. ([Stream A](04-sources/raw-notes/phase3-a-landscape.md))
-- **The evidence base is mostly thin** — small-n (10–40/arm), short, untrained-dominated. Flagship "science-based" claims (per-meal protein/leucine timing, mandatory periodization, optimal bulk rate) are far weaker than the content ecosystem implies; the field even reversed itself on lengthened partials. ([Stream B](04-sources/raw-notes/phase3-b-literature.md))
-- **Infrastructure is solved; curation is the cost** — OpenAlex (CC0) + Europe PMC + CrossRef; extracted numbers aren't copyrightable (re-plot, don't embed figures); a ~50-claim curated DB is solo-feasible, but grading is irreducible ongoing human labour. ([Stream C](01-research/technical/citation-infrastructure.md))
-- **Citations amplify trust more than the evidence warrants** — so a bare citation on this literature launders weak evidence. ([Stream D](03-thesis-review/wave1-d-credibility-risk.md))
+The screenshot inventory is intentionally empty until reproducible synthetic-data captures exist; its ownership rules are recorded in the [visual asset guide](assets/screenshots/README.md).
 
-**The reframe (the review's core):** citations and nuance are not two differentiators but **a feature and its safety system.** The honest product is not "the app that cites studies" but **"the app that grades the evidence honestly — including grading the sacred cows [C] — with the citation as the receipt."** Full synthesis in [03-thesis-review/findings.md](03-thesis-review/findings.md).
+## 2. Developer setup and architecture
 
-## Recommended, and the strongest objection
+Read this path to run the app, understand its boundaries, and find the relevant source:
 
-**Verdict:** the reframed thesis holds and is now the chosen product — an honest-grading advice layer (features **A** evidence-grade primitive + **C** progressive disclosure at its core; [feature-brainstorm.md](03-thesis-review/feature-brainstorm.md)), attached to the archived Phase 2 cut/bulk reconciliation engine so citations are earned by the user's own data. How the advice is actually generated is worked out in [advice-strategies.md](03-thesis-review/advice-strategies.md); the build assessment is in [feasibility.md](03-thesis-review/feasibility.md).
+1. [Development guide](guides/development.md) — **Current** setup, commands, and contributor conventions.
+2. [System overview](architecture/system-overview.md) — **Current** high-level components and online/offline boundaries.
+3. [Local-first storage](architecture/local-first-storage.md) and [data model](architecture/data-model.md) — **Current** persistence and schema responsibilities.
+4. [Advice engine](architecture/advice-engine.md), [JSON Logic](architecture/json-logic.md), and [domain algorithms](architecture/domain-algorithms.md) — **Current** deterministic trust path and calculations.
+5. [Sync](architecture/sync.md) — **Current** optional replication design and its verification boundary.
+6. [Testing](guides/testing.md) and [deployment](guides/deployment.md) — **Current** verification and operation guides.
+7. [Repository map](reference/repository-map.md) and [terminology](reference/terminology.md) — **Current** lookup references.
 
-**Strongest objection:** the biggest risk is neither technical nor competitive — it's whether de-mythologising is a product people *sustain using*. An app that tells science-based lifters their favourite protocols are [C] earns respect, but respect and daily engagement are different things, and no evidence settles which way it goes. For a portfolio piece that risk is acceptable; for a business it's the first thing to validate.
+The [requirements](REQUIREMENTS.md) are **Normative**. The [requirements traceability matrix](reference/requirements-traceability.md) connects those targets to current code and tests without treating a target as shipped merely because it is specified.
 
-## What planning should tackle first
+## 3. Evidence and claim curation
 
-1. **Prove the A+C interaction** — a confidence-graded claim with decisive default + depth-on-demand that feels honest *and* pleasant. This single interaction is the thesis standing or falling.
-2. **Curate ~50 high-leverage claims**, graded properly, treated as the product (not 500 shallow ones).
-3. **Attach citations to the reconciliation engine** so evidence is contextual to logged data.
-4. Carry forward all prior constraints (ED-safe baseline, medical-device fence, offline-first, open-data food stack) — see [00-meta/decision-log.md](00-meta/decision-log.md).
+Read this path to understand what advice is allowed to say and how a claim enters the app:
 
-## Repo map
+1. [Evidence curation guide](guides/evidence-curation.md) — **Current** map of the authoring and review workflow.
+2. [Advice engine](architecture/advice-engine.md) — **Current** runtime selection and provenance chain.
+3. [JSON Logic subset](architecture/json-logic.md) — **Current** supported predicate grammar and fail-closed behaviour.
+4. [Evidence standards](00-meta/evidence-standards.md) — **Normative** grading rubric.
+5. [Adding a claim](../app/claims/ADDING-A-CLAIM.md) and [claim schema](../app/claims/schema.md) — **Normative** authoring contract.
+6. [`claims.ts`](../app/src/generated/claims.ts) — **Generated** runtime claim bundle; regenerate it from YAML rather than editing it.
+7. [Claim review queue](00-meta/claim-review-queue.md) and [`review-ledger.json`](../app/claims/review-ledger.json) — **Current** review operations and machine-readable ledger.
 
-- [03-thesis-review/](03-thesis-review/) — **the live product**: thesis (review), findings, feature brainstorm, advice-strategies, feasibility, credibility-risk
-- [01-research/](01-research/) — supporting research kept live: evidence base, citation infrastructure, audience, constraints, competitor intel, tech patterns, food data
-- [00-meta/](00-meta/) — decision log, evidence standards, carryover, migration maps
-- [04-sources/](04-sources/) — raw subagent notes
-- [archive/](archive/) — all other, non-chosen ideas: Phase 1 ideation & research, Phase 2 ideation (incl. the Cut Reconciler)
-- [PROJECT-STATE.md](PROJECT-STATE.md) · [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md)
-- Superseded one-offs (kickoff prompts, the folder migration) are in [archive/build-history/](archive/build-history/)
+## 4. Historical research and decisions
+
+Read this path for the reasoning that led to MyoStat and for dated records:
+
+- [Thesis review](03-thesis-review/review.md) — **Historical research** that selected the evidence-graded product direction.
+- Supporting research on the [target audience](01-research/users/segments/science-based-lifters.md), [training evidence](01-research/domain/science-based-training-evidence.md), and [architecture patterns](01-research/technical/architecture-patterns.md) — **Historical research**; useful context, not runtime authority.
+- Original [landscape notes](04-sources/raw-notes/phase3-a-landscape.md) and [literature notes](04-sources/raw-notes/phase3-b-literature.md) — **Historical source notes** retained for auditability.
+- [Decision log](00-meta/decision-log.md) — **Historical decisions** with their original rationale.
+- [Current project state](PROJECT-STATE.md), [build compatibility/roadmap](BUILD-PLAN.md), and [open questions](OPEN-QUESTIONS.md) — maintained project ledgers; each entry carries its own current or historical framing.
+- [Pre-overhaul documentation manifest](archive/documentation-pre-overhaul-2026-09-19/MANIFEST.md) — **Historical** snapshot map and audit notes.
+- [Build-history archive index](archive/build-history/README.md) — **Historical** superseded prompts and migration notes; the dated manifest above links the pre-overhaul canonical documents.
+
+When prose disagrees, current runtime source, tests, claim YAML, and migrations outrank historical documents. Requirements still define the intended contract; [feature status](reference/feature-status.md) records how much of that contract is implemented and verified.
