@@ -8,13 +8,10 @@ import { fileURLToPath } from 'node:url';
  * produced. `app/CLAUDE.md` states it outright — "All target setting flows
  * through src/domain/guards.ts; there is no second path."
  *
- * This is deliberately dormant, exactly as `consent-enforcement.test.ts` was
- * before the logging screens landed. The nutrition UI does not exist yet, so
- * today this asserts almost nothing. It exists NOW because the guard was
- * written before its first caller, and a guard with no caller is trivially
- * forgotten — the consent gate was skipped once in this repo and only caught
- * by hand. When a screen that sets a target lands, this fires without anyone
- * remembering to wire it up.
+ * This is an active structural check over the shipped nutrition and goal UI.
+ * It complements the guard and component tests by rejecting a new second path
+ * as soon as source outside the domain layer restates a protected limit or
+ * performs target arithmetic.
  *
  * It checks a structural proxy, not behaviour: that no file outside the domain
  * layer does calorie-target arithmetic of its own. `guards.test.ts` proves the

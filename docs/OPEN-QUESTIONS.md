@@ -1,78 +1,30 @@
-# Open questions for the developer
+# Open questions and decisions
 
-Raised during autonomous development, recorded rather than blocking on. Each has a
-default I took so work could continue — the default is stated so it can be reversed
-cheaply if the answer differs.
+This register contains choices that still need evidence or product judgment.
+Implementation gaps with an obvious required outcome are tracked in
+[PROJECT-STATE](PROJECT-STATE.md), not disguised as questions.
 
-## Q1 — Ticking a set saves with empty weight and reps
+## Open
 
-**Status: ANSWERED 2026-07-29 by the developer.** A blank field takes the previous set for
-that exercise.
+| ID | question | current default / decision needed |
+| --- | --- | --- |
+| OQ-1 | Will the target audience keep using a product that foregrounds uncertainty and challenges preferred protocols? | Keep the evidence-first stance; validate with real users rather than weakening grades or dissent. |
+| OQ-3 | Is iOS installed-PWA storage reliable enough under real use? | Keep the PWA/OPFS design; repeat the [iOS gate](ios-gate.md) on current hardware before public reliance. |
+| ENG-1 | Should the currently unread `exercises` SQLite table be hardened or removed? | Leave it until a runtime reader exists; then use a content-versioned seed or delete the duplicate store. |
+| UX-1 | Should Log Weight replace `type="number"` with the workout screen's text/decimal-keypad pattern? | Cosmetic only; leave unchanged until that surface is revised for numbers-hidden. |
+| DATA-1 | How broad should the local food catalogue become, and should cached foods/recents sync? | Keep the audited small CoFID seed and device-local cache; add breadth only from traceable licensed data. |
 
-`LogWorkout`'s tick always called `logSet`, even with both fields blank, storing a
-`0 kg × 0` set. It was that way because the test contract demanded it and because it
-protects "never lose a write" — but a 0-rep set is not a write worth protecting, and it
-polluted weekly volume (it counts as a hard set) without touching e1RM (no RIR).
+## Closed
 
-**Resolution taken:** the tick still always saves — "never lose a write" is preserved —
-but a blank box now falls back rather than writing a zero. The precedence is:
+| ID | resolution |
+| --- | --- |
+| OQ-2 | Hevy CSV carries RPE; the parser maps it to RIR as `10 - RPE`. The remaining gap is UI/persistence wiring, not file-format uncertainty. |
+| OQ-4 | Developer review accepted that reconciliation earns its place by naming unresolved signals and withholding verdicts, not by overlaying two charts. |
+| LOG-1 | A blank set tick falls back to the latest same-session set, then exercise history, then `0`; explicit zero remains valid. |
+| NUTR-1 | Goal setup now computes Mifflin–St Jeor range and refuses partial input; maintenance remains the default. |
+| FOOD-1 | v1 uses a small CoFID seed plus Open Food Facts search/barcode caching. USDA fallback remains unimplemented and is tracked as roadmap, not an open architectural choice. |
 
-1. the last set logged for **this exercise in this session**;
-2. failing that, the exercise's own historical last set (the same value that prefills the
-   row);
-3. failing both, `0`.
-
-Chosen over gating the control on `reps > 0` because it keeps the one-tap path intact
-mid-workout, which is the NFR-3 design target. Nothing is invented — both fallbacks are
-the lifter's own recorded work — and an explicit `0` still stores `0`, which bodyweight
-work legitimately needs. Covered by three tests in `LogWorkout.test.tsx`.
-
-**Residual edge, accepted:** an exercise with no history and nothing logged this session
-still writes `0 × 0` on a blank tick, because there is genuinely nothing to fall back to.
-Rare, and inventing a number there would be worse.
-
-## Q2 — `LogWeight` still uses `type="number"`
-
-**Status:** unanswered, cosmetic.
-
-The global CSS strips its spinner arrows, so it is no longer ugly, but it has not had the
-text-input-plus-decimal-keypad treatment the set table got.
-
-**Default taken:** left alone.
-
-## Q3 — Should the `exercises` table be hardened, or deleted?
-
-**Status:** unanswered.
-
-Nothing reads it. The picker, `exerciseName` and volume all read the `SEED_EXERCISES`
-TypeScript constant. The table is seeded and never queried, and its seeder gates on row
-count — so *adding* an exercise propagates, but *editing* one never reaches the table and
-*removing* one would re-seed on every boot forever.
-
-**Default taken:** left as-is, since a bug in an unread table harms nobody today.
-**Options:** (a) harden the seeder with a content hash when something starts reading it,
-(b) delete the table until a reader exists, (c) leave it.
-
-## Q4 — Where does real food data come from, and when?
-
-**Status: superseded 2026-07-31 by FR-LOG-6.**
-
-FR-LOG-6 now ships with a smaller honest open-data stack: a curated CoFID seed for common
-foods, Open Food Facts keyword search as the user types, barcode lookup/scanning, and selected-item
-caching in `food_items`. USDA FDC is deferred as a later backend/proxy fallback, not a direct
-browser dependency.
-
-**Current follow-ups:** CoFID seed expansion, richer OFF proxy/rate limiting,
-USDA/FatSecret-style provider adapter, and a cross-device recents
-decision. See `docs/agent-handoff/REMAINING-WORK.md`.
-
-## Q5 — Maintenance calories before the calculator exists
-
-**Status: superseded 2026-07-31 by the goal setup flow.**
-
-`clampCalorieTarget` needs a maintenance figure. Until the Mifflin–St Jeor calculator and
-observed-maintenance logic land, there is nothing to give it for an existing user.
-
-**Default taken:** the goal flow asks for the estimate first and stores the result on
-`users.calorie_target_kcal`; a user with no estimate yet sees the calculator rather than a
-day view full of dashes.
+Named current gaps—claim target/review, Hevy UI, server erasure,
+browser-to-D1 proof, numbers-hidden leaks, warm-up volume counting, offline deep
+reload, and contested-session/Hub-cooldown recording—remain explicit in
+[PROJECT-STATE](PROJECT-STATE.md) and [BUILD-PLAN](BUILD-PLAN.md).

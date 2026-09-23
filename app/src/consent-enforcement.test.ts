@@ -6,13 +6,9 @@ import { fileURLToPath } from 'node:url';
 /**
  * GR-5 / FR-ONB-1: no logging surface may render without explicit consent.
  *
- * This test is deliberately dormant. `src/features/log/` does not exist yet —
- * it arrives with the set-logging screen later in M2 — so today this asserts
- * almost nothing. It exists now because the consent gate was built before its
- * first caller, and a gate with no caller is trivially forgotten: the consent
- * task itself was already skipped once in this milestone and only caught by
- * hand. When the logging screens land, this fires without anyone remembering
- * to wire it up.
+ * This is an active structural check over `.tsx` screens in `features/log` and
+ * `features/import`. It complements the route/component tests by making a new
+ * logging screen answer for its consent boundary as soon as the file lands.
  *
  * It checks a structural proxy, not behaviour: that every screen component
  * under a logging feature directory routes through ConsentGate somewhere in
@@ -44,8 +40,9 @@ describe('consent enforcement', () => {
 
   it.each(LOGGING_FEATURE_DIRS)('routes every screen in %s through the consent gate', (dir) => {
     const files = screenFilesIn(dir);
-    // Dormant until the directory exists. Not a failure — the logging screens
-    // are a later task — but once they land, each one has to answer for itself.
+    // A feature directory may legitimately contain no screen components (the
+    // current import feature is parser-only); any `.tsx` screen that does exist
+    // must answer for itself.
     if (files.length === 0) return;
 
     const unguarded = files.filter((file) => {
