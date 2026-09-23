@@ -21,8 +21,9 @@ comparison    ::= { comparison-op: [value, value] }     # exactly 2
 variable      ::= { "var": variable-name }             # string name
 some          ::= { "some": [
                     { "var": "muscleSets" },
-                    some-scope-rule
-                  ] }                                   # root only
+                    some-scope-value
+                  ] }                                   # allowed in root scope
+some-scope-value ::= value                              # muscle/sets vars; no some
 
 value         ::= rule | finite-number | string | boolean | null
                 | [value, ...]
@@ -46,9 +47,16 @@ At the root, these are the only variable names:
 | `numbersHidden` | Boolean preference |
 | `muscleSets` | Derived array of `{ muscle, sets }` from weekly totals |
 
-Inside `some`, only `muscle` and `sets` are legal. Root variables are not
-visible there; `muscle` and `sets` are not legal outside. `some` cannot be
-nested, and its collection must be exactly `{ "var": "muscleSets" }`.
+`some` may appear anywhere validation is still in root scope, including beneath
+root-scope `and`, `or`, `!`, or comparison traversal; it does not have to be the
+outermost rule. Its collection must be exactly `{ "var": "muscleSets" }`.
+
+The second argument is validated as any value in `some` scope. A literal is
+therefore accepted by the validator, although authored claims normally use a
+rule that examines an item. Within that argument, only `muscle` and `sets` are
+legal variable names. Root variables are not visible there, `muscle` and `sets`
+are not legal in root scope, and another `some` is rejected because validation
+is already inside `some` scope.
 
 ## Valid examples
 
